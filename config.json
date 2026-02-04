@@ -1,0 +1,32 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "src": "src/pages/Home.tsx"
+    },
+    {
+      "path": "/categories",
+      "src": "src/pages/Categories.tsx"
+    },
+    {
+      "path": "/recent",
+      "src": "src/pages/Recent.tsx"
+    },
+    {
+      "path": "/favorites",
+      "src": "src/pages/Favorites.tsx"
+    },
+    {
+      "path": "/profile",
+      "src": "src/pages/Profile.tsx"
+    }
+  ],
+  "components": [
+    {"name": "Header", "src": "src/components/Header.tsx"},
+    {"name": "LinkCard", "src": "src/components/LinkCard.tsx"},
+    {"name": "CategoryFilter", "src": "src/components/CategoryFilter.tsx"},
+    {"name": "SearchBar", "src": "src/components/SearchBar.tsx"},
+    {"name": "StatsCard", "src": "src/components/StatsCard.tsx"},
+    {"name": "UserAvatar", "src": "src/components/UserAvatar.tsx"}
+  ]
+}
