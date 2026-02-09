@@ -7,8 +7,12 @@ import CategoryFilter from '@/components/CategoryFilter';
 import LinkCard from '@/components/LinkCard';
 import StatsCard from '@/components/StatsCard';
 import { LinkCollection } from '@/types/link';
+import { useTranslations } from 'next-intl';
 
 export default function Home() {
+  const t = useTranslations('home');
+  const tCommon = useTranslations('common');
+  const tCategories = useTranslations('categories');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -120,43 +124,43 @@ export default function Home() {
         {/* Hero Section */}
         <div className="text-center mb-16 fade-in">
           <h1 className="text-5xl font-bold mb-6 gradient-text floating-animation">
-            发现精选链接合集
+            {t('hero.title')}
           </h1>
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            探索社区精心策划的高质量资源合集,找到你需要的一切工具和知识
+            {t('hero.subtitle')}
           </p>
           
           <SearchBar
             onSearch={setSearchQuery}
-            placeholder="搜索链接合集、标签或作者..."
+            placeholder={t('search.placeholder')}
           />
         </div>
         
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           <StatsCard
-            title="总合集数"
+            title={t('stats.totalCollections')}
             value="1,234"
             icon={Link2}
             change={12}
             color="purple"
           />
           <StatsCard
-            title="活跃用户"
+            title={t('stats.activeUsers')}
             value="5,678"
             icon={Users}
             change={8}
             color="blue"
           />
           <StatsCard
-            title="本月浏览"
+            title={t('stats.monthlyViews')}
             value="98.5K"
             icon={TrendingUp}
             change={15}
             color="green"
           />
           <StatsCard
-            title="精选合集"
+            title={t('stats.featuredCollections')}
             value="256"
             icon={Star}
             change={5}
@@ -166,7 +170,7 @@ export default function Home() {
         
         {/* Category Filter */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-6">浏览分类</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">{t('categories.title')}</h2>
           <CategoryFilter
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
@@ -177,10 +181,10 @@ export default function Home() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-foreground">
-              {selectedCategory === 'all' ? '精选合集' : '筛选结果'}
+              {selectedCategory === 'all' ? t('collections.title') : t('collections.filteredTitle')}
             </h2>
             <p className="text-muted-foreground">
-              共找到 {filteredCollections.length} 个合集
+              {t('collections.foundCount', { count: filteredCollections.length })}
             </p>
           </div>
           
@@ -200,8 +204,8 @@ export default function Home() {
               <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Link2 className="text-muted-foreground" size={24} />
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">没有找到匹配的合集</h3>
-              <p className="text-muted-foreground">尝试调整搜索条件或浏览其他分类</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">{t('collections.noResults.title')}</h3>
+              <p className="text-muted-foreground">{t('collections.noResults.description')}</p>
             </div>
           )}
         </div>

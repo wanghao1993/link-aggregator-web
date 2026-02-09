@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "title": "LinkHub - 精选链接合集",
+    "description": "探索社区精心策划的高质量资源合集"
+  },
+  "home": {
+    "hero": {
+      "title": "发现精选链接合集",
+      "subtitle": "探索社区精心策划的高质量资源合集,找到你需要的一切工具和知识"
+    },
+    "search": {
+      "placeholder": "搜索链接合集、标签或作者..."
+    },
+    "stats": {
+      "totalCollections": "总合集数",
+      "activeUsers": "活跃用户",
+      "monthlyViews": "本月浏览",
+      "featuredCollections": "精选合集"
+    },
+    "categories": {
+      "title": "浏览分类"
+    },
+    "collections": {
+      "title": "精选合集",
+      "filteredTitle": "筛选结果",
+      "foundCount": "共找到 {count} 个合集",
+      "noResults": {
+        "title": "没有找到匹配的合集",
+        "description": "尝试调整搜索条件或浏览其他分类"
+      }
+    }
+  },
+  "common": {
+    "all": "全部",
+    "search": "搜索",
+    "filter": "筛选",
+    "view": "查看",
+    "favorite": "收藏",
+    "share": "分享",
+    "copy": "复制",
+    "edit": "编辑",
+    "delete": "删除",
+    "save": "保存",
+    "cancel": "取消",
+    "loading": "加载中...",
+    "error": "出错了",
+    "success": "成功",
+    "home": "首页",
+    "categories": "分类",
+    "recent": "最新",
+    "favorites": "收藏",
+    "profile": "个人中心",
+    "login": "登录",
+    "register": "注册"
+  },
+  "categories": {
+    "all": "全部",
+    "ai": "AI/ML",
+    "web": "Web开发",
+    "design": "设计",
+    "mobile": "移动开发",
+    "devops": "DevOps",
+    "data": "数据科学",
+    "security": "安全",
+    "productivity": "生产力工具"
+  }
+}

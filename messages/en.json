@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "title": "LinkHub - Curated Link Collections",
+    "description": "Explore high-quality resource collections curated by the community"
+  },
+  "home": {
+    "hero": {
+      "title": "Discover Curated Link Collections",
+      "subtitle": "Explore high-quality resource collections curated by the community, find all the tools and knowledge you need"
+    },
+    "search": {
+      "placeholder": "Search collections, tags, or authors..."
+    },
+    "stats": {
+      "totalCollections": "Total Collections",
+      "activeUsers": "Active Users",
+      "monthlyViews": "Monthly Views",
+      "featuredCollections": "Featured Collections"
+    },
+    "categories": {
+      "title": "Browse Categories"
+    },
+    "collections": {
+      "title": "Featured Collections",
+      "filteredTitle": "Filtered Results",
+      "foundCount": "Found {count} collections",
+      "noResults": {
+        "title": "No matching collections found",
+        "description": "Try adjusting your search criteria or browse other categories"
+      }
+    }
+  },
+  "common": {
+    "all": "All",
+    "search": "Search",
+    "filter": "Filter",
+    "view": "View",
+    "favorite": "Favorite",
+    "share": "Share",
+    "copy": "Copy",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "home": "Home",
+    "categories": "Categories",
+    "recent": "Recent",
+    "favorites": "Favorites",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register"
+  },
+  "categories": {
+    "all": "All",
+    "ai": "AI/ML",
+    "web": "Web Development",
+    "design": "Design",
+    "mobile": "Mobile Development",
+    "devops": "DevOps",
+    "data": "Data Science",
+    "security": "Security",
+    "productivity": "Productivity Tools"
+  }
+}

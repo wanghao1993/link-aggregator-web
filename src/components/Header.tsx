@@ -2,23 +2,27 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Search, Heart, User, Grid3X3, Clock, Home } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Search, Heart, User, Grid3X3, Clock, Home, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
+import { locales } from '@/locales';
 
 const Header: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const t = useTranslations('common');
   
   console.log('Header component rendered, current route:', pathname);
   
   const isActive = (path: string) => pathname === path;
   
   const navItems = [
-    { path: '/', label: '首页', icon: Home },
-    { path: '/categories', label: '分类', icon: Grid3X3 },
-    { path: '/recent', label: '最新', icon: Clock },
-    { path: '/favorites', label: '收藏', icon: Heart },
-    { path: '/profile', label: '个人中心', icon: User },
+    { path: '/', label: t('home'), icon: Home },
+    { path: '/categories', label: t('categories'), icon: Grid3X3 },
+    { path: '/recent', label: t('recent'), icon: Clock },
+    { path: '/favorites', label: t('favorites'), icon: Heart },
+    { path: '/profile', label: t('profile'), icon: User },
   ];
   
   return (
@@ -56,11 +60,32 @@ const Header: React.FC = () => {
           
           {/* User Actions */}
           <div className="flex items-center space-x-3">
+            {/* Language Switcher */}
+            <div className="flex items-center space-x-1">
+              <Globe className="text-muted-foreground" size={16} />
+              <select
+                className="bg-transparent text-sm text-foreground border-none focus:outline-none"
+                onChange={(e) => {
+                  const newLocale = e.target.value;
+                  const currentPath = pathname;
+                  const pathWithoutLocale = currentPath.replace(/^\/(en|zh)/, '');
+                  router.push(`/${newLocale}${pathWithoutLocale || '/'}`);
+                }}
+                defaultValue={pathname.split('/')[1] || 'zh'}
+              >
+                {locales.map((locale) => (
+                  <option key={locale} value={locale}>
+                    {locale === 'en' ? 'English' : '中文'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
             <Button variant="outline" size="sm" className="glass-effect">
-              登录
+              {t('login')}
             </Button>
             <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-              注册
+              {t('register')}
             </Button>
           </div>
         </div>
