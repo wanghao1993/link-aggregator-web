@@ -51,7 +51,12 @@
     "favorites": "收藏",
     "profile": "个人中心",
     "login": "登录",
-    "register": "注册"
+    "register": "注册",
+    "back": "返回",
+    "sending": "发送中...",
+    "verifying": "验证中...",
+    "signingIn": "登录中...",
+    "orContinueWith": "或继续使用"
   },
   "categories": {
     "all": "全部",
@@ -63,5 +68,36 @@
     "data": "数据科学",
     "security": "安全",
     "productivity": "生产力工具"
+  },
+  "auth": {
+    "signUp": {
+      "title": "注册账号",
+      "description": "创建您的账号以开始使用",
+      "name": "姓名",
+      "namePlaceholder": "请输入您的姓名",
+      "email": "邮箱",
+      "emailPlaceholder": "name@example.com",
+      "password": "密码",
+      "passwordPlaceholder": "至少8个字符",
+      "verificationCode": "验证码",
+      "sendVerificationCode": "发送验证码",
+      "verificationSent": "验证码已发送至 {email}",
+      "verifyAndRegister": "验证并注册",
+      "resendCode": "重新发送验证码",
+      "haveAccount": "已有账号？",
+      "signInInstead": "立即登录"
+    },
+    "signIn": {
+      "title": "登录账号",
+      "description": "欢迎回来，请登录您的账号",
+      "email": "邮箱",
+      "emailPlaceholder": "name@example.com",
+      "password": "密码",
+      "passwordPlaceholder": "请输入密码",
+      "forgotPassword": "忘记密码？",
+      "signIn": "登录",
+      "noAccount": "没有账号？",
+      "signUpInstead": "立即注册"
+    }
   }
 }

@@ -11,8 +11,6 @@ import { useTranslations } from 'next-intl';
 
 export default function Home() {
   const t = useTranslations('home');
-  const tCommon = useTranslations('common');
-  const tCategories = useTranslations('categories');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   

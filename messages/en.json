@@ -51,7 +51,12 @@
     "favorites": "Favorites",
     "profile": "Profile",
     "login": "Login",
-    "register": "Register"
+    "register": "Register",
+    "back": "Back",
+    "sending": "Sending...",
+    "verifying": "Verifying...",
+    "signingIn": "Signing in...",
+    "orContinueWith": "Or continue with"
   },
   "categories": {
     "all": "All",
@@ -63,5 +68,36 @@
     "data": "Data Science",
     "security": "Security",
     "productivity": "Productivity Tools"
+  },
+  "auth": {
+    "signUp": {
+      "title": "Sign Up",
+      "description": "Create your account to get started",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "verificationCode": "Verification Code",
+      "sendVerificationCode": "Send Verification Code",
+      "verificationSent": "Verification code sent to {email}",
+      "verifyAndRegister": "Verify & Register",
+      "resendCode": "Resend Code",
+      "haveAccount": "Already have an account?",
+      "signInInstead": "Sign in instead"
+    },
+    "signIn": {
+      "title": "Sign In",
+      "description": "Welcome back, please sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "name@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUpInstead": "Sign up instead"
+    }
   }
 }

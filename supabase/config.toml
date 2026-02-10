@@ -1,0 +1,20 @@
+[auth]
+# Enable email authentication
+enable_email_signup = true
+enable_email_autoconfirm = false  # We'll handle email confirmation manually
+
+# Session settings
+session_expiry_time = 604800  # 7 days in seconds
+enable_refresh_token_rotation = true
+
+[api]
+# CORS settings for local development
+cors_origins = ["http://localhost:3000", "http://localhost:54321"]
+
+[storage]
+# File storage settings
+file_size_limit = 52428800  # 50MB
+
+[realtime]
+# Enable realtime features
+enabled = true

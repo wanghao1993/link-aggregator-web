@@ -81,11 +81,24 @@ const Header: React.FC = () => {
               </select>
             </div>
             
-            <Button variant="outline" size="sm" className="glass-effect">
-              {t('login')}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="glass-effect"
+              asChild
+            >
+              <Link href="/auth/signin">
+                {t('login')}
+              </Link>
             </Button>
-            <Button size="sm" className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600">
-              {t('register')}
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+              asChild
+            >
+              <Link href="/auth/signup">
+                {t('register')}
+              </Link>
             </Button>
           </div>
         </div>
