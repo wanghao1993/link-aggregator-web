@@ -116,8 +116,16 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
   };
 
   const handleOAuthSignIn = (provider: 'github' | 'google') => {
-    // TODO: Implement OAuth sign in
-    window.location.href = `/api/auth/signin/${provider}`;
+    // Use dev OAuth in development, real OAuth in production
+    const isDev = !process.env.GITHUB_CLIENT_ID || process.env.GITHUB_CLIENT_ID.includes('dev');
+    
+    if (isDev) {
+      // Development mode - use mock OAuth
+      window.location.href = `/api/auth/dev-oauth/callback?provider=${provider}&state=dev_${Date.now()}`;
+    } else {
+      // Production mode - use real OAuth
+      window.location.href = `/api/auth/signin/${provider}`;
+    }
   };
 
   return (

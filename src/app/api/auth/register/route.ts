@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '@/lib/supabase/server';
+import { sendWelcomeEmail } from '@/lib/auth/auth';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -98,6 +99,11 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
+
+    // Send welcome email (fire and forget)
+    sendWelcomeEmail(email, name).catch(error => {
+      console.error('Failed to send welcome email:', error);
+    });
 
     return NextResponse.json(
       { 

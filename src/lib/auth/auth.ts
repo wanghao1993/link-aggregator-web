@@ -14,32 +14,27 @@ const emailSchema = z.object({
   verificationCode: z.string().length(6, 'Verification code must be 6 digits').optional()
 });
 
-// Initialize Resend for email sending
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { devResend } from '@/lib/email/dev-resend';
 
 // Function to send verification email
 export async function sendVerificationEmail(email: string, code: string) {
   try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM!,
-      to: email,
-      subject: 'Verify your email address',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Verify Your Email Address</h2>
-          <p>Thank you for signing up! Please use the following verification code to complete your registration:</p>
-          <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
-            ${code}
-          </div>
-          <p>This code will expire in 10 minutes.</p>
-          <p>If you didn't request this verification, please ignore this email.</p>
-        </div>
-      `
-    });
+    await devResend.sendVerificationEmail(email, code);
     return { success: true };
   } catch (error) {
     console.error('Failed to send verification email:', error);
     return { success: false, error: 'Failed to send verification email' };
+  }
+}
+
+// Function to send welcome email
+export async function sendWelcomeEmail(email: string, name: string) {
+  try {
+    await devResend.sendWelcomeEmail(email, name);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+    return { success: false, error: 'Failed to send welcome email' };
   }
 }
 
