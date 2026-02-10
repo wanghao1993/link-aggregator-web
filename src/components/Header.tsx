@@ -3,17 +3,20 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Search, Heart, User, Grid3X3, Clock, Home, Globe } from 'lucide-react';
+import { Search, Heart, User, Grid3X3, Clock, Home, Globe, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { locales } from '@/locales';
+import { useSession, signOut } from 'next-auth/react';
 
 const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations('common');
+  const { data: session, status } = useSession();
   
   console.log('Header component rendered, current route:', pathname);
+  console.log('Auth status:', status, 'Session:', session?.user?.email);
   
   const isActive = (path: string) => pathname === path;
   
@@ -22,7 +25,6 @@ const Header: React.FC = () => {
     { path: '/categories', label: t('categories'), icon: Grid3X3 },
     { path: '/recent', label: t('recent'), icon: Clock },
     { path: '/favorites', label: t('favorites'), icon: Heart },
-    { path: '/profile', label: t('profile'), icon: User },
   ];
   
   return (
@@ -81,25 +83,51 @@ const Header: React.FC = () => {
               </select>
             </div>
             
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="glass-effect"
-              asChild
-            >
-              <Link href="/auth/signin">
-                {t('login')}
-              </Link>
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-              asChild
-            >
-              <Link href="/auth/signup">
-                {t('register')}
-              </Link>
-            </Button>
+            {status === 'authenticated' ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                    {session.user?.name?.[0]?.toUpperCase() || session.user?.email?.[0]?.toUpperCase()}
+                  </div>
+                  <div className="hidden md:block">
+                    <p className="text-sm font-medium">{session.user?.name || session.user?.email?.split('@')[0]}</p>
+                    <p className="text-xs text-muted-foreground">{session.user?.email}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="glass-effect"
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  {t('logout')}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="glass-effect"
+                  asChild
+                >
+                  <Link href="/auth/signin">
+                    <LogIn className="h-4 w-4 mr-1" />
+                    {t('login')}
+                  </Link>
+                </Button>
+                <Button 
+                  size="sm" 
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                  asChild
+                >
+                  <Link href="/auth/signup">
+                    {t('register')}
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

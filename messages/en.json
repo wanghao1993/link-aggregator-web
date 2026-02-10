@@ -51,6 +51,7 @@
     "favorites": "Favorites",
     "profile": "Profile",
     "login": "Login",
+    "logout": "Logout",
     "register": "Register",
     "back": "Back",
     "sending": "Sending...",
@@ -98,6 +99,50 @@
       "signIn": "Sign In",
       "noAccount": "Don't have an account?",
       "signUpInstead": "Sign up instead"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}!",
+    "profile": {
+      "title": "Profile",
+      "description": "Your account information and statistics",
+      "noName": "No name set",
+      "memberSince": "Member since",
+      "lastLogin": "Last login"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "description": "Quick access to common features",
+      "viewCalendar": "View Calendar",
+      "accountSettings": "Account Settings",
+      "editProfile": "Edit Profile",
+      "signOut": "Sign Out"
+    },
+    "stats": {
+      "title": "Statistics",
+      "activeProjects": "Active Projects",
+      "completedTasks": "Completed Tasks",
+      "upcomingEvents": "Upcoming Events"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "welcome": "Welcome aboard",
+      "welcomeMessage": "Thank you for signing up for our service!",
+      "accountVerified": "Account Verified",
+      "verificationComplete": "Your email verification is complete"
+    },
+    "devMode": {
+      "title": "Development Mode",
+      "message": "Currently running in development mode. The following features are simulated:",
+      "emailSimulation": "Email sending is simulated (verification codes shown in console)",
+      "oauthSimulation": "OAuth login is simulated (using preset test accounts)",
+      "localDatabase": "Using local Supabase database"
+    },
+    "footer": {
+      "needHelp": "Need help?",
+      "contactSupport": "Contact support",
+      "lastUpdated": "Last updated"
     }
   }
 }

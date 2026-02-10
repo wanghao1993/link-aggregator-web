@@ -51,6 +51,7 @@
     "favorites": "收藏",
     "profile": "个人中心",
     "login": "登录",
+    "logout": "退出",
     "register": "注册",
     "back": "返回",
     "sending": "发送中...",
@@ -98,6 +99,50 @@
       "signIn": "登录",
       "noAccount": "没有账号？",
       "signUpInstead": "立即注册"
+    }
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "welcome": "欢迎回来，{name}！",
+    "profile": {
+      "title": "个人信息",
+      "description": "您的账户信息和统计",
+      "noName": "未设置姓名",
+      "memberSince": "注册时间",
+      "lastLogin": "最后登录"
+    },
+    "quickActions": {
+      "title": "快速操作",
+      "description": "常用功能快捷入口",
+      "viewCalendar": "查看日历",
+      "accountSettings": "账户设置",
+      "editProfile": "编辑资料",
+      "signOut": "退出登录"
+    },
+    "stats": {
+      "title": "统计信息",
+      "activeProjects": "进行中的项目",
+      "completedTasks": "已完成的任务",
+      "upcomingEvents": "即将到来的事件"
+    },
+    "notifications": {
+      "title": "通知",
+      "welcome": "欢迎使用",
+      "welcomeMessage": "感谢您注册我们的服务！",
+      "accountVerified": "账户已验证",
+      "verificationComplete": "您的邮箱验证已完成"
+    },
+    "devMode": {
+      "title": "开发模式",
+      "message": "当前运行在开发模式下，以下功能为模拟实现：",
+      "emailSimulation": "邮件发送已模拟（验证码显示在控制台）",
+      "oauthSimulation": "OAuth登录已模拟（使用预设测试账户）",
+      "localDatabase": "使用本地Supabase数据库"
+    },
+    "footer": {
+      "needHelp": "需要帮助？",
+      "contactSupport": "联系技术支持",
+      "lastUpdated": "最后更新"
     }
   }
 }
