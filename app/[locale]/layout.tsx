@@ -2,10 +2,10 @@ import { ReactNode } from "react";
 import "@/index.css";
 import Header from "@/components/Header";
 import { Providers } from "../providers";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { locales } from '@/locales';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { locales } from "@/locales";
 
 export const metadata = {
   title: "LinkHub - 精选链接合集",
@@ -14,24 +14,22 @@ export const metadata = {
 
 type Props = {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 };
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export default async function LocaleLayout({
-  children,
-  params: { locale }
-}: Props) {
+export default async function LocaleLayout({ children, params }: Props) {
+  const { locale } = await params;
   // Validate that the incoming `locale` parameter is valid
   if (!locales.includes(locale as any)) {
     notFound();
   }
 
   const messages = await getMessages();
-  
+
   return (
     <html lang={locale}>
       <body>

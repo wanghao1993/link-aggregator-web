@@ -1,8 +1,7 @@
-import { redirect } from 'next/navigation';
-import { defaultLocale } from '@/locales';
+import { ReactNode } from "react";
 
-// This layout only renders when users visit `/`
-// It redirects them to the default locale
-export default function RootLayout() {
-  redirect(`/${defaultLocale}`);
+// Root layout: just pass through. Redirect from `/` to default locale
+// is handled by next-intl middleware (middleware.ts).
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return children;
 }
