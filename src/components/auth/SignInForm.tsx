@@ -1,21 +1,28 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Github, Mail, Lock, ArrowRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Github, Mail, Lock, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 const signInSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
@@ -25,8 +32,12 @@ interface SignInFormProps {
   onSwitchToSignUp?: () => void;
 }
 
-export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormProps) {
-  const t = useTranslations('auth');
+export default function SignInForm({
+  onSuccess,
+  onSwitchToSignUp,
+}: SignInFormProps) {
+  const t = useTranslations("auth");
+  const commonT = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -36,8 +47,8 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -45,9 +56,9 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
     setIsLoading(true);
     try {
       // TODO: Implement API call to sign in
-      const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -55,20 +66,22 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
         onSuccess?.();
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Sign in failed');
+        throw new Error(error.message || "Sign in failed");
       }
     } catch (error) {
-      console.error('Sign in failed:', error);
-      alert(error instanceof Error ? error.message : 'Sign in failed');
+      console.error("Sign in failed:", error);
+      alert(error instanceof Error ? error.message : "Sign in failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthSignIn = (provider: 'github' | 'google') => {
+  const handleOAuthSignIn = (provider: "github" | "google") => {
     // Use dev OAuth in development, real OAuth in production
-    const isDev = !process.env.GITHUB_CLIENT_ID || process.env.GITHUB_CLIENT_ID.includes('dev');
-    
+    const isDev =
+      !process.env.GITHUB_CLIENT_ID ||
+      process.env.GITHUB_CLIENT_ID.includes("dev");
+
     if (isDev) {
       // Development mode - use mock OAuth
       window.location.href = `/api/auth/dev-oauth/callback?provider=${provider}&state=dev_${Date.now()}`;
@@ -81,15 +94,17 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">{t('signIn.title')}</CardTitle>
-        <CardDescription>{t('signIn.description')}</CardDescription>
+        <CardTitle className="text-2xl font-bold">
+          {t("signIn.title")}
+        </CardTitle>
+        <CardDescription>{t("signIn.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* OAuth Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <Button
             variant="outline"
-            onClick={() => handleOAuthSignIn('github')}
+            onClick={() => handleOAuthSignIn("github")}
             disabled={isLoading}
             className="w-full"
           >
@@ -98,7 +113,7 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
           </Button>
           <Button
             variant="outline"
-            onClick={() => handleOAuthSignIn('google')}
+            onClick={() => handleOAuthSignIn("google")}
             disabled={isLoading}
             className="w-full"
           >
@@ -130,7 +145,7 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              {t('common.orContinueWith')}
+              {commonT("orContinueWith")}
             </span>
           </div>
         </div>
@@ -138,15 +153,15 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
         {/* Email Sign In Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">{t('signIn.email')}</Label>
+            <Label htmlFor="email">{t("signIn.email")}</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder={t('signIn.emailPlaceholder')}
+                placeholder={t("signIn.emailPlaceholder")}
                 className="pl-10"
-                {...register('email')}
+                {...register("email")}
                 disabled={isLoading}
               />
             </div>
@@ -157,14 +172,10 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password">{t('signIn.password')}</Label>
-              <Button
-                variant="link"
-                className="p-0 h-auto text-sm"
-                asChild
-              >
+              <Label htmlFor="password">{t("signIn.password")}</Label>
+              <Button variant="link" className="p-0 h-auto text-sm" asChild>
                 <Link href="/auth/forgot-password">
-                  {t('signIn.forgotPassword')}
+                  {t("signIn.forgotPassword")}
                 </Link>
               </Button>
             </div>
@@ -173,9 +184,9 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
               <Input
                 id="password"
                 type="password"
-                placeholder={t('signIn.passwordPlaceholder')}
+                placeholder={t("signIn.passwordPlaceholder")}
                 className="pl-10"
-                {...register('password')}
+                {...register("password")}
                 disabled={isLoading}
               />
             </div>
@@ -185,21 +196,21 @@ export default function SignInForm({ onSuccess, onSwitchToSignUp }: SignInFormPr
           </div>
 
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? t('common.signingIn') : t('signIn.signIn')}
+            {isLoading ? t("common.signingIn") : t("signIn.signIn")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </form>
       </CardContent>
       <CardFooter>
         <div className="text-center text-sm w-full">
-          <span className="text-muted-foreground">{t('signIn.noAccount')}</span>{' '}
+          <span className="text-muted-foreground">{t("signIn.noAccount")}</span>{" "}
           <Button
             variant="link"
             className="p-0 h-auto"
             onClick={onSwitchToSignUp}
             disabled={isLoading}
           >
-            {t('signIn.signUpInstead')}
+            {t("signIn.signUpInstead")}
           </Button>
         </div>
       </CardFooter>

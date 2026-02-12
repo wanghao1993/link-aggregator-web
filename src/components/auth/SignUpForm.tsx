@@ -1,22 +1,29 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Github, Mail, Lock, Key, User, ArrowRight } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Github, Mail, Lock, Key, User, ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const signUpSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  verificationCode: z.string().length(6, 'Verification code must be 6 digits'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  verificationCode: z.string().length(6, "Verification code must be 6 digits"),
 });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
@@ -26,10 +33,14 @@ interface SignUpFormProps {
   onSwitchToLogin?: () => void;
 }
 
-export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormProps) {
-  const t = useTranslations('auth');
+export default function SignUpForm({
+  onSuccess,
+  onSwitchToLogin,
+}: SignUpFormProps) {
+  const t = useTranslations("auth");
+  const commonT = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<'email' | 'verification'>('email');
+  const [step, setStep] = useState<"email" | "verification">("email");
   const [emailSent, setEmailSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
@@ -42,14 +53,14 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      verificationCode: '',
+      name: "",
+      email: "",
+      password: "",
+      verificationCode: "",
     },
   });
 
-  const email = watch('email');
+  const email = watch("email");
 
   // Start countdown timer
   const startCountdown = () => {
@@ -69,23 +80,27 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
     setIsLoading(true);
     try {
       // TODO: Implement API call to send verification code
-      const response = await fetch('/api/auth/send-verification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
       if (response.ok) {
         setEmailSent(true);
-        setStep('verification');
+        setStep("verification");
         startCountdown();
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to send verification code');
+        throw new Error(error.message || "Failed to send verification code");
       }
     } catch (error) {
-      console.error('Failed to send verification code:', error);
-      alert(error instanceof Error ? error.message : 'Failed to send verification code');
+      console.error("Failed to send verification code:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to send verification code"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -95,9 +110,9 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
     setIsLoading(true);
     try {
       // TODO: Implement API call to register user
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -105,20 +120,22 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
         onSuccess?.();
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
+        throw new Error(error.message || "Registration failed");
       }
     } catch (error) {
-      console.error('Registration failed:', error);
-      alert(error instanceof Error ? error.message : 'Registration failed');
+      console.error("Registration failed:", error);
+      alert(error instanceof Error ? error.message : "Registration failed");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthSignIn = (provider: 'github' | 'google') => {
+  const handleOAuthSignIn = (provider: "github" | "google") => {
     // Use dev OAuth in development, real OAuth in production
-    const isDev = !process.env.GITHUB_CLIENT_ID || process.env.GITHUB_CLIENT_ID.includes('dev');
-    
+    const isDev =
+      !process.env.GITHUB_CLIENT_ID ||
+      process.env.GITHUB_CLIENT_ID.includes("dev");
+
     if (isDev) {
       // Development mode - use mock OAuth
       window.location.href = `/api/auth/dev-oauth/callback?provider=${provider}&state=dev_${Date.now()}`;
@@ -131,15 +148,17 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">{t('signUp.title')}</CardTitle>
-        <CardDescription>{t('signUp.description')}</CardDescription>
+        <CardTitle className="text-2xl font-bold">
+          {t("signUp.title")}
+        </CardTitle>
+        <CardDescription>{t("signUp.description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* OAuth Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <Button
             variant="outline"
-            onClick={() => handleOAuthSignIn('github')}
+            onClick={() => handleOAuthSignIn("github")}
             disabled={isLoading}
             className="w-full"
           >
@@ -148,7 +167,7 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
           </Button>
           <Button
             variant="outline"
-            onClick={() => handleOAuthSignIn('google')}
+            onClick={() => handleOAuthSignIn("google")}
             disabled={isLoading}
             className="w-full"
           >
@@ -180,24 +199,24 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">
-              {t('common.orContinueWith')}
+              {commonT("orContinueWith")}
             </span>
           </div>
         </div>
 
         {/* Email Registration Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {step === 'email' && (
+          {step === "email" && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="name">{t('signUp.name')}</Label>
+                <Label htmlFor="name">{t("signUp.name")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="name"
-                    placeholder={t('signUp.namePlaceholder')}
+                    placeholder={t("signUp.namePlaceholder")}
                     className="pl-10"
-                    {...register('name')}
+                    {...register("name")}
                     disabled={isLoading}
                   />
                 </div>
@@ -207,15 +226,15 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">{t('signUp.email')}</Label>
+                <Label htmlFor="email">{t("signUp.email")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder={t('signUp.emailPlaceholder')}
+                    placeholder={t("signUp.emailPlaceholder")}
                     className="pl-10"
-                    {...register('email')}
+                    {...register("email")}
                     disabled={isLoading}
                   />
                 </div>
@@ -225,20 +244,22 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">{t('signUp.password')}</Label>
+                <Label htmlFor="password">{t("signUp.password")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
-                    placeholder={t('signUp.passwordPlaceholder')}
+                    placeholder={t("signUp.passwordPlaceholder")}
                     className="pl-10"
-                    {...register('password')}
+                    {...register("password")}
                     disabled={isLoading}
                   />
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -248,16 +269,20 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
                 disabled={isLoading || !email || !!errors.email}
                 className="w-full"
               >
-                {isLoading ? t('common.sending') : t('signUp.sendVerificationCode')}
+                {isLoading
+                  ? t("common.sending")
+                  : t("signUp.sendVerificationCode")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </>
           )}
 
-          {step === 'verification' && (
+          {step === "verification" && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="verificationCode">{t('signUp.verificationCode')}</Label>
+                <Label htmlFor="verificationCode">
+                  {t("signUp.verificationCode")}
+                </Label>
                 <div className="relative">
                   <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -265,18 +290,20 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
                     placeholder="123456"
                     className="pl-10 text-center text-lg tracking-widest"
                     maxLength={6}
-                    {...register('verificationCode')}
+                    {...register("verificationCode")}
                     disabled={isLoading}
                   />
                 </div>
                 {errors.verificationCode && (
-                  <p className="text-sm text-red-500">{errors.verificationCode.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.verificationCode.message}
+                  </p>
                 )}
               </div>
 
               {emailSent && (
                 <p className="text-sm text-green-600">
-                  {t('signUp.verificationSent', { email })}
+                  {t("signUp.verificationSent", { email })}
                 </p>
               )}
 
@@ -284,18 +311,20 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setStep('email')}
+                  onClick={() => setStep("email")}
                   disabled={isLoading}
                   className="flex-1"
                 >
-                  {t('common.back')}
+                  {t("common.back")}
                 </Button>
                 <Button
                   type="submit"
                   disabled={isLoading || countdown > 0}
                   className="flex-1"
                 >
-                  {isLoading ? t('common.verifying') : t('signUp.verifyAndRegister')}
+                  {isLoading
+                    ? t("common.verifying")
+                    : t("signUp.verifyAndRegister")}
                   {countdown > 0 && ` (${countdown}s)`}
                 </Button>
               </div>
@@ -308,7 +337,7 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
                   disabled={isLoading}
                   className="w-full text-sm"
                 >
-                  {t('signUp.resendCode')}
+                  {t("signUp.resendCode")}
                 </Button>
               )}
             </>
@@ -317,14 +346,16 @@ export default function SignUpForm({ onSuccess, onSwitchToLogin }: SignUpFormPro
       </CardContent>
       <CardFooter>
         <div className="text-center text-sm w-full">
-          <span className="text-muted-foreground">{t('signUp.haveAccount')}</span>{' '}
+          <span className="text-muted-foreground">
+            {t("signUp.haveAccount")}
+          </span>{" "}
           <Button
             variant="link"
             className="p-0 h-auto"
             onClick={onSwitchToLogin}
             disabled={isLoading}
           >
-            {t('signUp.signInInstead')}
+            {t("signUp.signInInstead")}
           </Button>
         </div>
       </CardFooter>
