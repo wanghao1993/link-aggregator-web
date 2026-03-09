@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase/server';
 const signInSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
+  verificationCode: z.string().length(6, 'Verification code must be 6 digits'),
 });
 
 export async function POST(request: NextRequest) {
@@ -20,7 +21,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password } = parsed.data;
+    const { email, password, verificationCode } = parsed.data;
+
+    // Verify verification code
+    const { data: verificationData, error: verificationError } = await supabaseAdmin
+      .from('verification_codes')
+      .select('*')
+      .eq('email', email)
+      .eq('code', verificationCode)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (verificationError || !verificationData) {
+      return NextResponse.json(
+        { error: 'Invalid or expired verification code' },
+        { status: 400 }
+      );
+    }
 
     // Get user from database
     const { data: user, error: userError } = await supabaseAdmin
@@ -45,6 +62,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Delete used verification code
+    await supabaseAdmin
+      .from('verification_codes')
+      .delete()
+      .eq('email', email)
+      .eq('code', verificationCode);
+
     // Get user profile
     const { data: profile } = await supabaseAdmin
       .from('profiles')
@@ -52,7 +76,7 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .single();
 
-    // Create session (simplified - in production use NextAuth.js sessions)
+    // Create session token
     const sessionToken = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
     
     // Store session in database

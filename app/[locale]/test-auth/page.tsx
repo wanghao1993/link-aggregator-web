@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
 import { getServerSession } from 'next-auth';
-import { auth } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
+import authOptions from '@/lib/auth/nextauth-config';
 
 export default async function TestAuthPage() {
-  const session = await getServerSession(auth);
+  const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect('/auth/signin');

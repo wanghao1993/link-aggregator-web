@@ -85,6 +85,7 @@
       "verificationSent": "Verification code sent to {email}",
       "verifyAndRegister": "Verify & Register",
       "resendCode": "Resend Code",
+      "resendIn": "Resend in {seconds}s",
       "haveAccount": "Already have an account?",
       "signInInstead": "Sign in instead"
     },
@@ -97,6 +98,7 @@
       "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot password?",
       "signIn": "Sign In",
+      "verificationSent": "Verification code sent to {email}, please check",
       "noAccount": "Don't have an account?",
       "signUpInstead": "Sign up instead"
     }

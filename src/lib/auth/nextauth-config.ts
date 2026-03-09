@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import { SupabaseAdapter } from '@auth/supabase-adapter';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
@@ -13,7 +13,7 @@ const emailSchema = z.object({
 });
 
 // NextAuth.js configuration for v4
-const authOptions = {
+const authOptions: NextAuthOptions = {
   adapter: SupabaseAdapter({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
     secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -55,13 +55,13 @@ const authOptions = {
     error: '/auth/error',
   },
   session: {
-    strategy: 'jwt' as const,
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = (user as { id: string }).id;
+        token.id = user.id;
         token.email = user.email;
       }
       return token;

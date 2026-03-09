@@ -85,6 +85,7 @@
       "verificationSent": "验证码已发送至 {email}",
       "verifyAndRegister": "验证并注册",
       "resendCode": "重新发送验证码",
+      "resendIn": "{seconds}秒后可重新发送",
       "haveAccount": "已有账号？",
       "signInInstead": "立即登录"
     },
@@ -97,6 +98,7 @@
       "passwordPlaceholder": "请输入密码",
       "forgotPassword": "忘记密码？",
       "signIn": "登录",
+      "verificationSent": "验证码已发送至 {email}，请查收",
       "noAccount": "没有账号？",
       "signUpInstead": "立即注册"
     }

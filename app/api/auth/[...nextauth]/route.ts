@@ -1,3 +1,3 @@
-import { GET, POST } from '../../../../src/lib/auth/auth';
+import { GET, POST } from '@/lib/auth/auth';
 
 export { GET, POST };

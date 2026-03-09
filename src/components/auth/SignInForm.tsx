@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Github, Mail, Lock, ArrowRight } from "lucide-react";
+import { Github, Mail, Lock, Key, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
@@ -25,7 +25,14 @@ const signInSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+const verifySchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+  verificationCode: z.string().length(6, "Verification code must be 6 digits"),
+});
+
 type SignInFormData = z.infer<typeof signInSchema>;
+type VerifyFormData = z.infer<typeof verifySchema>;
 
 interface SignInFormProps {
   onSuccess?: () => void;
@@ -39,12 +46,16 @@ export default function SignInForm({
   const t = useTranslations("auth");
   const commonT = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<"credentials" | "verification">(
+    "credentials"
+  );
+  const [countdown, setCountdown] = useState(0);
+  const [userData, setUserData] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignInFormData>({
+  const credentialsForm = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
@@ -52,10 +63,72 @@ export default function SignInForm({
     },
   });
 
-  const onSubmit = async (data: SignInFormData) => {
+  const verifyForm = useForm<VerifyFormData>({
+    resolver: zodResolver(verifySchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      verificationCode: "",
+    },
+  });
+
+  const startCountdown = () => {
+    setCountdown(60);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleCredentialsSubmit = async (data: SignInFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Implement API call to sign in
+      const response = await fetch("/api/auth/verify-credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const sendCodeResponse = await fetch(
+          "/api/auth/send-login-verification",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: data.email }),
+          }
+        );
+
+        if (sendCodeResponse.ok) {
+          setUserData(data);
+          verifyForm.setValue("email", data.email);
+          verifyForm.setValue("password", data.password);
+          setStep("verification");
+          startCountdown();
+        } else {
+          const error = await sendCodeResponse.json();
+          throw new Error(error.message || "Failed to send verification code");
+        }
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || "Invalid email or password");
+      }
+    } catch (error) {
+      console.error("Sign in failed:", error);
+      alert(error instanceof Error ? error.message : "Sign in failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerificationSubmit = async (data: VerifyFormData) => {
+    setIsLoading(true);
+    try {
       const response = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,27 +139,50 @@ export default function SignInForm({
         onSuccess?.();
       } else {
         const error = await response.json();
-        throw new Error(error.message || "Sign in failed");
+        throw new Error(error.message || "Verification failed");
       }
     } catch (error) {
-      console.error("Sign in failed:", error);
-      alert(error instanceof Error ? error.message : "Sign in failed");
+      console.error("Verification failed:", error);
+      alert(error instanceof Error ? error.message : "Verification failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (!userData) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/send-login-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userData.email }),
+      });
+
+      if (response.ok) {
+        startCountdown();
+      } else {
+        const error = await response.json();
+        throw new Error(
+          error.message || "Failed to resend verification code"
+        );
+      }
+    } catch (error) {
+      console.error("Failed to resend code:", error);
+      alert(error instanceof Error ? error.message : "Failed to resend code");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleOAuthSignIn = (provider: "github" | "google") => {
-    // Use dev OAuth in development, real OAuth in production
     const isDev =
       !process.env.GITHUB_CLIENT_ID ||
       process.env.GITHUB_CLIENT_ID.includes("dev");
 
     if (isDev) {
-      // Development mode - use mock OAuth
       window.location.href = `/api/auth/dev-oauth/callback?provider=${provider}&state=dev_${Date.now()}`;
     } else {
-      // Production mode - use real OAuth
       window.location.href = `/api/auth/signin/${provider}`;
     }
   };
@@ -150,60 +246,138 @@ export default function SignInForm({
           </div>
         </div>
 
-        {/* Email Sign In Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">{t("signIn.email")}</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder={t("signIn.emailPlaceholder")}
-                className="pl-10"
-                {...register("email")}
-                disabled={isLoading}
-              />
+        {step === "credentials" && (
+          <form
+            onSubmit={credentialsForm.handleSubmit(handleCredentialsSubmit)}
+            className="space-y-4"
+          >
+            <div className="space-y-2">
+              <Label htmlFor="email">{t("signIn.email")}</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder={t("signIn.emailPlaceholder")}
+                  className="pl-10"
+                  {...credentialsForm.register("email")}
+                  disabled={isLoading}
+                />
+              </div>
+              {credentialsForm.formState.errors.email && (
+                <p className="text-sm text-red-500">
+                  {credentialsForm.formState.errors.email.message}
+                </p>
+              )}
             </div>
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">{t("signIn.password")}</Label>
-              <Button variant="link" className="p-0 h-auto text-sm" asChild>
-                <Link href="/auth/forgot-password">
-                  {t("signIn.forgotPassword")}
-                </Link>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t("signIn.password")}</Label>
+                <Button variant="link" className="p-0 h-auto text-sm" asChild>
+                  <Link href="/auth/forgot-password">
+                    {t("signIn.forgotPassword")}
+                  </Link>
+                </Button>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder={t("signIn.passwordPlaceholder")}
+                  className="pl-10"
+                  {...credentialsForm.register("password")}
+                  disabled={isLoading}
+                />
+              </div>
+              {credentialsForm.formState.errors.password && (
+                <p className="text-sm text-red-500">
+                  {credentialsForm.formState.errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? t("common.sending") : t("signIn.signIn")}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </form>
+        )}
+
+        {step === "verification" && (
+          <form
+            onSubmit={verifyForm.handleSubmit(handleVerificationSubmit)}
+            className="space-y-4"
+          >
+            <div className="text-center mb-4">
+              <p className="text-sm text-muted-foreground">
+                {t("signIn.verificationSent", {
+                  email: userData?.email || "",
+                })}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="verificationCode">
+                {t("signUp.verificationCode")}
+              </Label>
+              <div className="relative">
+                <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="verificationCode"
+                  placeholder="123456"
+                  className="pl-10 text-center text-lg tracking-widest"
+                  maxLength={6}
+                  {...verifyForm.register("verificationCode")}
+                  disabled={isLoading}
+                />
+              </div>
+              {verifyForm.formState.errors.verificationCode && (
+                <p className="text-sm text-red-500">
+                  {verifyForm.formState.errors.verificationCode.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep("credentials")}
+                disabled={isLoading}
+                className="flex-1"
+              >
+                {t("common.back")}
+              </Button>
+              <Button type="submit" disabled={isLoading} className="flex-1">
+                {isLoading ? t("common.signingIn") : t("signIn.signIn")}
               </Button>
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                placeholder={t("signIn.passwordPlaceholder")}
-                className="pl-10"
-                {...register("password")}
-                disabled={isLoading}
-              />
-            </div>
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
-          </div>
 
-          <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? t("common.signingIn") : t("signIn.signIn")}
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </form>
+            {countdown > 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                {t("signUp.resendIn", { seconds: countdown })}
+              </p>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleResendCode}
+                disabled={isLoading}
+                className="w-full text-sm"
+              >
+                {t("signUp.resendCode")}
+              </Button>
+            )}
+          </form>
+        )}
       </CardContent>
       <CardFooter>
         <div className="text-center text-sm w-full">
-          <span className="text-muted-foreground">{t("signIn.noAccount")}</span>{" "}
+          <span className="text-muted-foreground">
+            {t("signIn.noAccount")}
+          </span>{" "}
           <Button
             variant="link"
             className="p-0 h-auto"

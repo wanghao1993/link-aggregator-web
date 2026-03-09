@@ -1,6 +1,7 @@
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth/auth';
+import Link from 'next/link';
+import authOptions from '@/lib/auth/nextauth-config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Mail, Calendar, Settings, LogOut } from 'lucide-react';
@@ -12,7 +13,7 @@ interface SessionUser {
 }
 
 export default async function DashboardPage() {
-  const session = await getServerSession(auth);
+  const session = await getServerSession(authOptions);
   const t = await getTranslations('dashboard');
 
   // 如果未登录，重定向到登录页面
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
 
         {/* 底部信息 */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>{t('footer.needHelp')} <a href="/help" className="text-blue-600 hover:underline">{t('footer.contactSupport')}</a></p>
+          <p>{t('footer.needHelp')} <Link href="/help" className="text-blue-600 hover:underline">{t('footer.contactSupport')}</Link></p>
           <p className="mt-1">{t('footer.lastUpdated')}: {new Date().toLocaleDateString()}</p>
         </div>
       </div>

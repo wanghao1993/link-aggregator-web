@@ -329,7 +329,7 @@ export default function SignUpForm({
                 </Button>
               </div>
 
-              {countdown === 0 && (
+              {countdown === 0 ? (
                 <Button
                   type="button"
                   variant="ghost"
@@ -339,6 +339,10 @@ export default function SignUpForm({
                 >
                   {t("signUp.resendCode")}
                 </Button>
+              ) : (
+                <p className="text-center text-sm text-muted-foreground">
+                  {t('signUp.resendIn', { seconds: countdown })}
+                </p>
               )}
             </>
           )}
