@@ -261,6 +261,20 @@
       "atLeastOneLink": "At least one link is required"
     }
   },
+  "share": {
+    "title": "Share",
+    "copyLink": "Copy Link",
+    "copied": "Link copied to clipboard",
+    "shareTo": "Share to",
+    "twitter": "Twitter / X",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "wechat": "WeChat",
+    "wechatTip": "Take a screenshot or copy the link to share on WeChat",
+    "close": "Close",
+    "shareCollection": "Share Collection",
+    "scanQrCode": "Scan QR code to visit"
+  },
   "notFound": {
     "message": "Page not found"
   },

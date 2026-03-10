@@ -12,6 +12,7 @@ import {
   User,
   Link2,
   CheckCircle,
+  QrCode,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LinkCollection, LinkItem } from "@/types/link";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
+import ShareButton from "@/components/ShareButton";
+import ShareModal from "@/components/ShareModal";
 
 const mockLinks: LinkItem[] = [
   {
@@ -226,6 +229,8 @@ export default function CollectionDetailPage() {
     collection?.isFavorited ?? false
   );
   const [likes, setLikes] = useState(collection?.likes ?? 0);
+  const ts = useTranslations("share");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   if (!collection) {
     return (
@@ -289,22 +294,40 @@ export default function CollectionDetailPage() {
               </div>
             </div>
 
-            <Button
-              onClick={handleFavorite}
-              variant={isFavorited ? "default" : "outline"}
-              className={
-                isFavorited
-                  ? "bg-red-500 hover:bg-red-600 text-white"
-                  : "border-border/50 hover:border-red-500 hover:text-red-500"
-              }
-            >
-              <Bookmark
-                size={18}
-                className="mr-2"
-                fill={isFavorited ? "currentColor" : "none"}
+            <div className="flex items-center space-x-2">
+              <ShareButton
+                title={collection.title}
+                description={collection.description}
+                variant="outline"
+                size="default"
+                className="border-border/50"
               />
-              {t("addToFavorites")}
-            </Button>
+              <Button
+                onClick={() => setShareModalOpen(true)}
+                variant="outline"
+                size="icon"
+                className="border-border/50"
+                title={ts("shareCollection")}
+              >
+                <QrCode size={18} />
+              </Button>
+              <Button
+                onClick={handleFavorite}
+                variant={isFavorited ? "default" : "outline"}
+                className={
+                  isFavorited
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "border-border/50 hover:border-red-500 hover:text-red-500"
+                }
+              >
+                <Bookmark
+                  size={18}
+                  className="mr-2"
+                  fill={isFavorited ? "currentColor" : "none"}
+                />
+                {t("addToFavorites")}
+              </Button>
+            </div>
           </div>
 
           <p className="text-lg text-muted-foreground leading-relaxed mb-6">
@@ -452,6 +475,13 @@ export default function CollectionDetailPage() {
           )}
         </div>
       </div>
+
+      <ShareModal
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
+        title={collection.title}
+        description={collection.description}
+      />
     </div>
   );
 }

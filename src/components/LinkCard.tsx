@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { LinkCollection } from '@/types/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import ShareButton from '@/components/ShareButton';
 
 interface LinkCardProps {
   collection?: LinkCollection;
@@ -88,14 +89,22 @@ const LinkCard: React.FC<LinkCardProps> = ({
             </div>
           </div>
           
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={(e) => { e.stopPropagation(); onFavorite(); }}
-            className={`${collection.isFavorited ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
-          >
-            <Heart size={18} fill={collection.isFavorited ? 'currentColor' : 'none'} />
-          </Button>
+          <div className="flex items-center space-x-1">
+            <ShareButton
+              url={typeof window !== 'undefined' ? `${window.location.origin}/${locale}/collection/${collection.id}` : ''}
+              title={collection.title}
+              description={collection.description}
+              className="text-muted-foreground hover:text-primary"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => { e.stopPropagation(); onFavorite(); }}
+              className={`${collection.isFavorited ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
+            >
+              <Heart size={18} fill={collection.isFavorited ? 'currentColor' : 'none'} />
+            </Button>
+          </div>
         </div>
         
         <CardDescription className="text-muted-foreground leading-relaxed">

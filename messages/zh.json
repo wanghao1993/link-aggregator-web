@@ -261,6 +261,20 @@
       "atLeastOneLink": "至少添加一个链接"
     }
   },
+  "share": {
+    "title": "分享",
+    "copyLink": "复制链接",
+    "copied": "链接已复制到剪贴板",
+    "shareTo": "分享到",
+    "twitter": "Twitter / X",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "wechat": "微信",
+    "wechatTip": "请截图或复制链接后在微信中分享",
+    "close": "关闭",
+    "shareCollection": "分享合集",
+    "scanQrCode": "扫描二维码访问"
+  },
   "notFound": {
     "message": "页面未找到"
   },

@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales } from "@/locales";
+import { Toaster } from "@/components/ui/sonner";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -43,6 +44,7 @@ export default async function LocaleLayout({ children, params }: Props) {
               <Header />
               {children}
             </div>
+            <Toaster position="bottom-right" />
           </Providers>
         </NextIntlClientProvider>
       </body>
