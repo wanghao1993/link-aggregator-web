@@ -14,6 +14,7 @@ import {
   LogIn,
   LogOut,
   Plus,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -33,9 +34,12 @@ const Header: React.FC = () => {
 
   const isActive = (path: string) => pathname === path;
 
+  const tagsT = useTranslations("tags");
+
   const navItems = [
     { path: "/", label: t("home"), icon: Home },
     { path: "/categories", label: t("categories"), icon: Grid3X3 },
+    { path: "/tags", label: tagsT("title"), icon: Tag },
     { path: "/recent", label: t("recent"), icon: Clock },
     { path: "/favorites", label: t("favorites"), icon: Heart },
   ];

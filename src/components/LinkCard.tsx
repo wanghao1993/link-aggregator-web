@@ -119,7 +119,11 @@ const LinkCard: React.FC<LinkCardProps> = ({
             <Badge
               key={index}
               variant="outline"
-              className="text-xs border-border/30 hover:bg-accent/30 transition-colors cursor-pointer"
+              className="text-xs border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/${locale}/tags/${encodeURIComponent(tag)}`);
+              }}
             >
               {tag}
             </Badge>

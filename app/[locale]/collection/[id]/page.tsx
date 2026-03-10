@@ -340,7 +340,11 @@ export default function CollectionDetailPage() {
               <Badge
                 key={index}
                 variant="outline"
-                className="border-border/30 hover:bg-accent/30 transition-colors"
+                className="border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors cursor-pointer"
+                onClick={() => {
+                  const locale = (params.locale as string) || "en";
+                  router.push(`/${locale}/tags/${encodeURIComponent(tag)}`);
+                }}
               >
                 <Tag size={12} className="mr-1" />
                 {tag}
@@ -442,7 +446,11 @@ export default function CollectionDetailPage() {
                             <Badge
                               key={i}
                               variant="outline"
-                              className="text-xs border-border/20"
+                              className="text-xs border-border/20 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors cursor-pointer"
+                              onClick={() => {
+                                const locale = (params.locale as string) || "en";
+                                router.push(`/${locale}/tags/${encodeURIComponent(tag)}`);
+                              }}
                             >
                               {tag}
                             </Badge>

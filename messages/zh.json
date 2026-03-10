@@ -280,6 +280,16 @@
     "dark": "深色",
     "system": "跟随系统"
   },
+  "tags": {
+    "title": "标签",
+    "subtitle": "浏览所有标签，发现感兴趣的内容",
+    "popular": "热门标签",
+    "allTags": "所有标签",
+    "collectionsCount": "{count} 个合集",
+    "noCollections": "该标签下暂无合集",
+    "tagDetail": "标签：{tag}",
+    "backToTags": "返回标签列表"
+  },
   "notFound": {
     "message": "页面未找到"
   },

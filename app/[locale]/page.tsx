@@ -1,18 +1,36 @@
 "use client";
 
-import React, { useState } from 'react';
-import { TrendingUp, Users, Link2, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Users, Link2, Star, Tag } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import LinkCard from '@/components/LinkCard';
 import StatsCard from '@/components/StatsCard';
+import { Badge } from '@/components/ui/badge';
 import { LinkCollection } from '@/types/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
+
+interface TagItem {
+  name: string;
+  count: number;
+}
 
 export default function Home() {
   const t = useTranslations('home');
+  const tt = useTranslations('tags');
+  const locale = useLocale();
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [popularTags, setPopularTags] = useState<TagItem[]>([]);
+
+  useEffect(() => {
+    fetch('/api/tags')
+      .then((res) => res.json())
+      .then((data) => setPopularTags(data.tags.slice(0, 8)))
+      .catch(() => {});
+  }, []);
   
   console.log('Home page rendered');
   
@@ -175,6 +193,37 @@ export default function Home() {
           />
         </div>
         
+        {/* Popular Tags */}
+        {popularTags.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <Tag size={22} className="text-primary" />
+                {tt('popular')}
+              </h2>
+              <button
+                onClick={() => router.push(`/${locale}/tags`)}
+                className="text-sm text-primary hover:underline"
+              >
+                {tt('allTags')} →
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {popularTags.map((tag) => (
+                <Badge
+                  key={tag.name}
+                  variant="outline"
+                  className="px-4 py-2 text-sm cursor-pointer border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all"
+                  onClick={() => router.push(`/${locale}/tags/${encodeURIComponent(tag.name)}`)}
+                >
+                  {tag.name}
+                  <span className="ml-1.5 opacity-60 text-xs">{tag.count}</span>
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Collections Grid */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">

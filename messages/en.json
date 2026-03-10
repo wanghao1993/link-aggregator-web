@@ -280,6 +280,16 @@
     "dark": "Dark",
     "system": "System"
   },
+  "tags": {
+    "title": "Tags",
+    "subtitle": "Browse all tags and discover content you love",
+    "popular": "Popular Tags",
+    "allTags": "All Tags",
+    "collectionsCount": "{count} collections",
+    "noCollections": "No collections found for this tag",
+    "tagDetail": "Tag: {tag}",
+    "backToTags": "Back to Tags"
+  },
   "notFound": {
     "message": "Page not found"
   },
