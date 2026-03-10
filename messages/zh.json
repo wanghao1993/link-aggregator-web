@@ -312,6 +312,16 @@
       "system": "系统通知"
     }
   },
+  "seo": {
+    "collectionTitle": "{title} - 链接合集",
+    "collectionDesc": "浏览精选链接合集「{title}」- {description}",
+    "tagTitle": "标签：{tag}",
+    "tagDesc": "浏览标签「{tag}」下的 {count} 个精选链接合集",
+    "userTitle": "{name} 的主页",
+    "userDesc": "查看 {name} 创建的 {count} 个链接合集",
+    "rssTitle": "LinkHub - 最新合集 RSS 订阅",
+    "rssCollectionTitle": "{title} - RSS 订阅"
+  },
   "notFound": {
     "message": "页面未找到"
   },

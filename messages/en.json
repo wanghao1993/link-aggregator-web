@@ -312,6 +312,16 @@
       "system": "System notification"
     }
   },
+  "seo": {
+    "collectionTitle": "{title} - Link Collection",
+    "collectionDesc": "Browse the curated link collection \"{title}\" - {description}",
+    "tagTitle": "Tag: {tag}",
+    "tagDesc": "Browse {count} curated link collections tagged with \"{tag}\"",
+    "userTitle": "{name}'s Profile",
+    "userDesc": "View {count} link collections created by {name}",
+    "rssTitle": "LinkHub - Latest Collections RSS Feed",
+    "rssCollectionTitle": "{title} - RSS Feed"
+  },
   "notFound": {
     "message": "Page not found"
   },

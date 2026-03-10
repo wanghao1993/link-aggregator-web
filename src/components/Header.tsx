@@ -15,6 +15,7 @@ import {
   LogOut,
   Plus,
   Tag,
+  Rss,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -106,6 +107,18 @@ const Header: React.FC = () => {
                 ))}
               </select>
             </div>
+
+            {/* RSS */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-orange-500"
+              asChild
+            >
+              <a href="/api/rss" target="_blank" rel="noopener noreferrer" title="RSS Feed">
+                <Rss size={18} />
+              </a>
+            </Button>
 
             {/* Theme Toggle */}
             <ThemeToggle />
