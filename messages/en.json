@@ -199,6 +199,20 @@
     "subtitle": "Explore curated link collections by technology field",
     "collectionsCount": "{count} collections"
   },
+  "collectionDetail": {
+    "title": "Collection Detail",
+    "description": "Description",
+    "links": "Links",
+    "author": "Author",
+    "stats": {
+      "views": "views",
+      "likes": "likes",
+      "linksCount": "links"
+    },
+    "back": "Back",
+    "addToFavorites": "Favorite",
+    "noLinks": "No links yet"
+  },
   "notFound": {
     "message": "Page not found"
   },

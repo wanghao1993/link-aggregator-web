@@ -199,6 +199,20 @@
     "subtitle": "按技术领域探索精选链接合集",
     "collectionsCount": "{count} 个合集"
   },
+  "collectionDetail": {
+    "title": "合集详情",
+    "description": "描述",
+    "links": "链接列表",
+    "author": "作者信息",
+    "stats": {
+      "views": "浏览",
+      "likes": "点赞",
+      "linksCount": "个链接"
+    },
+    "back": "返回",
+    "addToFavorites": "收藏",
+    "noLinks": "暂无链接"
+  },
   "notFound": {
     "message": "页面未找到"
   },

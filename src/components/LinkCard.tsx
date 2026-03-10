@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LinkCollection } from '@/types/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 interface LinkCardProps {
   collection?: LinkCollection;
@@ -45,10 +46,18 @@ const LinkCard: React.FC<LinkCardProps> = ({
     isFavorited: false
   },
   onFavorite = () => console.log('Favorite toggled'),
-  onVisit = () => console.log('Collection visited')
+  onVisit
 }) => {
   const t = useTranslations('common');
-  console.log('LinkCard rendered for collection:', collection.title);
+  const locale = useLocale();
+  const router = useRouter();
+
+  const handleVisit = () => {
+    if (onVisit) {
+      onVisit();
+    }
+    router.push(`/${locale}/collection/${collection.id}`);
+  };
   
   const formatDate = (date: Date) => {
     const now = new Date();
@@ -62,7 +71,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
   };
   
   return (
-    <Card data-cmp="LinkCard" className="glass-effect link-card-hover border-border/30 bg-card/60 fade-in">
+    <Card data-cmp="LinkCard" className="glass-effect link-card-hover border-border/30 bg-card/60 fade-in cursor-pointer" onClick={handleVisit}>
       <CardHeader className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
@@ -82,7 +91,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onFavorite}
+            onClick={(e) => { e.stopPropagation(); onFavorite(); }}
             className={`${collection.isFavorited ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
           >
             <Heart size={18} fill={collection.isFavorited ? 'currentColor' : 'none'} />
@@ -133,7 +142,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
         
         {/* Action Button */}
         <Button
-          onClick={onVisit}
+          onClick={(e) => { e.stopPropagation(); handleVisit(); }}
           className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 group"
         >
           <span>{t('viewCollection')}</span>
