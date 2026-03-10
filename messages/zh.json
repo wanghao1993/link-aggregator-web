@@ -290,6 +290,28 @@
     "tagDetail": "标签：{tag}",
     "backToTags": "返回标签列表"
   },
+  "follow": {
+    "follow": "关注",
+    "unfollow": "取消关注",
+    "following": "正在关注",
+    "followers": "粉丝",
+    "userCollections": "该用户创建的链接合集",
+    "noCollections": "该用户暂未创建任何合集",
+    "loginRequired": "请先登录后再关注"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAsRead": "标记已读",
+    "markAllAsRead": "全部标记已读",
+    "noNotifications": "暂无通知",
+    "types": {
+      "follow": "新关注",
+      "like": "新点赞",
+      "favorite": "新收藏",
+      "comment": "新评论",
+      "system": "系统通知"
+    }
+  },
   "notFound": {
     "message": "页面未找到"
   },

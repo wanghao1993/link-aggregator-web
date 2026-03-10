@@ -290,6 +290,28 @@
     "tagDetail": "Tag: {tag}",
     "backToTags": "Back to Tags"
   },
+  "follow": {
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "following": "Following",
+    "followers": "Followers",
+    "userCollections": "Link collections created by this user",
+    "noCollections": "This user hasn't created any collections yet",
+    "loginRequired": "Please sign in to follow"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAsRead": "Mark as read",
+    "markAllAsRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "types": {
+      "follow": "New follower",
+      "like": "New like",
+      "favorite": "New favorite",
+      "comment": "New comment",
+      "system": "System notification"
+    }
+  },
   "notFound": {
     "message": "Page not found"
   },

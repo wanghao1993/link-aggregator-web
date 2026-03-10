@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 import { useTranslations } from "next-intl";
 import { locales } from "@/locales";
 import { useSession, signOut } from "next-auth/react";
@@ -111,6 +112,7 @@ const Header: React.FC = () => {
 
             {status === "authenticated" ? (
               <div className="flex items-center gap-3">
+                <NotificationBell />
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
