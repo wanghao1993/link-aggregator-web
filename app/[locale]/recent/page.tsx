@@ -3,8 +3,10 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import LinkCard from '@/components/LinkCard';
+import { useTranslations } from 'next-intl';
 
 export default function Recent() {
+  const t = useTranslations('recentPage');
   console.log('Recent page rendered');
   
   return (
@@ -13,10 +15,10 @@ export default function Recent() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <Clock className="text-primary" size={32} />
-            <h1 className="text-4xl font-bold gradient-text">最新更新</h1>
+            <h1 className="text-4xl font-bold gradient-text">{t('title')}</h1>
           </div>
           <p className="text-xl text-muted-foreground">
-            查看最近添加和更新的链接合集
+            {t('subtitle')}
           </p>
         </div>
         

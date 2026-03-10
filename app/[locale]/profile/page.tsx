@@ -6,8 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import UserAvatar from '@/components/UserAvatar';
 import StatsCard from '@/components/StatsCard';
+import { useTranslations } from 'next-intl';
 
 export default function Profile() {
+  const t = useTranslations('profilePage');
+  const commonT = useTranslations('common');
   console.log('Profile page rendered');
   
   return (
@@ -42,7 +45,7 @@ export default function Profile() {
                 </div>
                 <Button variant="outline" className="glass-effect">
                   <Settings size={16} className="mr-2" />
-                  编辑资料
+                  {t('editProfile')}
                 </Button>
               </div>
             </CardHeader>
@@ -51,25 +54,25 @@ export default function Profile() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <StatsCard
-              title="创建的合集"
+              title={t('stats.collections')}
               value="12"
               icon={Link2}
               color="purple"
             />
             <StatsCard
-              title="总浏览量"
+              title={t('stats.totalViews')}
               value="5.2K"
               icon={BarChart3}
               color="blue"
             />
             <StatsCard
-              title="获得点赞"
+              title={t('stats.likesReceived')}
               value="284"
               icon={User}
               color="green"
             />
             <StatsCard
-              title="收藏数量"
+              title={t('stats.favoritesCount')}
               value="38"
               icon={User}
               color="orange"
@@ -79,9 +82,9 @@ export default function Profile() {
           {/* My Collections */}
           <Card className="glass-effect border-border/30 bg-card/60">
             <CardHeader>
-              <CardTitle className="text-foreground">我的合集</CardTitle>
+              <CardTitle className="text-foreground">{t('myCollections.title')}</CardTitle>
               <CardDescription className="text-muted-foreground">
-                管理你创建的链接合集
+                {t('myCollections.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -89,12 +92,12 @@ export default function Profile() {
                 {Array.from({ length: 3 }, (_, i) => (
                   <div key={i} className="flex items-center justify-between p-4 bg-muted/10 rounded-lg">
                     <div>
-                      <h4 className="font-medium text-foreground">我的合集 {i + 1}</h4>
-                      <p className="text-sm text-muted-foreground">最后更新: 2天前</p>
+                      <h4 className="font-medium text-foreground">{t('myCollections.collectionName', { index: i + 1 })}</h4>
+                      <p className="text-sm text-muted-foreground">{t('myCollections.lastUpdated', { time: '2d' })}</p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">125 浏览</span>
-                      <Button variant="ghost" size="sm">编辑</Button>
+                      <span className="text-sm text-muted-foreground">{t('myCollections.views', { count: 125 })}</span>
+                      <Button variant="ghost" size="sm">{commonT('edit')}</Button>
                     </div>
                   </div>
                 ))}

@@ -23,6 +23,7 @@ const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("common");
+  const headerT = useTranslations("header");
   const { data: session, status } = useSession();
 
   console.log("Header component rendered, current route:", pathname);
@@ -50,8 +51,8 @@ const Header: React.FC = () => {
               <Search className="text-white" size={20} />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold gradient-text">链接聚合</h1>
-              <p className="text-xs text-muted-foreground">发现精选链接合集</p>
+              <h1 className="text-xl font-bold gradient-text">{headerT('title')}</h1>
+              <p className="text-xs text-muted-foreground">{headerT('subtitle')}</p>
             </div>
           </Link>
 

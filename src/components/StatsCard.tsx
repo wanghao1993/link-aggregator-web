@@ -11,7 +11,7 @@ interface StatsCardProps {
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
-  title = '统计项目',
+  title = '',
   value = '0',
   icon: Icon = () => <div className="w-6 h-6 bg-muted rounded" />,
   change = 0,

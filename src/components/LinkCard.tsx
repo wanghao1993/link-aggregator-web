@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LinkCollection } from '@/types/link';
+import { useTranslations } from 'next-intl';
 
 interface LinkCardProps {
   collection?: LinkCollection;
@@ -46,6 +47,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
   onFavorite = () => console.log('Favorite toggled'),
   onVisit = () => console.log('Collection visited')
 }) => {
+  const t = useTranslations('common');
   console.log('LinkCard rendered for collection:', collection.title);
   
   const formatDate = (date: Date) => {
@@ -53,10 +55,10 @@ const LinkCard: React.FC<LinkCardProps> = ({
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 1) return '1天前';
-    if (diffDays < 7) return `${diffDays}天前`;
-    if (diffDays < 30) return `${Math.ceil(diffDays / 7)}周前`;
-    return `${Math.ceil(diffDays / 30)}月前`;
+    if (diffDays === 1) return t('timeAgo.daysAgo', { count: 1 });
+    if (diffDays < 7) return t('timeAgo.daysAgo', { count: diffDays });
+    if (diffDays < 30) return t('timeAgo.weeksAgo', { count: Math.ceil(diffDays / 7) });
+    return t('timeAgo.monthsAgo', { count: Math.ceil(diffDays / 30) });
   };
   
   return (
@@ -134,7 +136,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
           onClick={onVisit}
           className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 group"
         >
-          <span>查看合集</span>
+          <span>{t('viewCollection')}</span>
           <ExternalLink size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </CardContent>

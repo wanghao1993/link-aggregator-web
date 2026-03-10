@@ -3,6 +3,7 @@ import { User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { User as UserType } from '@/types/link';
+import { useTranslations } from 'next-intl';
 
 interface UserAvatarProps {
   user?: UserType;
@@ -24,6 +25,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   showName = true,
   showBadge = true
 }) => {
+  const t = useTranslations('common');
   console.log('UserAvatar rendered for user:', user.displayName);
   
   const sizeClasses = {
@@ -66,7 +68,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
             </p>
             {user.isVerified && (
               <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-400 border-green-500/30">
-                已验证
+                {t('verified')}
               </Badge>
             )}
           </div>

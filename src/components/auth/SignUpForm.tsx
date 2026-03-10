@@ -270,7 +270,7 @@ export default function SignUpForm({
                 className="w-full"
               >
                 {isLoading
-                  ? t("common.sending")
+                  ? commonT("sending")
                   : t("signUp.sendVerificationCode")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -315,7 +315,7 @@ export default function SignUpForm({
                   disabled={isLoading}
                   className="flex-1"
                 >
-                  {t("common.back")}
+                  {commonT("back")}
                 </Button>
                 <Button
                   type="submit"
@@ -323,7 +323,7 @@ export default function SignUpForm({
                   className="flex-1"
                 >
                   {isLoading
-                    ? t("common.verifying")
+                    ? commonT("verifying")
                     : t("signUp.verifyAndRegister")}
                   {countdown > 0 && ` (${countdown}s)`}
                 </Button>

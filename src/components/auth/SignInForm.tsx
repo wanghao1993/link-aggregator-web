@@ -299,7 +299,7 @@ export default function SignInForm({
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? t("common.sending") : t("signIn.signIn")}
+              {isLoading ? commonT("sending") : t("signIn.signIn")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </form>
@@ -348,10 +348,10 @@ export default function SignInForm({
                 disabled={isLoading}
                 className="flex-1"
               >
-                {t("common.back")}
+                {commonT("back")}
               </Button>
               <Button type="submit" disabled={isLoading} className="flex-1">
-                {isLoading ? t("common.signingIn") : t("signIn.signIn")}
+                {isLoading ? commonT("signingIn") : t("signIn.signIn")}
               </Button>
             </div>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Category } from '@/types/link';
+import { useTranslations } from 'next-intl';
 
 interface CategoryFilterProps {
   categories?: Category[];
@@ -9,17 +10,22 @@ interface CategoryFilterProps {
 }
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({
-  categories = [
-    { id: 'all', name: '全部', description: 'All categories', icon: '🔥', color: 'gray', slug: 'all', isActive: true },
-    { id: 'ai', name: 'AI/ML', description: 'AI & Machine Learning', icon: '🤖', color: 'purple', slug: 'ai-ml', isActive: true },
-    { id: 'web', name: 'Web开发', description: 'Web Development', icon: '💻', color: 'blue', slug: 'web-dev', isActive: true },
-    { id: 'design', name: '设计', description: 'Design Resources', icon: '🎨', color: 'pink', slug: 'design', isActive: true },
-    { id: 'tools', name: '工具', description: 'Productivity Tools', icon: '🛠️', color: 'green', slug: 'tools', isActive: true },
-    { id: 'mobile', name: '移动开发', description: 'Mobile Development', icon: '📱', color: 'indigo', slug: 'mobile', isActive: true }
-  ],
+  categories: categoriesProp,
   selectedCategory = 'all',
   onSelectCategory = () => console.log('Category selected')
 }) => {
+  const catT = useTranslations('categories');
+
+  const defaultCategories: Category[] = [
+    { id: 'all', name: catT('all'), description: 'All categories', icon: '🔥', color: 'gray', slug: 'all', isActive: true },
+    { id: 'ai', name: catT('ai'), description: 'AI & Machine Learning', icon: '🤖', color: 'purple', slug: 'ai-ml', isActive: true },
+    { id: 'web', name: catT('web'), description: 'Web Development', icon: '💻', color: 'blue', slug: 'web-dev', isActive: true },
+    { id: 'design', name: catT('design'), description: 'Design Resources', icon: '🎨', color: 'pink', slug: 'design', isActive: true },
+    { id: 'tools', name: catT('tools'), description: 'Productivity Tools', icon: '🛠️', color: 'green', slug: 'tools', isActive: true },
+    { id: 'mobile', name: catT('mobile'), description: 'Mobile Development', icon: '📱', color: 'indigo', slug: 'mobile', isActive: true }
+  ];
+
+  const categories = categoriesProp || defaultCategories;
   console.log('CategoryFilter rendered with', categories.length, 'categories');
   
   const getColorClasses = (color: string, isSelected: boolean) => {

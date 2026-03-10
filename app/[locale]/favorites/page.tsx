@@ -3,8 +3,10 @@
 import React from 'react';
 import { Heart } from 'lucide-react';
 import LinkCard from '@/components/LinkCard';
+import { useTranslations } from 'next-intl';
 
 export default function Favorites() {
+  const t = useTranslations('favoritesPage');
   console.log('Favorites page rendered');
   
   return (
@@ -13,10 +15,10 @@ export default function Favorites() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <Heart className="text-red-500" size={32} fill="currentColor" />
-            <h1 className="text-4xl font-bold gradient-text">我的收藏</h1>
+            <h1 className="text-4xl font-bold gradient-text">{t('title')}</h1>
           </div>
           <p className="text-xl text-muted-foreground">
-            管理你收藏的链接合集
+            {t('subtitle')}
           </p>
         </div>
         

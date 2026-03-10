@@ -6,14 +6,16 @@ import SignUpForm from '@/components/auth/SignUpForm';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function SignUpPage() {
   const router = useRouter();
   const [isSuccess, setIsSuccess] = useState(false);
+  const t = useTranslations('auth.signUp');
+  const commonT = useTranslations('common');
 
   const handleSuccess = () => {
     setIsSuccess(true);
-    // Redirect to home page after 2 seconds
     setTimeout(() => {
       router.push('/');
     }, 2000);
@@ -32,8 +34,8 @@ export default function SignUpPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">注册成功！</h1>
-          <p className="text-muted-foreground">正在跳转到首页...</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('success')}</h1>
+          <p className="text-muted-foreground">{t('redirecting')}</p>
         </div>
       </div>
     );
@@ -45,15 +47,15 @@ export default function SignUpPage() {
         <Button variant="ghost" asChild>
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            返回首页
+            {commonT('backToHome')}
           </Link>
         </Button>
       </div>
       
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold gradient-text mb-2">加入链接聚合</h1>
-          <p className="text-muted-foreground">发现并分享精选链接合集</p>
+          <h1 className="text-3xl font-bold gradient-text mb-2">{t('pageTitle')}</h1>
+          <p className="text-muted-foreground">{t('pageSubtitle')}</p>
         </div>
         
         <SignUpForm 

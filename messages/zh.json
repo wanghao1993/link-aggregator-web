@@ -3,6 +3,10 @@
     "title": "LinkHub - 精选链接合集",
     "description": "探索社区精心策划的高质量资源合集"
   },
+  "header": {
+    "title": "链接聚合",
+    "subtitle": "发现精选链接合集"
+  },
   "home": {
     "hero": {
       "title": "发现精选链接合集",
@@ -57,7 +61,17 @@
     "sending": "发送中...",
     "verifying": "验证中...",
     "signingIn": "登录中...",
-    "orContinueWith": "或继续使用"
+    "orContinueWith": "或继续使用",
+    "backToHome": "返回首页",
+    "searchButton": "搜索",
+    "verified": "已验证",
+    "viewCollection": "查看合集",
+    "timeAgo": {
+      "justNow": "刚刚",
+      "daysAgo": "{count}天前",
+      "weeksAgo": "{count}周前",
+      "monthsAgo": "{count}月前"
+    }
   },
   "categories": {
     "all": "全部",
@@ -68,7 +82,8 @@
     "devops": "DevOps",
     "data": "数据科学",
     "security": "安全",
-    "productivity": "生产力工具"
+    "productivity": "生产力工具",
+    "tools": "工具"
   },
   "auth": {
     "signUp": {
@@ -87,7 +102,11 @@
       "resendCode": "重新发送验证码",
       "resendIn": "{seconds}秒后可重新发送",
       "haveAccount": "已有账号？",
-      "signInInstead": "立即登录"
+      "signInInstead": "立即登录",
+      "success": "注册成功！",
+      "redirecting": "正在跳转到首页...",
+      "pageTitle": "加入链接聚合",
+      "pageSubtitle": "发现并分享精选链接合集"
     },
     "signIn": {
       "title": "登录账号",
@@ -100,7 +119,11 @@
       "signIn": "登录",
       "verificationSent": "验证码已发送至 {email}，请查收",
       "noAccount": "没有账号？",
-      "signUpInstead": "立即注册"
+      "signUpInstead": "立即注册",
+      "success": "登录成功！",
+      "redirecting": "正在跳转到首页...",
+      "pageTitle": "欢迎回来",
+      "pageSubtitle": "登录您的账号继续使用"
     }
   },
   "dashboard": {
@@ -145,6 +168,57 @@
       "needHelp": "需要帮助？",
       "contactSupport": "联系技术支持",
       "lastUpdated": "最后更新"
+    }
+  },
+  "profilePage": {
+    "editProfile": "编辑资料",
+    "stats": {
+      "collections": "创建的合集",
+      "totalViews": "总浏览量",
+      "likesReceived": "获得点赞",
+      "favoritesCount": "收藏数量"
+    },
+    "myCollections": {
+      "title": "我的合集",
+      "description": "管理你创建的链接合集",
+      "collectionName": "我的合集 {index}",
+      "lastUpdated": "最后更新: {time}",
+      "views": "{count} 浏览"
+    }
+  },
+  "recentPage": {
+    "title": "最新更新",
+    "subtitle": "查看最近添加和更新的链接合集"
+  },
+  "favoritesPage": {
+    "title": "我的收藏",
+    "subtitle": "管理你收藏的链接合集"
+  },
+  "categoriesPage": {
+    "title": "浏览分类",
+    "subtitle": "按技术领域探索精选链接合集",
+    "collectionsCount": "{count} 个合集"
+  },
+  "notFound": {
+    "message": "页面未找到"
+  },
+  "testAuth": {
+    "title": "NextAuth.js 测试页面",
+    "sessionInfo": "会话信息",
+    "apiEndpoints": "API 端点测试",
+    "githubLogin": "GitHub 登录",
+    "googleLogin": "Google 登录",
+    "customApi": "自定义 API 测试",
+    "sendVerificationApi": "发送验证码 API (POST)",
+    "registerApi": "注册 API (POST)",
+    "loginApi": "登录 API (POST)",
+    "devOauthCallback": "开发 OAuth 回调",
+    "devModeTitle": "开发模式说明",
+    "devModeItems": {
+      "emailConsole": "电子邮件验证码会在控制台显示",
+      "oauthSimulation": "OAuth 使用开发模式模拟",
+      "localDatabase": "数据库使用本地 Supabase 实例",
+      "apiReady": "所有 API 端点都已配置完成"
     }
   }
 }

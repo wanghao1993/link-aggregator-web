@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 interface SearchBarProps {
   onSearch?: (query: string) => void;
@@ -12,8 +13,9 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch = () => console.log('Search triggered'),
   onFilter = () => console.log('Filter triggered'),
-  placeholder = '搜索链接合集...'
+  placeholder
 }) => {
+  const t = useTranslations('common');
   const [query, setQuery] = useState('');
   
   console.log('SearchBar component rendered with query:', query);
@@ -36,7 +38,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
           <Input
             type="text"
-            placeholder={placeholder}
+            placeholder={placeholder || t('search')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -48,7 +50,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onClick={handleSearch}
           className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 px-6"
         >
-          搜索
+          {t('searchButton')}
         </Button>
         
         <Button

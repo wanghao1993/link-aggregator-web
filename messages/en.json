@@ -3,6 +3,10 @@
     "title": "LinkHub - Curated Link Collections",
     "description": "Explore high-quality resource collections curated by the community"
   },
+  "header": {
+    "title": "LinkHub",
+    "subtitle": "Discover Curated Collections"
+  },
   "home": {
     "hero": {
       "title": "Discover Curated Link Collections",
@@ -57,7 +61,17 @@
     "sending": "Sending...",
     "verifying": "Verifying...",
     "signingIn": "Signing in...",
-    "orContinueWith": "Or continue with"
+    "orContinueWith": "Or continue with",
+    "backToHome": "Back to Home",
+    "searchButton": "Search",
+    "verified": "Verified",
+    "viewCollection": "View Collection",
+    "timeAgo": {
+      "justNow": "Just now",
+      "daysAgo": "{count}d ago",
+      "weeksAgo": "{count}w ago",
+      "monthsAgo": "{count}mo ago"
+    }
   },
   "categories": {
     "all": "All",
@@ -68,7 +82,8 @@
     "devops": "DevOps",
     "data": "Data Science",
     "security": "Security",
-    "productivity": "Productivity Tools"
+    "productivity": "Productivity Tools",
+    "tools": "Tools"
   },
   "auth": {
     "signUp": {
@@ -87,7 +102,11 @@
       "resendCode": "Resend Code",
       "resendIn": "Resend in {seconds}s",
       "haveAccount": "Already have an account?",
-      "signInInstead": "Sign in instead"
+      "signInInstead": "Sign in instead",
+      "success": "Sign up successful!",
+      "redirecting": "Redirecting to home page...",
+      "pageTitle": "Join LinkHub",
+      "pageSubtitle": "Discover and share curated link collections"
     },
     "signIn": {
       "title": "Sign In",
@@ -100,7 +119,11 @@
       "signIn": "Sign In",
       "verificationSent": "Verification code sent to {email}, please check",
       "noAccount": "Don't have an account?",
-      "signUpInstead": "Sign up instead"
+      "signUpInstead": "Sign up instead",
+      "success": "Sign in successful!",
+      "redirecting": "Redirecting to home page...",
+      "pageTitle": "Welcome Back",
+      "pageSubtitle": "Sign in to your account to continue"
     }
   },
   "dashboard": {
@@ -145,6 +168,57 @@
       "needHelp": "Need help?",
       "contactSupport": "Contact support",
       "lastUpdated": "Last updated"
+    }
+  },
+  "profilePage": {
+    "editProfile": "Edit Profile",
+    "stats": {
+      "collections": "Collections Created",
+      "totalViews": "Total Views",
+      "likesReceived": "Likes Received",
+      "favoritesCount": "Favorites Count"
+    },
+    "myCollections": {
+      "title": "My Collections",
+      "description": "Manage your link collections",
+      "collectionName": "My Collection {index}",
+      "lastUpdated": "Last updated: {time}",
+      "views": "{count} views"
+    }
+  },
+  "recentPage": {
+    "title": "Recent Updates",
+    "subtitle": "View recently added and updated link collections"
+  },
+  "favoritesPage": {
+    "title": "My Favorites",
+    "subtitle": "Manage your favorite link collections"
+  },
+  "categoriesPage": {
+    "title": "Browse Categories",
+    "subtitle": "Explore curated link collections by technology field",
+    "collectionsCount": "{count} collections"
+  },
+  "notFound": {
+    "message": "Page not found"
+  },
+  "testAuth": {
+    "title": "NextAuth.js Test Page",
+    "sessionInfo": "Session Info",
+    "apiEndpoints": "API Endpoint Tests",
+    "githubLogin": "GitHub Login",
+    "googleLogin": "Google Login",
+    "customApi": "Custom API Tests",
+    "sendVerificationApi": "Send Verification API (POST)",
+    "registerApi": "Register API (POST)",
+    "loginApi": "Login API (POST)",
+    "devOauthCallback": "Dev OAuth Callback",
+    "devModeTitle": "Development Mode Notes",
+    "devModeItems": {
+      "emailConsole": "Email verification codes are shown in the console",
+      "oauthSimulation": "OAuth uses development mode simulation",
+      "localDatabase": "Using local Supabase instance",
+      "apiReady": "All API endpoints are configured"
     }
   }
 }

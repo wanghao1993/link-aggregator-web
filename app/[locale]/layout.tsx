@@ -3,14 +3,18 @@ import "@/index.css";
 import Header from "@/components/Header";
 import { Providers } from "../providers";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales } from "@/locales";
 
-export const metadata = {
-  title: "LinkHub - 精选链接合集",
-  description: "探索社区精心策划的高质量资源合集",
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
 type Props = {
   children: ReactNode;
