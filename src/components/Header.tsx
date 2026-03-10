@@ -13,6 +13,7 @@ import {
   Globe,
   LogIn,
   LogOut,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -102,6 +103,16 @@ const Header: React.FC = () => {
 
             {status === "authenticated" ? (
               <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                  asChild
+                >
+                  <Link href="/create">
+                    <Plus className="h-4 w-4 mr-1" />
+                    {t("create")}
+                  </Link>
+                </Button>
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                     {session.user?.name?.[0]?.toUpperCase() ||
