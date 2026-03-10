@@ -8,6 +8,8 @@ import LinkCard from "@/components/LinkCard";
 import { LinkCollection } from "@/types/link";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
+import { LinkCardSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TagDetailPage() {
   const t = useTranslations("tags");
@@ -39,14 +41,6 @@ export default function TagDetailPage() {
       .catch(() => setLoading(false));
   }, [tag]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -67,26 +61,45 @@ export default function TagDetailPage() {
               <Hash className="text-white" size={28} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                {t("tagDetail", { tag })}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {t("collectionsCount", { count: collections.length })}
-              </p>
+              {loading ? (
+                <>
+                  <Skeleton className="h-8 w-48 mb-2" />
+                  <Skeleton className="h-5 w-28" />
+                </>
+              ) : (
+                <>
+                  <h1 className="text-3xl font-bold text-foreground">
+                    {t("tagDetail", { tag })}
+                  </h1>
+                  <p className="text-muted-foreground mt-1">
+                    {t("collectionsCount", { count: collections.length })}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
-          <Badge
-            variant="secondary"
-            className="text-sm px-4 py-1.5 bg-primary/10 text-primary"
-          >
-            <Tag size={14} className="mr-1.5" />
-            {tag}
-          </Badge>
+          {loading ? (
+            <Skeleton className="h-8 w-24 rounded-full" />
+          ) : (
+            <Badge
+              variant="secondary"
+              className="text-sm px-4 py-1.5 bg-primary/10 text-primary"
+            >
+              <Tag size={14} className="mr-1.5" />
+              {tag}
+            </Badge>
+          )}
         </div>
 
         {/* Collections Grid */}
-        {collections.length > 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <LinkCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : collections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {collections.map((collection) => (
               <LinkCard key={collection.id} collection={collection} />

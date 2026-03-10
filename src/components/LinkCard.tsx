@@ -7,14 +7,17 @@ import { LinkCollection } from '@/types/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
+import { LinkCardSkeleton } from '@/components/skeletons';
 
 interface LinkCardProps {
   collection?: LinkCollection;
+  loading?: boolean;
   onFavorite?: () => void;
   onVisit?: () => void;
 }
 
 const LinkCard: React.FC<LinkCardProps> = ({
+  loading = false,
   collection = {
     id: '1',
     title: 'AI & Machine Learning Resources',
@@ -52,6 +55,10 @@ const LinkCard: React.FC<LinkCardProps> = ({
   const t = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
+
+  if (loading) {
+    return <LinkCardSkeleton />;
+  }
 
   const handleVisit = () => {
     if (onVisit) {

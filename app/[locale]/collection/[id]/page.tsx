@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   ExternalLink,
@@ -24,6 +24,7 @@ import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import ShareButton from "@/components/ShareButton";
 import ShareModal from "@/components/ShareModal";
+import { CollectionDetailSkeleton } from "@/components/skeletons";
 
 const mockLinks: LinkItem[] = [
   {
@@ -231,6 +232,16 @@ export default function CollectionDetailPage() {
   const [likes, setLikes] = useState(collection?.likes ?? 0);
   const ts = useTranslations("share");
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <CollectionDetailSkeleton />;
+  }
 
   if (!collection) {
     return (

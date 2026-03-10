@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { LinkCollection } from '@/types/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { LinkCardSkeleton, StatsCardSkeleton } from '@/components/skeletons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TagItem {
   name: string;
@@ -24,12 +26,17 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [popularTags, setPopularTags] = useState<TagItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/tags')
       .then((res) => res.json())
       .then((data) => setPopularTags(data.tags.slice(0, 8)))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        const timer = setTimeout(() => setLoading(false), 600);
+        return () => clearTimeout(timer);
+      });
   }, []);
   
   console.log('Home page rendered');
@@ -160,6 +167,7 @@ export default function Home() {
             icon={Link2}
             change={12}
             color="purple"
+            loading={loading}
           />
           <StatsCard
             title={t('stats.activeUsers')}
@@ -167,6 +175,7 @@ export default function Home() {
             icon={Users}
             change={8}
             color="blue"
+            loading={loading}
           />
           <StatsCard
             title={t('stats.monthlyViews')}
@@ -174,6 +183,7 @@ export default function Home() {
             icon={TrendingUp}
             change={15}
             color="green"
+            loading={loading}
           />
           <StatsCard
             title={t('stats.featuredCollections')}
@@ -181,6 +191,7 @@ export default function Home() {
             icon={Star}
             change={5}
             color="orange"
+            loading={loading}
           />
         </div>
         
@@ -194,7 +205,7 @@ export default function Home() {
         </div>
         
         {/* Popular Tags */}
-        {popularTags.length > 0 && (
+        {(loading || popularTags.length > 0) && (
           <div className="mb-10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -209,17 +220,23 @@ export default function Home() {
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {popularTags.map((tag) => (
-                <Badge
-                  key={tag.name}
-                  variant="outline"
-                  className="px-4 py-2 text-sm cursor-pointer border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all"
-                  onClick={() => router.push(`/${locale}/tags/${encodeURIComponent(tag.name)}`)}
-                >
-                  {tag.name}
-                  <span className="ml-1.5 opacity-60 text-xs">{tag.count}</span>
-                </Badge>
-              ))}
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-9 w-20 rounded-full" />
+                ))
+              ) : (
+                popularTags.map((tag) => (
+                  <Badge
+                    key={tag.name}
+                    variant="outline"
+                    className="px-4 py-2 text-sm cursor-pointer border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all"
+                    onClick={() => router.push(`/${locale}/tags/${encodeURIComponent(tag.name)}`)}
+                  >
+                    {tag.name}
+                    <span className="ml-1.5 opacity-60 text-xs">{tag.count}</span>
+                  </Badge>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -236,14 +253,20 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCollections.map((collection) => (
-              <LinkCard
-                key={collection.id}
-                collection={collection}
-                onFavorite={() => console.log('Toggled favorite for:', collection.title)}
-                onVisit={() => console.log('Visiting collection:', collection.title)}
-              />
-            ))}
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <LinkCardSkeleton key={i} />
+              ))
+            ) : (
+              filteredCollections.map((collection) => (
+                <LinkCard
+                  key={collection.id}
+                  collection={collection}
+                  onFavorite={() => console.log('Toggled favorite for:', collection.title)}
+                  onVisit={() => console.log('Visiting collection:', collection.title)}
+                />
+              ))
+            )}
           </div>
           
           {filteredCollections.length === 0 && (

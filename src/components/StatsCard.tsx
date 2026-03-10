@@ -1,6 +1,7 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { StatsCardSkeleton } from '@/components/skeletons';
 
 interface StatsCardProps {
   title?: string;
@@ -8,6 +9,7 @@ interface StatsCardProps {
   icon?: LucideIcon;
   change?: number;
   color?: string;
+  loading?: boolean;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -15,8 +17,13 @@ const StatsCard: React.FC<StatsCardProps> = ({
   value = '0',
   icon: Icon = () => <div className="w-6 h-6 bg-muted rounded" />,
   change = 0,
-  color = 'purple'
+  color = 'purple',
+  loading = false,
 }) => {
+  if (loading) {
+    return <StatsCardSkeleton />;
+  }
+
   console.log('StatsCard rendered:', title, value);
   
   const getColorGradient = (color: string) => {
