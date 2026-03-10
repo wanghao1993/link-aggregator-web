@@ -275,6 +275,11 @@
     "shareCollection": "Share Collection",
     "scanQrCode": "Scan QR code to visit"
   },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "notFound": {
     "message": "Page not found"
   },

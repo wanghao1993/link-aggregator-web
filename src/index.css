@@ -49,44 +49,44 @@
 
 :root {
   --fontSans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --background: rgb(15, 23, 42);
-  --foreground: rgb(248, 250, 252);
-  --card: rgba(30, 41, 59, 0.8);
-  --card-foreground: rgb(248, 250, 252);
-  --popover: rgba(30, 41, 59, 0.95);
-  --popover-foreground: rgb(248, 250, 252);
-  --primary: rgb(139, 92, 246);
+  --background: rgb(250, 250, 252);
+  --foreground: rgb(15, 23, 42);
+  --card: rgb(255, 255, 255);
+  --card-foreground: rgb(15, 23, 42);
+  --popover: rgb(255, 255, 255);
+  --popover-foreground: rgb(15, 23, 42);
+  --primary: rgb(124, 58, 237);
   --primary-foreground: rgb(255, 255, 255);
-  --secondary: rgba(100, 116, 139, 0.3);
-  --secondary-foreground: rgb(248, 250, 252);
-  --muted: rgba(51, 65, 85, 0.5);
-  --muted-foreground: rgb(156, 163, 175);
-  --accent: rgba(139, 92, 246, 0.1);
-  --accent-foreground: rgb(139, 92, 246);
+  --secondary: rgb(241, 245, 249);
+  --secondary-foreground: rgb(15, 23, 42);
+  --muted: rgb(241, 245, 249);
+  --muted-foreground: rgb(100, 116, 139);
+  --accent: rgba(124, 58, 237, 0.1);
+  --accent-foreground: rgb(124, 58, 237);
   --destructive: rgb(239, 68, 68);
   --destructive-foreground: rgb(255, 255, 255);
-  --border: rgba(100, 116, 139, 0.2);
-  --input: rgba(100, 116, 139, 0.3);
-  --ring: rgb(139, 92, 246);
+  --border: rgb(226, 232, 240);
+  --input: rgb(226, 232, 240);
+  --ring: rgb(124, 58, 237);
   --chart-1: rgb(99, 102, 241);
   --chart-2: rgb(236, 72, 153);
   --chart-3: rgb(34, 197, 94);
   --chart-4: rgb(251, 146, 60);
   --chart-5: rgb(14, 165, 233);
   --radius: 12px;
-  --sidebar: rgba(30, 41, 59, 0.8);
-  --sidebar-foreground: rgb(248, 250, 252);
-  --sidebar-primary: rgb(139, 92, 246);
+  --sidebar: rgb(248, 250, 252);
+  --sidebar-foreground: rgb(15, 23, 42);
+  --sidebar-primary: rgb(124, 58, 237);
   --sidebar-primary-foreground: rgb(255, 255, 255);
-  --sidebar-accent: rgba(139, 92, 246, 0.1);
-  --sidebar-accent-foreground: rgb(139, 92, 246);
-  --sidebar-border: rgba(100, 116, 139, 0.2);
-  --sidebar-ring: rgb(139, 92, 246);
+  --sidebar-accent: rgba(124, 58, 237, 0.1);
+  --sidebar-accent-foreground: rgb(124, 58, 237);
+  --sidebar-border: rgb(226, 232, 240);
+  --sidebar-ring: rgb(124, 58, 237);
   --shadow-x: 0px;
-  --shadow-y: 10px;
-  --shadow-blur: 25px;
-  --shadow-spread: -5px;
-  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-y: 4px;
+  --shadow-blur: 16px;
+  --shadow-spread: -2px;
+  --shadow-color: rgba(0, 0, 0, 0.08);
 }
 
 .dark {
@@ -126,8 +126,10 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    background: linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 50%, rgb(15, 23, 42) 100%);
     min-height: 100vh;
+  }
+  .dark body {
+    background: linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(30, 41, 59) 50%, rgb(15, 23, 42) 100%);
   }
   
   html {
@@ -142,6 +144,11 @@
   
   .glass-effect {
     backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+  
+  .dark .glass-effect {
     background: rgba(30, 41, 59, 0.7);
     border: 1px solid rgba(100, 116, 139, 0.2);
   }

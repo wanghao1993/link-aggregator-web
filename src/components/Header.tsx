@@ -16,6 +16,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslations } from "next-intl";
 import { locales } from "@/locales";
 import { useSession, signOut } from "next-auth/react";
@@ -100,6 +101,9 @@ const Header: React.FC = () => {
                 ))}
               </select>
             </div>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {status === "authenticated" ? (
               <div className="flex items-center gap-3">
