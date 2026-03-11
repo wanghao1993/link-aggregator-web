@@ -175,6 +175,29 @@
       "lastUpdated": "最后更新"
     }
   },
+  "userCard": {
+    "viewProfile": "查看主页",
+    "editProfile": "编辑资料",
+    "dashboard": "仪表板",
+    "myCollections": "我的合集",
+    "signOut": "退出登录"
+  },
+  "profileSettings": {
+    "title": "个人设置",
+    "subtitle": "更新你的个人信息",
+    "displayName": "昵称",
+    "displayNamePlaceholder": "输入你的昵称",
+    "bio": "个人简介",
+    "bioPlaceholder": "介绍一下你自己...",
+    "website": "个人网站",
+    "websitePlaceholder": "https://yoursite.com",
+    "location": "所在地",
+    "locationPlaceholder": "城市，国家",
+    "save": "保存修改",
+    "saving": "保存中...",
+    "success": "资料更新成功",
+    "error": "更新资料失败"
+  },
   "profilePage": {
     "editProfile": "编辑资料",
     "stats": {

@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Search,
   Heart,
-  User,
   Grid3X3,
   Clock,
   Home,
@@ -15,8 +14,18 @@ import {
   LogOut,
   Plus,
   Tag,
+  Settings,
+  LayoutDashboard,
+  FolderOpen,
+  UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { useTranslations } from "next-intl";
@@ -28,11 +37,11 @@ const Header: React.FC = () => {
   const router = useRouter();
   const t = useTranslations("common");
   const headerT = useTranslations("header");
+  const tagsT = useTranslations("tags");
+  const ucT = useTranslations("userCard");
   const { user, isLoading: authLoading, signOut } = useAuth();
 
   const isActive = (path: string) => pathname === path;
-
-  const tagsT = useTranslations("tags");
 
   const navItems = [
     { path: "/", label: t("home"), icon: Home },
@@ -41,6 +50,14 @@ const Header: React.FC = () => {
     { path: "/recent", label: t("recent"), icon: Clock },
     { path: "/favorites", label: t("favorites"), icon: Heart },
   ];
+
+  const displayName =
+    user?.user_metadata?.name || user?.email?.split("@")[0] || "";
+  const email = user?.email || "";
+  const initial =
+    user?.user_metadata?.name?.[0]?.toUpperCase() ||
+    user?.email?.[0]?.toUpperCase() ||
+    "?";
 
   return (
     <header
@@ -55,8 +72,12 @@ const Header: React.FC = () => {
               <Search className="text-white" size={20} />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold gradient-text">{headerT('title')}</h1>
-              <p className="text-xs text-muted-foreground">{headerT('subtitle')}</p>
+              <h1 className="text-xl font-bold gradient-text">
+                {headerT("title")}
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                {headerT("subtitle")}
+              </p>
             </div>
           </Link>
 
@@ -87,8 +108,7 @@ const Header: React.FC = () => {
                 className="bg-transparent text-sm text-foreground border-none focus:outline-none"
                 onChange={(e) => {
                   const newLocale = e.target.value;
-                  const currentPath = pathname;
-                  const pathWithoutLocale = currentPath.replace(
+                  const pathWithoutLocale = pathname.replace(
                     /^\/(en|zh)/,
                     ""
                   );
@@ -104,7 +124,6 @@ const Header: React.FC = () => {
               </select>
             </div>
 
-            {/* Theme Toggle */}
             <ThemeToggle />
 
             {!authLoading && user ? (
@@ -120,54 +139,107 @@ const Header: React.FC = () => {
                     {t("create")}
                   </Link>
                 </Button>
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                    {user.user_metadata?.name?.[0]?.toUpperCase() ||
-                      user.email?.[0]?.toUpperCase()}
-                  </div>
-                  <div className="hidden md:block">
-                    <p className="text-sm font-medium">
-                      {user.user_metadata?.name || user.email?.split("@")[0]}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {user.email}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="glass-effect"
-                  onClick={async () => {
-                    await signOut();
-                    router.push("/");
-                  }}
-                >
-                  <LogOut className="h-4 w-4 mr-1" />
-                  {t("logout")}
-                </Button>
+
+                {/* User HoverCard */}
+                <HoverCard openDelay={100} closeDelay={200}>
+                  <HoverCardTrigger asChild>
+                    <button className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold cursor-pointer hover:scale-105 transition-transform">
+                        {initial}
+                      </div>
+                    </button>
+                  </HoverCardTrigger>
+                  <HoverCardContent
+                    align="end"
+                    className="w-72 p-0"
+                    sideOffset={8}
+                  >
+                    {/* Profile Header */}
+                    <div className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-11 w-11 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold shrink-0">
+                          {initial}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">
+                            {displayName}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    {/* Menu Items */}
+                    <div className="py-1">
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        <UserCircle size={16} className="text-muted-foreground" />
+                        {ucT("viewProfile")}
+                      </Link>
+                      <Link
+                        href="/profile/settings"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        <Settings size={16} className="text-muted-foreground" />
+                        {ucT("editProfile")}
+                      </Link>
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        <LayoutDashboard
+                          size={16}
+                          className="text-muted-foreground"
+                        />
+                        {ucT("dashboard")}
+                      </Link>
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-accent/50 transition-colors"
+                      >
+                        <FolderOpen
+                          size={16}
+                          className="text-muted-foreground"
+                        />
+                        {ucT("myCollections")}
+                      </Link>
+                    </div>
+
+                    <Separator />
+
+                    <div className="py-1">
+                      <button
+                        onClick={async () => {
+                          await signOut();
+                          router.push("/");
+                        }}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 transition-colors w-full"
+                      >
+                        <LogOut size={16} />
+                        {ucT("signOut")}
+                      </button>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               </div>
             ) : !authLoading ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="glass-effect"
-                  asChild
-                >
-                  <Link href="/auth/signin">
-                    <LogIn className="h-4 w-4 mr-1" />
-                    {t("login")}
-                  </Link>
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-                  asChild
-                >
-                  <Link href="/auth/signup">{t("register")}</Link>
-                </Button>
-              </>
+              <Button
+                variant="outline"
+                size="sm"
+                className="glass-effect"
+                asChild
+              >
+                <Link href="/auth/signin">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  {t("login")}
+                </Link>
+              </Button>
             ) : null}
           </div>
         </div>

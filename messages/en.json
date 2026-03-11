@@ -175,6 +175,29 @@
       "lastUpdated": "Last updated"
     }
   },
+  "userCard": {
+    "viewProfile": "View Profile",
+    "editProfile": "Edit Profile",
+    "dashboard": "Dashboard",
+    "myCollections": "My Collections",
+    "signOut": "Sign Out"
+  },
+  "profileSettings": {
+    "title": "Profile Settings",
+    "subtitle": "Update your personal information",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Enter your display name",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us about yourself...",
+    "website": "Website",
+    "websitePlaceholder": "https://yoursite.com",
+    "location": "Location",
+    "locationPlaceholder": "City, Country",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "success": "Profile updated successfully",
+    "error": "Failed to update profile"
+  },
   "profilePage": {
     "editProfile": "Edit Profile",
     "stats": {
