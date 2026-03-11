@@ -21,14 +21,11 @@ export async function POST(request: NextRequest) {
 
     const { email } = parsed.data;
 
-    // Check if user already exists
-    const { data: existingUser } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
+    // Check if user already exists in Supabase Auth
+    const { data: existingAuthUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingAuthUser = existingAuthUsers?.users?.find(u => u.email === email);
 
-    if (existingUser) {
+    if (existingAuthUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
         { status: 400 }

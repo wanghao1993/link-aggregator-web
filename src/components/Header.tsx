@@ -15,24 +15,20 @@ import {
   LogOut,
   Plus,
   Tag,
-  Rss,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
 import { useTranslations } from "next-intl";
 import { locales } from "@/locales";
-import { useSession, signOut } from "next-auth/react";
+import { useAuth } from "@/lib/supabase/auth-context";
 
 const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("common");
   const headerT = useTranslations("header");
-  const { data: session, status } = useSession();
-
-  console.log("Header component rendered, current route:", pathname);
-  console.log("Auth status:", status, "Session:", session?.user?.email);
+  const { user, isLoading: authLoading, signOut } = useAuth();
 
   const isActive = (path: string) => pathname === path;
 
@@ -108,22 +104,10 @@ const Header: React.FC = () => {
               </select>
             </div>
 
-            {/* RSS */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-orange-500"
-              asChild
-            >
-              <a href="/api/rss" target="_blank" rel="noopener noreferrer" title="RSS Feed">
-                <Rss size={18} />
-              </a>
-            </Button>
-
             {/* Theme Toggle */}
             <ThemeToggle />
 
-            {status === "authenticated" ? (
+            {!authLoading && user ? (
               <div className="flex items-center gap-3">
                 <NotificationBell />
                 <Button
@@ -138,15 +122,15 @@ const Header: React.FC = () => {
                 </Button>
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                    {session.user?.name?.[0]?.toUpperCase() ||
-                      session.user?.email?.[0]?.toUpperCase()}
+                    {user.user_metadata?.name?.[0]?.toUpperCase() ||
+                      user.email?.[0]?.toUpperCase()}
                   </div>
                   <div className="hidden md:block">
                     <p className="text-sm font-medium">
-                      {session.user?.name || session.user?.email?.split("@")[0]}
+                      {user.user_metadata?.name || user.email?.split("@")[0]}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {session.user?.email}
+                      {user.email}
                     </p>
                   </div>
                 </div>
@@ -154,13 +138,16 @@ const Header: React.FC = () => {
                   variant="outline"
                   size="sm"
                   className="glass-effect"
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={async () => {
+                    await signOut();
+                    router.push("/");
+                  }}
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   {t("logout")}
                 </Button>
               </div>
-            ) : (
+            ) : !authLoading ? (
               <>
                 <Button
                   variant="outline"
@@ -181,7 +168,7 @@ const Header: React.FC = () => {
                   <Link href="/auth/signup">{t("register")}</Link>
                 </Button>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

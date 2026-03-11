@@ -2,13 +2,14 @@ import { ReactNode } from "react";
 import { Metadata, Viewport } from "next";
 import "@/index.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Providers } from "../providers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { locales } from "@/locales";
 import { Toaster } from "@/components/ui/sonner";
-import { getBaseUrl, generateRssUrl } from "@/lib/seo";
+import { getBaseUrl } from "@/lib/seo";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 export const viewport: Viewport = {
@@ -37,11 +38,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     formatDetection: {
       telephone: false,
-    },
-    alternates: {
-      types: {
-        "application/rss+xml": generateRssUrl(),
-      },
     },
     icons: {
       icon: "/icons/icon-192x192.svg",
@@ -79,9 +75,10 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body>
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <div className="min-h-screen">
+            <div className="min-h-screen flex flex-col">
               <Header />
-              {children}
+              <main className="flex-1">{children}</main>
+              <Footer />
             </div>
             <Toaster position="bottom-right" />
             <ServiceWorkerRegister />

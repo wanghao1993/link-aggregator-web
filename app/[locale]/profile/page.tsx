@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import UserAvatar from "@/components/UserAvatar";
 import StatsCard from "@/components/StatsCard";
 import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/supabase/auth-context";
 
 interface FollowStats {
   followersCount: number;
@@ -24,13 +24,13 @@ export default function Profile() {
   const t = useTranslations("profilePage");
   const ft = useTranslations("follow");
   const commonT = useTranslations("common");
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [followStats, setFollowStats] = useState<FollowStats>({
     followersCount: 0,
     followingCount: 0,
   });
 
-  const userId = (session?.user as { id?: string })?.id;
+  const userId = user?.id;
 
   useEffect(() => {
     if (!userId) return;
@@ -46,8 +46,8 @@ export default function Profile() {
       .catch(console.error);
   }, [userId]);
 
-  const displayName = session?.user?.name || "Demo User";
-  const email = session?.user?.email || "demo@example.com";
+  const displayName = user?.user_metadata?.name || "Demo User";
+  const email = user?.email || "demo@example.com";
 
   return (
     <div className="min-h-screen">

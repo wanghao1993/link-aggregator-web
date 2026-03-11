@@ -100,6 +100,7 @@
       "sendVerificationCode": "发送验证码",
       "verificationSent": "验证码已发送至 {email}",
       "verifyAndRegister": "验证并注册",
+      "codeSentSuccess": "验证码发送成功",
       "resendCode": "重新发送验证码",
       "resendIn": "{seconds}秒后可重新发送",
       "haveAccount": "已有账号？",
@@ -118,7 +119,10 @@
       "passwordPlaceholder": "请输入密码",
       "forgotPassword": "忘记密码？",
       "signIn": "登录",
-      "verificationSent": "验证码已发送至 {email}，请查收",
+      "captcha": "验证码",
+      "captchaPlaceholder": "输入验证码",
+      "refreshCaptcha": "点击刷新验证码",
+      "captchaInvalid": "验证码错误，请重试",
       "noAccount": "没有账号？",
       "signUpInstead": "立即注册",
       "success": "登录成功！",
@@ -319,8 +323,19 @@
     "tagDesc": "浏览标签「{tag}」下的 {count} 个精选链接合集",
     "userTitle": "{name} 的主页",
     "userDesc": "查看 {name} 创建的 {count} 个链接合集",
-    "rssTitle": "LinkHub - 最新合集 RSS 订阅",
-    "rssCollectionTitle": "{title} - RSS 订阅"
+    "rssTitle": "LinkHub - 最新合集 RSS 订阅"
+  },
+  "footer": {
+    "description": "发现和分享社区精选链接合集。",
+    "product": "产品",
+    "explore": "探索发现",
+    "createCollection": "创建合集",
+    "community": "社区",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "terms": "服务条款",
+    "privacy": "隐私政策",
+    "copyright": "© {year} LinkHub. 保留所有权利。"
   },
   "notFound": {
     "message": "页面未找到"

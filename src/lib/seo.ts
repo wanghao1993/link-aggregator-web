@@ -127,10 +127,3 @@ export function generateUserMetadata(
     locale,
   });
 }
-
-export function generateRssUrl(collectionId?: string): string {
-  if (collectionId) {
-    return `${SITE_URL}/api/rss/${collectionId}`;
-  }
-  return `${SITE_URL}/api/rss`;
-}

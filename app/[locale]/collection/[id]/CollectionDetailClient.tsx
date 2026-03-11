@@ -11,7 +11,6 @@ import {
   Tag,
   User,
   Link2,
-  CheckCircle,
   QrCode,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,231 +18,78 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LinkCollection, LinkItem } from "@/types/link";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import ShareButton from "@/components/ShareButton";
 import ShareModal from "@/components/ShareModal";
 import { CollectionDetailSkeleton } from "@/components/skeletons";
 
-const mockLinks: LinkItem[] = [
-  {
-    id: "l1",
-    title: "TensorFlow",
-    description: "An end-to-end open source machine learning platform",
-    url: "https://www.tensorflow.org",
-    category: {
-      id: "ai",
-      name: "AI/ML",
-      description: "AI & ML",
-      icon: "🤖",
-      color: "purple",
-      slug: "ai-ml",
-      isActive: true,
-    },
-    author: {
-      id: "1",
-      username: "ai_expert",
-      displayName: "AI Expert",
-      email: "ai@example.com",
-      isVerified: true,
-      joinedAt: new Date("2023-01-01"),
-    },
-    tags: ["ML", "Google", "Python"],
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-15"),
-    isActive: true,
-    linkCount: 0,
-    views: 450,
-    likes: 32,
-    isFavorited: false,
-  },
-  {
-    id: "l2",
-    title: "PyTorch",
-    description: "An open source machine learning framework",
-    url: "https://pytorch.org",
-    category: {
-      id: "ai",
-      name: "AI/ML",
-      description: "AI & ML",
-      icon: "🤖",
-      color: "purple",
-      slug: "ai-ml",
-      isActive: true,
-    },
-    author: {
-      id: "1",
-      username: "ai_expert",
-      displayName: "AI Expert",
-      email: "ai@example.com",
-      isVerified: true,
-      joinedAt: new Date("2023-01-01"),
-    },
-    tags: ["ML", "Meta", "Python"],
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-15"),
-    isActive: true,
-    linkCount: 0,
-    views: 380,
-    likes: 28,
-    isFavorited: false,
-  },
-  {
-    id: "l3",
-    title: "Hugging Face",
-    description:
-      "The AI community building the future with open source models and datasets",
-    url: "https://huggingface.co",
-    category: {
-      id: "ai",
-      name: "AI/ML",
-      description: "AI & ML",
-      icon: "🤖",
-      color: "purple",
-      slug: "ai-ml",
-      isActive: true,
-    },
-    author: {
-      id: "1",
-      username: "ai_expert",
-      displayName: "AI Expert",
-      email: "ai@example.com",
-      isVerified: true,
-      joinedAt: new Date("2023-01-01"),
-    },
-    tags: ["NLP", "Models", "Datasets"],
-    createdAt: new Date("2024-01-12"),
-    updatedAt: new Date("2024-01-18"),
-    isActive: true,
-    linkCount: 0,
-    views: 520,
-    likes: 41,
-    isFavorited: true,
-  },
-];
+interface CollectionLink {
+  id: string;
+  title: string;
+  url: string;
+  description: string;
+}
 
-const mockCollections: Record<string, LinkCollection> = {
-  "1": {
-    id: "1",
-    title: "AI & Machine Learning Resources",
-    description:
-      "精心策划的AI和机器学习工具、论文和教程合集,涵盖从基础理论到实际应用的各个方面",
-    author: {
-      id: "1",
-      username: "ai_expert",
-      displayName: "AI Expert",
-      email: "ai@example.com",
-      isVerified: true,
-      joinedAt: new Date("2023-01-01"),
-    },
-    links: mockLinks,
-    category: {
-      id: "ai",
-      name: "AI/ML",
-      description: "AI & Machine Learning",
-      icon: "🤖",
-      color: "purple",
-      slug: "ai-ml",
-      isActive: true,
-    },
-    tags: ["AI", "Machine Learning", "Tools", "Papers"],
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-20"),
-    isPublic: true,
-    views: 1250,
-    likes: 89,
-    isFavorited: false,
-  },
-  "2": {
-    id: "2",
-    title: "Web Development Tools",
-    description:
-      "现代Web开发必备工具和库的完整集合,包括框架、构建工具、UI组件等",
-    author: {
-      id: "2",
-      username: "webdev_pro",
-      displayName: "WebDev Pro",
-      email: "web@example.com",
-      isVerified: true,
-      joinedAt: new Date("2023-02-01"),
-    },
-    links: mockLinks.slice(0, 2),
-    category: {
-      id: "web",
-      name: "Web开发",
-      description: "Web Development",
-      icon: "💻",
-      color: "blue",
-      slug: "web-dev",
-      isActive: true,
-    },
-    tags: ["React", "Vue", "Angular", "Tools"],
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-18"),
-    isPublic: true,
-    views: 890,
-    likes: 67,
-    isFavorited: true,
-  },
-  "3": {
-    id: "3",
-    title: "Design Inspiration",
-    description: "美丽的设计案例和资源库,为设计师提供源源不断的创意灵感",
-    author: {
-      id: "3",
-      username: "design_guru",
-      displayName: "Design Guru",
-      email: "design@example.com",
-      isVerified: false,
-      joinedAt: new Date("2023-03-01"),
-    },
-    links: mockLinks.slice(0, 1),
-    category: {
-      id: "design",
-      name: "设计",
-      description: "Design Resources",
-      icon: "🎨",
-      color: "pink",
-      slug: "design",
-      isActive: true,
-    },
-    tags: ["UI/UX", "Inspiration", "Colors", "Typography"],
-    createdAt: new Date("2024-01-05"),
-    updatedAt: new Date("2024-01-15"),
-    isPublic: true,
-    views: 567,
-    likes: 45,
-    isFavorited: false,
-  },
-};
+interface CollectionData {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  isPublic: boolean;
+  views: number;
+  likes: number;
+  createdAt: string;
+  updatedAt: string;
+  author: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  links: CollectionLink[];
+}
 
 export default function CollectionDetailClient() {
   const t = useTranslations("collectionDetail");
   const tc = useTranslations("common");
+  const ts = useTranslations("share");
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
 
-  const collection = mockCollections[id];
-  const [isFavorited, setIsFavorited] = useState(
-    collection?.isFavorited ?? false
-  );
-  const [likes, setLikes] = useState(collection?.likes ?? 0);
-  const ts = useTranslations("share");
-  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [collection, setCollection] = useState<CollectionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [likes, setLikes] = useState(0);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
+    async function fetchCollection() {
+      try {
+        const res = await fetch(`/api/collections/${id}`);
+        if (!res.ok) {
+          setError(true);
+          return;
+        }
+        const data: CollectionData = await res.json();
+        setCollection(data);
+        setLikes(data.likes);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCollection();
+  }, [id]);
 
   if (loading) {
     return <CollectionDetailSkeleton />;
   }
 
-  if (!collection) {
+  if (error || !collection) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -259,8 +105,8 @@ export default function CollectionDetailClient() {
     );
   }
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("zh-CN", {
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("zh-CN", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -271,6 +117,9 @@ export default function CollectionDetailClient() {
     setIsFavorited(!isFavorited);
     setLikes((prev) => (isFavorited ? prev - 1 : prev + 1));
   };
+
+  const authorName = collection.author?.name || "Unknown";
+  const authorInitial = authorName.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen">
@@ -288,14 +137,14 @@ export default function CollectionDetailClient() {
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-3xl">
-                {collection.category.icon}
+                📁
               </div>
               <div>
                 <Badge
                   variant="secondary"
                   className="mb-2 bg-accent/50 text-accent-foreground"
                 >
-                  {collection.category.name}
+                  {collection.category}
                 </Badge>
                 <h1 className="text-3xl font-bold text-foreground">
                   {collection.title}
@@ -388,36 +237,33 @@ export default function CollectionDetailClient() {
 
         <Separator className="mb-8 border-border/30" />
 
-        <Card className="glass-effect border-border/30 bg-card/60 mb-8 fade-in">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center space-x-2">
-              <User size={20} />
-              <span>{t("author")}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center space-x-4">
-              <Avatar className="w-12 h-12">
-                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold">
-                  {collection.author.displayName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="flex items-center space-x-2">
+        {collection.author && (
+          <Card className="glass-effect border-border/30 bg-card/60 mb-8 fade-in">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center space-x-2">
+                <User size={20} />
+                <span>{t("author")}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-4">
+                <Avatar className="w-12 h-12">
+                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold">
+                    {authorInitial}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
                   <span className="font-semibold text-foreground">
-                    {collection.author.displayName}
+                    {authorName}
                   </span>
-                  {collection.author.isVerified && (
-                    <CheckCircle size={16} className="text-blue-500" />
-                  )}
+                  <p className="text-sm text-muted-foreground">
+                    {collection.author.email}
+                  </p>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  @{collection.author.username}
-                </span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="mb-8 fade-in">
           <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center space-x-2">
@@ -437,30 +283,20 @@ export default function CollectionDetailClient() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4 flex-1">
                       <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-lg shrink-0">
-                        {link.category.icon}
+                        🔗
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
                           {link.title}
                         </h3>
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                          {link.description}
+                        {link.description && (
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                            {link.description}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground/60 truncate">
+                          {link.url}
                         </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {link.tags.map((tag, i) => (
-                            <Badge
-                              key={i}
-                              variant="outline"
-                              className="text-xs border-border/20 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors cursor-pointer"
-                              onClick={() => {
-                                const locale = (params.locale as string) || "en";
-                                router.push(`/${locale}/tags/${encodeURIComponent(tag)}`);
-                              }}
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
                       </div>
                     </div>
 

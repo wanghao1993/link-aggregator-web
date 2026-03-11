@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getServerSession } from "next-auth";
-import authOptions from "@/lib/auth/nextauth-config";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { supabaseAdmin, getAuthUser } from "@/lib/supabase/server";
 
 const linkSchema = z.object({
   title: z.string().min(1),
@@ -27,13 +25,7 @@ export async function GET(
 
     const { data: collection, error } = await supabaseAdmin
       .from("collections")
-      .select(
-        `
-        *,
-        users:user_id (id, name, email),
-        collection_links (id, title, url, description, sort_order)
-      `
-      )
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -42,6 +34,24 @@ export async function GET(
         { error: "Collection not found" },
         { status: 404 }
       );
+    }
+
+    const { data: links } = await supabaseAdmin
+      .from("collection_links")
+      .select("id, title, url, description, sort_order")
+      .eq("collection_id", id)
+      .order("sort_order", { ascending: true });
+
+    let author: { id: string; name: string; email: string } | null = null;
+    if (collection.user_id) {
+      const { data: userData } = await supabaseAdmin
+        .from("users")
+        .select("id, name, email")
+        .eq("id", collection.user_id)
+        .single();
+      if (userData) {
+        author = userData;
+      }
     }
 
     const formatted = {
@@ -55,24 +65,20 @@ export async function GET(
       likes: collection.likes,
       createdAt: collection.created_at,
       updatedAt: collection.updated_at,
-      author: collection.users
-        ? {
-            id: collection.users.id,
-            name: collection.users.name,
-            email: collection.users.email,
-          }
-        : null,
-      links: (collection.collection_links || [])
-        .sort(
-          (a: { sort_order: number }, b: { sort_order: number }) =>
-            a.sort_order - b.sort_order
-        )
-        .map((link: { id: string; title: string; url: string; description: string }) => ({
+      author,
+      links: (links || []).map(
+        (link: {
+          id: string;
+          title: string;
+          url: string;
+          description: string;
+        }) => ({
           id: link.id,
           title: link.title,
           url: link.url,
           description: link.description,
-        })),
+        })
+      ),
     };
 
     return NextResponse.json(formatted);
@@ -91,20 +97,12 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: user } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", session.user.email)
-      .single();
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const user = { id: authUser.id };
 
     const { data: existing } = await supabaseAdmin
       .from("collections")

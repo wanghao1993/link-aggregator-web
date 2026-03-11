@@ -1,27 +1,23 @@
-import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import authOptions from '@/lib/auth/nextauth-config';
+import { getAuthUser } from '@/lib/supabase/server';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { User, Mail, Calendar, Settings, LogOut } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
-interface SessionUser {
-  name?: string | null;
-  email?: string | null;
-}
-
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const authUser = await getAuthUser();
   const t = await getTranslations('dashboard');
 
-  // 如果未登录，重定向到登录页面
-  if (!session || !session.user) {
+  if (!authUser) {
     redirect('/auth/signin');
   }
 
-  const user = session.user as SessionUser;
+  const user = {
+    name: authUser.user_metadata?.name as string | null,
+    email: authUser.email ?? null,
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-slate-900">

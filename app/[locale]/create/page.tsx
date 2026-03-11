@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/supabase/auth-context";
 import { ArrowLeft, LogIn, LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import Link from "next/link";
 
 export default function CreateCollectionPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { user, isLoading: authLoading } = useAuth();
   const t = useTranslations("collectionForm");
   const commonT = useTranslations("common");
 
@@ -41,7 +41,7 @@ export default function CreateCollectionPage() {
     router.push(`/collection/${result.id}`);
   };
 
-  if (status === "loading") {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">{commonT("loading")}</p>
@@ -49,7 +49,7 @@ export default function CreateCollectionPage() {
     );
   }
 
-  if (status === "unauthenticated") {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="glass-effect border-border/30 bg-card/60 max-w-md w-full mx-4">

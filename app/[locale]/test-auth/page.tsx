@@ -1,16 +1,17 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import authOptions from '@/lib/auth/nextauth-config';
+import { getAuthUser } from '@/lib/supabase/server';
 import { getTranslations } from 'next-intl/server';
 
 export default async function TestAuthPage() {
-  const session = await getServerSession(authOptions);
+  const authUser = await getAuthUser();
   const t = await getTranslations('testAuth');
 
-  if (!session) {
+  if (!authUser) {
     redirect('/auth/signin');
   }
+
+  const session = { user: { id: authUser.id, email: authUser.email, name: authUser.user_metadata?.name } };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

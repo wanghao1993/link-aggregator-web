@@ -14,7 +14,7 @@ import UserAvatar from "@/components/UserAvatar";
 import StatsCard from "@/components/StatsCard";
 import FollowButton from "@/components/FollowButton";
 import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/supabase/auth-context";
 import Link from "next/link";
 
 interface UserProfile {
@@ -52,7 +52,7 @@ export default function UserProfileClient({
   const t = useTranslations("profilePage");
   const ft = useTranslations("follow");
   const commonT = useTranslations("common");
-  const { data: session } = useSession();
+  const { user: authUser } = useAuth();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -63,7 +63,7 @@ export default function UserProfileClient({
   });
   const [loading, setLoading] = useState(true);
 
-  const currentUserId = (session?.user as { id?: string })?.id;
+  const currentUserId = authUser?.id;
   const isOwnProfile = currentUserId === userId;
 
   useEffect(() => {

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import authOptions from "@/lib/auth/nextauth-config";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { supabaseAdmin, getAuthUser } from "@/lib/supabase/server";
 import { createNotification } from "@/lib/notifications/create";
 
 export async function GET(
@@ -10,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id: targetUserId } = await params;
-    const session = await getServerSession(authOptions);
+    const authUser = await getAuthUser();
 
     const { count: followersCount } = await supabaseAdmin
       .from("user_follows")
@@ -23,23 +21,15 @@ export async function GET(
       .eq("follower_id", targetUserId);
 
     let isFollowing = false;
-    if (session?.user?.email) {
-      const { data: currentUser } = await supabaseAdmin
-        .from("users")
+    if (authUser) {
+      const { data: follow } = await supabaseAdmin
+        .from("user_follows")
         .select("id")
-        .eq("email", session.user.email)
+        .eq("follower_id", authUser.id)
+        .eq("following_id", targetUserId)
         .single();
 
-      if (currentUser) {
-        const { data: follow } = await supabaseAdmin
-          .from("user_follows")
-          .select("id")
-          .eq("follower_id", currentUser.id)
-          .eq("following_id", targetUserId)
-          .single();
-
-        isFollowing = !!follow;
-      }
+      isFollowing = !!follow;
     }
 
     return NextResponse.json({
@@ -61,22 +51,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id: targetUserId } = await params;
-
-    const { data: currentUser } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", session.user.email)
-      .single();
-
-    if (!currentUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const currentUser = { id: authUser.id };
 
     if (currentUser.id === targetUserId) {
       return NextResponse.json(
@@ -123,7 +104,7 @@ export async function POST(
       });
 
       const followerName =
-        session.user.name || session.user.email?.split("@")[0] || "Someone";
+        authUser.user_metadata?.name || authUser.email?.split("@")[0] || "Someone";
 
       createNotification({
         userId: targetUserId,
@@ -133,7 +114,7 @@ export async function POST(
         data: {
           followerId: currentUser.id,
           followerName,
-          followerEmail: session.user.email,
+          followerEmail: authUser.email,
         },
       });
 

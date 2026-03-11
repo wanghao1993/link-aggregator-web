@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { sendWelcomeEmail } from '@/lib/auth/auth';
 
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     const { name, email, password, verificationCode } = parsed.data;
 
-    // Verify verification code
+    // Verify the email verification code
     const { data: verificationData, error: verificationError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
@@ -41,43 +40,66 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
-    const { data: existingUser } = await supabaseAdmin
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
+    // Check if user already exists in Supabase Auth
+    const { data: existingAuthUsers } = await supabaseAdmin.auth.admin.listUsers();
+    const existingAuthUser = existingAuthUsers?.users?.find(u => u.email === email);
 
-    if (existingUser) {
+    if (existingAuthUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
         { status: 400 }
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    // Create user via Supabase Auth (handles password hashing internally)
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    });
 
-    // Create user in database
-    const { data: user, error: userError } = await supabaseAdmin
+    if (authError || !authData.user) {
+      console.error('Supabase Auth createUser failed:', authError);
+      return NextResponse.json(
+        { error: authError?.message || 'Failed to create user account' },
+        { status: 500 }
+      );
+    }
+
+    const authUserId = authData.user.id;
+
+    // Create row in custom users table linked to auth.users
+    const { error: userError } = await supabaseAdmin
       .from('users')
       .insert({
+        id: authUserId,
         name,
         email,
-        password: hashedPassword,
         email_verified: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .select('id, name, email')
-      .single();
+      });
 
     if (userError) {
-      console.error('Failed to create user:', userError);
+      console.error('Failed to create custom user row:', userError);
+      // Roll back Supabase Auth user on failure
+      await supabaseAdmin.auth.admin.deleteUser(authUserId);
       return NextResponse.json(
         { error: 'Failed to create user account' },
         { status: 500 }
       );
+    }
+
+    // Create user profile
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .insert({
+        user_id: authUserId,
+        username: email.split('@')[0],
+        display_name: name,
+      });
+
+    if (profileError) {
+      console.error('Failed to create profile:', profileError);
     }
 
     // Delete used verification code
@@ -86,19 +108,6 @@ export async function POST(request: NextRequest) {
       .delete()
       .eq('email', email)
       .eq('code', verificationCode);
-
-    // Create user profile
-    await supabaseAdmin
-      .from('profiles')
-      .insert({
-        user_id: user.id,
-        username: email.split('@')[0],
-        display_name: name,
-        avatar_url: null,
-        bio: null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      });
 
     // Send welcome email (fire and forget)
     sendWelcomeEmail(email, name).catch(error => {
@@ -109,9 +118,9 @@ export async function POST(request: NextRequest) {
       { 
         message: 'Registration successful',
         user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
+          id: authUserId,
+          name,
+          email,
         }
       },
       { status: 201 }

@@ -60,11 +60,6 @@ npm run dev
 NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# NextAuth配置
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=supersecretkeyforlocaldevelopmentonly
-
 # 邮件服务（开发模式）
 RESEND_API_KEY=re_development_key_placeholder
 EMAIL_FROM=noreply@linkhub.local

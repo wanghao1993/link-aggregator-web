@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { UserPlus, UserCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/lib/supabase/auth-context";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -20,7 +20,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   onFollowChange,
   size = "default",
 }) => {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const t = useTranslations("follow");
   const router = useRouter();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
@@ -28,7 +28,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   const [isHovering, setIsHovering] = useState(false);
 
   const handleToggleFollow = useCallback(async () => {
-    if (!session?.user) {
+    if (!user) {
       router.push("/auth/signin");
       return;
     }
@@ -51,7 +51,7 @@ const FollowButton: React.FC<FollowButtonProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [session, targetUserId, router, onFollowChange]);
+  }, [user, targetUserId, router, onFollowChange]);
 
   const getButtonText = () => {
     if (isLoading) return t("follow");

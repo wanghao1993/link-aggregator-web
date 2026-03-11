@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,6 +18,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Github, Mail, Lock, Key, User, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase/client";
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -49,7 +51,7 @@ export default function SignUpForm({
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
+    trigger,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -62,9 +64,8 @@ export default function SignUpForm({
 
   const email = watch("email");
 
-  // Start countdown timer
-  const startCountdown = () => {
-    setCountdown(60); // 60 seconds
+  const startCountdown = useCallback(() => {
+    setCountdown(60);
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -74,12 +75,14 @@ export default function SignUpForm({
         return prev - 1;
       });
     }, 1000);
-  };
+  }, []);
 
   const handleSendVerificationCode = async () => {
+    const valid = await trigger(["name", "email", "password"]);
+    if (!valid) return;
+
     setIsLoading(true);
     try {
-      // TODO: Implement API call to send verification code
       const response = await fetch("/api/auth/send-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -90,13 +93,14 @@ export default function SignUpForm({
         setEmailSent(true);
         setStep("verification");
         startCountdown();
+        toast.success(t("signUp.codeSentSuccess"));
       } else {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to send verification code");
+        const data = await response.json();
+        throw new Error(data.error || "Failed to send verification code");
       }
     } catch (error) {
       console.error("Failed to send verification code:", error);
-      alert(
+      toast.error(
         error instanceof Error
           ? error.message
           : "Failed to send verification code"
@@ -109,39 +113,49 @@ export default function SignUpForm({
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Implement API call to register user
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
-      if (response.ok) {
-        onSuccess?.();
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || "Registration failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Registration failed");
       }
+
+      // Sign in via Supabase Auth to establish a client-side session
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        console.error("Auto sign-in after registration failed:", signInError);
+      }
+
+      toast.success(t("signUp.success"));
+      onSuccess?.();
     } catch (error) {
       console.error("Registration failed:", error);
-      alert(error instanceof Error ? error.message : "Registration failed");
+      toast.error(
+        error instanceof Error ? error.message : "Registration failed"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthSignIn = (provider: "github" | "google") => {
-    // Use dev OAuth in development, real OAuth in production
-    const isDev =
-      !process.env.GITHUB_CLIENT_ID ||
-      process.env.GITHUB_CLIENT_ID.includes("dev");
+  const handleOAuthSignIn = async (provider: "github" | "google") => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    });
 
-    if (isDev) {
-      // Development mode - use mock OAuth
-      window.location.href = `/api/auth/dev-oauth/callback?provider=${provider}&state=dev_${Date.now()}`;
-    } else {
-      // Production mode - use real OAuth
-      window.location.href = `/api/auth/signin/${provider}`;
+    if (error) {
+      toast.error(error.message);
     }
   };
 
@@ -319,13 +333,12 @@ export default function SignUpForm({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading || countdown > 0}
+                  disabled={isLoading}
                   className="flex-1"
                 >
                   {isLoading
                     ? commonT("verifying")
                     : t("signUp.verifyAndRegister")}
-                  {countdown > 0 && ` (${countdown}s)`}
                 </Button>
               </div>
 

@@ -1,242 +1,249 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { TrendingUp, Users, Link2, Star, Tag } from 'lucide-react';
-import SearchBar from '@/components/SearchBar';
-import CategoryFilter from '@/components/CategoryFilter';
-import LinkCard from '@/components/LinkCard';
-import StatsCard from '@/components/StatsCard';
-import { Badge } from '@/components/ui/badge';
-import { LinkCollection } from '@/types/link';
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { LinkCardSkeleton, StatsCardSkeleton } from '@/components/skeletons';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState, useEffect, useCallback } from "react";
+import { TrendingUp, Users, Link2, Star, Tag } from "lucide-react";
+import SearchBar from "@/components/SearchBar";
+import CategoryFilter from "@/components/CategoryFilter";
+import LinkCard from "@/components/LinkCard";
+import StatsCard from "@/components/StatsCard";
+import { Badge } from "@/components/ui/badge";
+import { LinkCollection, Category } from "@/types/link";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+import { LinkCardSkeleton, StatsCardSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TagItem {
   name: string;
   count: number;
 }
 
+interface ApiCollection {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  isPublic: boolean;
+  views: number;
+  likes: number;
+  createdAt: string;
+  updatedAt: string;
+  author: { id: string; name: string; email: string } | null;
+}
+
+const CATEGORY_META: Record<
+  string,
+  { icon: string; color: string; slug: string }
+> = {
+  ai: { icon: "🤖", color: "purple", slug: "ai-ml" },
+  web: { icon: "💻", color: "blue", slug: "web-dev" },
+  design: { icon: "🎨", color: "pink", slug: "design" },
+  tools: { icon: "🛠️", color: "green", slug: "tools" },
+  mobile: { icon: "📱", color: "indigo", slug: "mobile" },
+  devops: { icon: "⚙️", color: "gray", slug: "devops" },
+  data: { icon: "📊", color: "green", slug: "data" },
+  security: { icon: "🔒", color: "red", slug: "security" },
+  productivity: { icon: "⚡", color: "orange", slug: "productivity" },
+};
+
+function toCategory(catId: string, catT: (key: string) => string): Category {
+  const meta = CATEGORY_META[catId] || {
+    icon: "📁",
+    color: "gray",
+    slug: catId,
+  };
+  return {
+    id: catId,
+    name: catT(catId) ?? catId,
+    description: "",
+    icon: meta.icon,
+    color: meta.color,
+    slug: meta.slug,
+    isActive: true,
+  };
+}
+
+function toCollection(
+  api: ApiCollection,
+  catT: (key: string) => string
+): LinkCollection {
+  return {
+    id: api.id,
+    title: api.title,
+    description: api.description,
+    category: toCategory(api.category, catT),
+    tags: api.tags,
+    createdAt: new Date(api.createdAt),
+    updatedAt: new Date(api.updatedAt),
+    isPublic: api.isPublic,
+    views: api.views,
+    likes: api.likes,
+    isFavorited: false,
+    links: [],
+    author: {
+      id: api.author?.id || "",
+      username: api.author?.name || "unknown",
+      displayName: api.author?.name || "Unknown",
+      email: api.author?.email || "",
+      isVerified: false,
+      joinedAt: new Date(),
+    },
+  };
+}
+
 export default function Home() {
-  const t = useTranslations('home');
-  const tt = useTranslations('tags');
+  const t = useTranslations("home");
+  const tt = useTranslations("tags");
+  const catT = useTranslations("categories");
   const locale = useLocale();
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [popularTags, setPopularTags] = useState<TagItem[]>([]);
+  const [collections, setCollections] = useState<LinkCollection[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const fetchCollections = useCallback(
+    async (category: string, search: string) => {
+      try {
+        const params = new URLSearchParams();
+        if (category && category !== "all") params.set("category", category);
+        if (search) params.set("search", search);
+        const res = await fetch(`/api/collections?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = (data.collections as ApiCollection[]).map((c) =>
+            toCollection(c, catT)
+          );
+          setCollections(mapped);
+          setTotalCount(data.total);
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+    [catT]
+  );
+
   useEffect(() => {
-    fetch('/api/tags')
-      .then((res) => res.json())
-      .then((data) => setPopularTags(data.tags.slice(0, 8)))
-      .catch(() => {})
-      .finally(() => {
-        const timer = setTimeout(() => setLoading(false), 600);
-        return () => clearTimeout(timer);
-      });
+    Promise.all([
+      fetch("/api/tags")
+        .then((r) => r.json())
+        .then((d) => setPopularTags(d.tags?.slice(0, 8) || []))
+        .catch(() => {}),
+      fetchCollections(selectedCategory, searchQuery),
+    ]).finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
-  console.log('Home page rendered');
-  
-  const mockCollections: LinkCollection[] = [
-    {
-      id: '1',
-      title: 'AI & Machine Learning Resources',
-      description: '精心策划的AI和机器学习工具、论文和教程合集,涵盖从基础理论到实际应用的各个方面',
-      author: {
-        id: '1',
-        username: 'ai_expert',
-        displayName: 'AI Expert',
-        email: 'ai@example.com',
-        isVerified: true,
-        joinedAt: new Date('2023-01-01')
-      },
-      links: [],
-      category: {
-        id: 'ai',
-        name: 'AI/ML',
-        description: 'AI & Machine Learning',
-        icon: '🤖',
-        color: 'purple',
-        slug: 'ai-ml',
-        isActive: true
-      },
-      tags: ['AI', 'Machine Learning', 'Tools', 'Papers'],
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-20'),
-      isPublic: true,
-      views: 1250,
-      likes: 89,
-      isFavorited: false
-    },
-    {
-      id: '2',
-      title: 'Web Development Tools',
-      description: '现代Web开发必备工具和库的完整集合,包括框架、构建工具、UI组件等',
-      author: {
-        id: '2',
-        username: 'webdev_pro',
-        displayName: 'WebDev Pro',
-        email: 'web@example.com',
-        isVerified: true,
-        joinedAt: new Date('2023-02-01')
-      },
-      links: [],
-      category: {
-        id: 'web',
-        name: 'Web开发',
-        description: 'Web Development',
-        icon: '💻',
-        color: 'blue',
-        slug: 'web-dev',
-        isActive: true
-      },
-      tags: ['React', 'Vue', 'Angular', 'Tools'],
-      createdAt: new Date('2024-01-10'),
-      updatedAt: new Date('2024-01-18'),
-      isPublic: true,
-      views: 890,
-      likes: 67,
-      isFavorited: true
-    },
-    {
-      id: '3',
-      title: 'Design Inspiration',
-      description: '美丽的设计案例和资源库,为设计师提供源源不断的创意灵感',
-      author: {
-        id: '3',
-        username: 'design_guru',
-        displayName: 'Design Guru',
-        email: 'design@example.com',
-        isVerified: false,
-        joinedAt: new Date('2023-03-01')
-      },
-      links: [],
-      category: {
-        id: 'design',
-        name: '设计',
-        description: 'Design Resources',
-        icon: '🎨',
-        color: 'pink',
-        slug: 'design',
-        isActive: true
-      },
-      tags: ['UI/UX', 'Inspiration', 'Colors', 'Typography'],
-      createdAt: new Date('2024-01-05'),
-      updatedAt: new Date('2024-01-15'),
-      isPublic: true,
-      views: 567,
-      likes: 45,
-      isFavorited: false
+
+  useEffect(() => {
+    if (!loading) {
+      fetchCollections(selectedCategory, searchQuery);
     }
-  ];
-  
-  const filteredCollections = mockCollections.filter(collection => {
-    const matchesCategory = selectedCategory === 'all' || collection.category.id === selectedCategory;
-    const matchesSearch = collection.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         collection.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, searchQuery]);
+
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 fade-in">
           <h1 className="text-5xl font-bold mb-6 gradient-text floating-animation">
-            {t('hero.title')}
+            {t("hero.title")}
           </h1>
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            {t('hero.subtitle')}
+            {t("hero.subtitle")}
           </p>
-          
+
           <SearchBar
             onSearch={setSearchQuery}
-            placeholder={t('search.placeholder')}
+            placeholder={t("search.placeholder")}
           />
         </div>
-        
+
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           <StatsCard
-            title={t('stats.totalCollections')}
-            value="1,234"
+            title={t("stats.totalCollections")}
+            value={String(totalCount)}
             icon={Link2}
-            change={12}
             color="purple"
             loading={loading}
           />
           <StatsCard
-            title={t('stats.activeUsers')}
-            value="5,678"
+            title={t("stats.activeUsers")}
+            value="-"
             icon={Users}
-            change={8}
             color="blue"
             loading={loading}
           />
           <StatsCard
-            title={t('stats.monthlyViews')}
-            value="98.5K"
+            title={t("stats.monthlyViews")}
+            value="-"
             icon={TrendingUp}
-            change={15}
             color="green"
             loading={loading}
           />
           <StatsCard
-            title={t('stats.featuredCollections')}
-            value="256"
+            title={t("stats.featuredCollections")}
+            value="-"
             icon={Star}
-            change={5}
             color="orange"
             loading={loading}
           />
         </div>
-        
+
         {/* Category Filter */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-6">{t('categories.title')}</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">
+            {t("categories.title")}
+          </h2>
           <CategoryFilter
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
         </div>
-        
+
         {/* Popular Tags */}
         {(loading || popularTags.length > 0) && (
           <div className="mb-10">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
                 <Tag size={22} className="text-primary" />
-                {tt('popular')}
+                {tt("popular")}
               </h2>
               <button
                 onClick={() => router.push(`/${locale}/tags`)}
                 className="text-sm text-primary hover:underline"
               >
-                {tt('allTags')} →
+                {tt("allTags")} →
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-9 w-20 rounded-full" />
-                ))
-              ) : (
-                popularTags.map((tag) => (
-                  <Badge
-                    key={tag.name}
-                    variant="outline"
-                    className="px-4 py-2 text-sm cursor-pointer border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all"
-                    onClick={() => router.push(`/${locale}/tags/${encodeURIComponent(tag.name)}`)}
-                  >
-                    {tag.name}
-                    <span className="ml-1.5 opacity-60 text-xs">{tag.count}</span>
-                  </Badge>
-                ))
-              )}
+              {loading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-9 w-20 rounded-full" />
+                  ))
+                : popularTags.map((tag) => (
+                    <Badge
+                      key={tag.name}
+                      variant="outline"
+                      className="px-4 py-2 text-sm cursor-pointer border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all"
+                      onClick={() =>
+                        router.push(
+                          `/${locale}/tags/${encodeURIComponent(tag.name)}`
+                        )
+                      }
+                    >
+                      {tag.name}
+                      <span className="ml-1.5 opacity-60 text-xs">
+                        {tag.count}
+                      </span>
+                    </Badge>
+                  ))}
             </div>
           </div>
         )}
@@ -245,37 +252,36 @@ export default function Home() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-foreground">
-              {selectedCategory === 'all' ? t('collections.title') : t('collections.filteredTitle')}
+              {selectedCategory === "all"
+                ? t("collections.title")
+                : t("collections.filteredTitle")}
             </h2>
             <p className="text-muted-foreground">
-              {t('collections.foundCount', { count: filteredCollections.length })}
+              {t("collections.foundCount", { count: collections.length })}
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <LinkCardSkeleton key={i} />
-              ))
-            ) : (
-              filteredCollections.map((collection) => (
-                <LinkCard
-                  key={collection.id}
-                  collection={collection}
-                  onFavorite={() => console.log('Toggled favorite for:', collection.title)}
-                  onVisit={() => console.log('Visiting collection:', collection.title)}
-                />
-              ))
-            )}
+            {loading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <LinkCardSkeleton key={i} />
+                ))
+              : collections.map((collection) => (
+                  <LinkCard key={collection.id} collection={collection} />
+                ))}
           </div>
-          
-          {filteredCollections.length === 0 && (
+
+          {!loading && collections.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Link2 className="text-muted-foreground" size={24} />
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">{t('collections.noResults.title')}</h3>
-              <p className="text-muted-foreground">{t('collections.noResults.description')}</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                {t("collections.noResults.title")}
+              </h3>
+              <p className="text-muted-foreground">
+                {t("collections.noResults.description")}
+              </p>
             </div>
           )}
         </div>

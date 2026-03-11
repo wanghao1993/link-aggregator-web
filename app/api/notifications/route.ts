@@ -1,24 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import authOptions from "@/lib/auth/nextauth-config";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { supabaseAdmin, getAuthUser } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: currentUser } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", session.user.email)
-      .single();
-
-    if (!currentUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const currentUser = { id: authUser.id };
 
     const { searchParams } = new URL(request.url);
     const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 50);
@@ -60,20 +50,12 @@ export async function GET(request: NextRequest) {
 
 export async function PUT() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: currentUser } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", session.user.email)
-      .single();
-
-    if (!currentUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const currentUser = { id: authUser.id };
 
     const { error } = await supabaseAdmin
       .from("notifications")

@@ -100,6 +100,7 @@
       "sendVerificationCode": "Send Verification Code",
       "verificationSent": "Verification code sent to {email}",
       "verifyAndRegister": "Verify & Register",
+      "codeSentSuccess": "Verification code sent successfully",
       "resendCode": "Resend Code",
       "resendIn": "Resend in {seconds}s",
       "haveAccount": "Already have an account?",
@@ -118,7 +119,10 @@
       "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot password?",
       "signIn": "Sign In",
-      "verificationSent": "Verification code sent to {email}, please check",
+      "captcha": "Captcha",
+      "captchaPlaceholder": "Enter code",
+      "refreshCaptcha": "Click to refresh captcha",
+      "captchaInvalid": "Captcha is incorrect, please try again",
       "noAccount": "Don't have an account?",
       "signUpInstead": "Sign up instead",
       "success": "Sign in successful!",
@@ -319,8 +323,19 @@
     "tagDesc": "Browse {count} curated link collections tagged with \"{tag}\"",
     "userTitle": "{name}'s Profile",
     "userDesc": "View {count} link collections created by {name}",
-    "rssTitle": "LinkHub - Latest Collections RSS Feed",
-    "rssCollectionTitle": "{title} - RSS Feed"
+    "rssTitle": "LinkHub - Latest Collections RSS Feed"
+  },
+  "footer": {
+    "description": "Discover and share curated link collections with the community.",
+    "product": "Product",
+    "explore": "Explore",
+    "createCollection": "Create Collection",
+    "community": "Community",
+    "about": "About Us",
+    "contact": "Contact",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© {year} LinkHub. All rights reserved."
   },
   "notFound": {
     "message": "Page not found"

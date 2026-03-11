@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,23 +16,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Github, Mail, Lock, Key, ArrowRight } from "lucide-react";
+import { Github, Mail, Lock, RefreshCw, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
-});
-
-const verifySchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(1, "Password is required"),
-  verificationCode: z.string().length(6, "Verification code must be 6 digits"),
+  captchaInput: z.string().min(1, "Captcha is required"),
 });
 
 type SignInFormData = z.infer<typeof signInSchema>;
-type VerifyFormData = z.infer<typeof verifySchema>;
 
 interface SignInFormProps {
   onSuccess?: () => void;
@@ -46,144 +42,91 @@ export default function SignInForm({
   const t = useTranslations("auth");
   const commonT = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState<"credentials" | "verification">(
-    "credentials"
-  );
-  const [countdown, setCountdown] = useState(0);
-  const [userData, setUserData] = useState<{
-    email: string;
-    password: string;
-  } | null>(null);
+  const [captchaSvg, setCaptchaSvg] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
 
-  const credentialsForm = useForm<SignInFormData>({
+  const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
       password: "",
+      captchaInput: "",
     },
   });
 
-  const verifyForm = useForm<VerifyFormData>({
-    resolver: zodResolver(verifySchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      verificationCode: "",
-    },
-  });
+  const fetchCaptcha = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/captcha");
+      if (res.ok) {
+        const data = await res.json();
+        setCaptchaSvg(data.svg);
+        setCaptchaToken(data.token);
+        form.setValue("captchaInput", "");
+      }
+    } catch (err) {
+      console.error("Failed to load captcha:", err);
+    }
+  }, [form]);
 
-  const startCountdown = () => {
-    setCountdown(60);
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
+  useEffect(() => {
+    fetchCaptcha();
+  }, [fetchCaptcha]);
 
-  const handleCredentialsSubmit = async (data: SignInFormData) => {
+  const handleSubmit = async (data: SignInFormData) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/auth/verify-credentials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          captchaToken,
+          captchaInput: data.captchaInput,
+        }),
       });
 
-      if (response.ok) {
-        const sendCodeResponse = await fetch(
-          "/api/auth/send-login-verification",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: data.email }),
-          }
-        );
-
-        if (sendCodeResponse.ok) {
-          setUserData(data);
-          verifyForm.setValue("email", data.email);
-          verifyForm.setValue("password", data.password);
-          setStep("verification");
-          startCountdown();
-        } else {
-          const error = await sendCodeResponse.json();
-          throw new Error(error.message || "Failed to send verification code");
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.error === "captcha_invalid") {
+          toast.error(t("signIn.captchaInvalid"));
+          fetchCaptcha();
+          throw new Error("captcha_invalid");
         }
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || "Invalid email or password");
+        throw new Error(errorData.error || "Invalid email or password");
       }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      if (signInError) {
+        throw new Error(signInError.message);
+      }
+
+      toast.success(t("signIn.success"));
+      onSuccess?.();
     } catch (error) {
+      if (error instanceof Error && error.message === "captcha_invalid") return;
       console.error("Sign in failed:", error);
-      alert(error instanceof Error ? error.message : "Sign in failed");
+      toast.error(error instanceof Error ? error.message : "Sign in failed");
+      fetchCaptcha();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleVerificationSubmit = async (data: VerifyFormData) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/auth/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+  const handleOAuthSignIn = async (provider: "github" | "google") => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback`,
+      },
+    });
 
-      if (response.ok) {
-        onSuccess?.();
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || "Verification failed");
-      }
-    } catch (error) {
-      console.error("Verification failed:", error);
-      alert(error instanceof Error ? error.message : "Verification failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendCode = async () => {
-    if (!userData) return;
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/auth/send-login-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: userData.email }),
-      });
-
-      if (response.ok) {
-        startCountdown();
-      } else {
-        const error = await response.json();
-        throw new Error(
-          error.message || "Failed to resend verification code"
-        );
-      }
-    } catch (error) {
-      console.error("Failed to resend code:", error);
-      alert(error instanceof Error ? error.message : "Failed to resend code");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOAuthSignIn = (provider: "github" | "google") => {
-    const isDev =
-      !process.env.GITHUB_CLIENT_ID ||
-      process.env.GITHUB_CLIENT_ID.includes("dev");
-
-    if (isDev) {
-      window.location.href = `/api/auth/dev-oauth/callback?provider=${provider}&state=dev_${Date.now()}`;
-    } else {
-      window.location.href = `/api/auth/signin/${provider}`;
+    if (error) {
+      toast.error(error.message);
     }
   };
 
@@ -246,132 +189,96 @@ export default function SignInForm({
           </div>
         </div>
 
-        {step === "credentials" && (
-          <form
-            onSubmit={credentialsForm.handleSubmit(handleCredentialsSubmit)}
-            className="space-y-4"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="email">{t("signIn.email")}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t("signIn.emailPlaceholder")}
-                  className="pl-10"
-                  {...credentialsForm.register("email")}
-                  disabled={isLoading}
-                />
-              </div>
-              {credentialsForm.formState.errors.email && (
-                <p className="text-sm text-red-500">
-                  {credentialsForm.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t("signIn.password")}</Label>
-                <Button variant="link" className="p-0 h-auto text-sm" asChild>
-                  <Link href="/auth/forgot-password">
-                    {t("signIn.forgotPassword")}
-                  </Link>
-                </Button>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder={t("signIn.passwordPlaceholder")}
-                  className="pl-10"
-                  {...credentialsForm.register("password")}
-                  disabled={isLoading}
-                />
-              </div>
-              {credentialsForm.formState.errors.password && (
-                <p className="text-sm text-red-500">
-                  {credentialsForm.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? commonT("sending") : t("signIn.signIn")}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </form>
-        )}
-
-        {step === "verification" && (
-          <form
-            onSubmit={verifyForm.handleSubmit(handleVerificationSubmit)}
-            className="space-y-4"
-          >
-            <div className="text-center mb-4">
-              <p className="text-sm text-muted-foreground">
-                {t("signIn.verificationSent", {
-                  email: userData?.email || "",
-                })}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="verificationCode">
-                {t("signUp.verificationCode")}
-              </Label>
-              <div className="relative">
-                <Key className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="verificationCode"
-                  placeholder="123456"
-                  className="pl-10 text-center text-lg tracking-widest"
-                  maxLength={6}
-                  {...verifyForm.register("verificationCode")}
-                  disabled={isLoading}
-                />
-              </div>
-              {verifyForm.formState.errors.verificationCode && (
-                <p className="text-sm text-red-500">
-                  {verifyForm.formState.errors.verificationCode.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep("credentials")}
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">{t("signIn.email")}</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                placeholder={t("signIn.emailPlaceholder")}
+                className="pl-10"
+                {...form.register("email")}
                 disabled={isLoading}
-                className="flex-1"
-              >
-                {commonT("back")}
-              </Button>
-              <Button type="submit" disabled={isLoading} className="flex-1">
-                {isLoading ? commonT("signingIn") : t("signIn.signIn")}
+              />
+            </div>
+            {form.formState.errors.email && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">{t("signIn.password")}</Label>
+              <Button variant="link" className="p-0 h-auto text-sm" asChild>
+                <Link href="/auth/forgot-password">
+                  {t("signIn.forgotPassword")}
+                </Link>
               </Button>
             </div>
-
-            {countdown > 0 ? (
-              <p className="text-center text-sm text-muted-foreground">
-                {t("signUp.resendIn", { seconds: countdown })}
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                placeholder={t("signIn.passwordPlaceholder")}
+                className="pl-10"
+                {...form.register("password")}
+                disabled={isLoading}
+              />
+            </div>
+            {form.formState.errors.password && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.password.message}
               </p>
-            ) : (
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="captchaInput">{t("signIn.captcha")}</Label>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Input
+                  id="captchaInput"
+                  placeholder={t("signIn.captchaPlaceholder")}
+                  className="w-32 text-center text-lg tracking-widest"
+                  maxLength={4}
+                  {...form.register("captchaInput")}
+                  disabled={isLoading}
+                />
+              </div>
+              <div
+                className="shrink-0 rounded border bg-muted/30 overflow-hidden cursor-pointer select-none"
+                onClick={fetchCaptcha}
+                title={t("signIn.refreshCaptcha")}
+                dangerouslySetInnerHTML={{ __html: captchaSvg }}
+              />
               <Button
                 type="button"
                 variant="ghost"
-                onClick={handleResendCode}
+                size="icon"
+                onClick={fetchCaptcha}
                 disabled={isLoading}
-                className="w-full text-sm"
+                title={t("signIn.refreshCaptcha")}
               >
-                {t("signUp.resendCode")}
+                <RefreshCw className="h-4 w-4" />
               </Button>
+            </div>
+            {form.formState.errors.captchaInput && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.captchaInput.message}
+              </p>
             )}
-          </form>
-        )}
+          </div>
+
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? commonT("signingIn") : t("signIn.signIn")}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </form>
       </CardContent>
       <CardFooter>
         <div className="text-center text-sm w-full">

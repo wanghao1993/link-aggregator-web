@@ -1,8 +1,81 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getServerSession } from "next-auth";
-import authOptions from "@/lib/auth/nextauth-config";
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { supabaseAdmin, getAuthUser } from "@/lib/supabase/server";
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    const search = searchParams.get("search");
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
+    const offset = parseInt(searchParams.get("offset") || "0");
+
+    let query = supabaseAdmin
+      .from("collections")
+      .select("*", { count: "exact" })
+      .eq("is_public", true)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (category && category !== "all") {
+      query = query.eq("category", category);
+    }
+
+    if (search) {
+      query = query.or(
+        `title.ilike.%${search}%,description.ilike.%${search}%`
+      );
+    }
+
+    const { data: collections, error, count } = await query;
+
+    if (error) {
+      console.error("Failed to list collections:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch collections" },
+        { status: 500 }
+      );
+    }
+
+    const userIds = [
+      ...new Set((collections || []).map((c) => c.user_id).filter(Boolean)),
+    ];
+
+    let usersMap: Record<string, { id: string; name: string; email: string }> =
+      {};
+    if (userIds.length > 0) {
+      const { data: users } = await supabaseAdmin
+        .from("users")
+        .select("id, name, email")
+        .in("id", userIds);
+      if (users) {
+        usersMap = Object.fromEntries(users.map((u) => [u.id, u]));
+      }
+    }
+
+    const formatted = (collections || []).map((c) => ({
+      id: c.id,
+      title: c.title,
+      description: c.description,
+      category: c.category,
+      tags: c.tags || [],
+      isPublic: c.is_public,
+      views: c.views,
+      likes: c.likes,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+      author: usersMap[c.user_id] || null,
+    }));
+
+    return NextResponse.json({ collections: formatted, total: count || 0 });
+  } catch (error) {
+    console.error("List collections error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
 
 const linkSchema = z.object({
   title: z.string().min(1, "Link title is required"),
@@ -20,8 +93,8 @@ const createCollectionSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -36,16 +109,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { title, description, category, tags, links } = parsed.data;
-
-    const { data: user } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("email", session.user.email)
-      .single();
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const user = { id: authUser.id };
 
     const { data: collection, error: collectionError } = await supabaseAdmin
       .from("collections")
