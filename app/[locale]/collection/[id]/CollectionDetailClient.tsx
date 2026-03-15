@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
-  ExternalLink,
   Heart,
   Eye,
   Bookmark,
@@ -24,6 +23,7 @@ import ShareButton from "@/components/ShareButton";
 import ShareModal from "@/components/ShareModal";
 import { CollectionDetailSkeleton } from "@/components/skeletons";
 import LinkItemCard from "@/components/LinkItemCard";
+import { toast } from "sonner";
 
 interface CollectionLink {
   id: string;
@@ -65,7 +65,9 @@ export default function CollectionDetailClient() {
   const [error, setError] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [likes, setLikes] = useState(0);
+  const [views, setViews] = useState(0);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     async function fetchCollection() {
@@ -78,13 +80,41 @@ export default function CollectionDetailClient() {
         const data: CollectionData = await res.json();
         setCollection(data);
         setLikes(data.likes);
+        setViews(data.views);
       } catch {
         setError(true);
       } finally {
         setLoading(false);
       }
     }
+
+    // Check if favorited
+    async function checkFavorite() {
+      try {
+        const res = await fetch(`/api/collections/${id}/favorite`);
+        if (res.ok) {
+          const data = await res.json();
+          setIsFavorited(data.isFavorited);
+        }
+      } catch (error) {
+        console.error("Check favorite error:", error);
+      }
+    }
+
+    // Record view
+    async function recordView() {
+      try {
+        await fetch(`/api/collections/${id}/view`, { method: "POST" });
+        // Update local view count
+        setViews((prev) => prev + 1);
+      } catch (error) {
+        console.error("Record view error:", error);
+      }
+    }
+
     fetchCollection();
+    checkFavorite();
+    recordView();
   }, [id]);
 
   if (loading) {
@@ -115,9 +145,39 @@ export default function CollectionDetailClient() {
     });
   };
 
-  const handleFavorite = () => {
-    setIsFavorited(!isFavorited);
-    setLikes((prev) => (isFavorited ? prev - 1 : prev + 1));
+  const handleFavorite = async () => {
+    setFavoriteLoading(true);
+    try {
+      if (isFavorited) {
+        // Remove from favorites
+        const res = await fetch(`/api/collections/${id}/favorite`, {
+          method: "DELETE",
+        });
+        if (res.ok) {
+          setIsFavorited(false);
+          setLikes((prev) => Math.max(0, prev - 1));
+          toast.success("Removed from favorites");
+        } else if (res.status === 401) {
+          toast.error("Please sign in to favorite collections");
+        }
+      } else {
+        // Add to favorites
+        const res = await fetch(`/api/collections/${id}/favorite`, {
+          method: "POST",
+        });
+        if (res.ok) {
+          setIsFavorited(true);
+          setLikes((prev) => prev + 1);
+          toast.success("Added to favorites");
+        } else if (res.status === 401) {
+          toast.error("Please sign in to favorite collections");
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to update favorite");
+    } finally {
+      setFavoriteLoading(false);
+    }
   };
 
   const authorName = collection.author?.name || "Unknown";
@@ -173,6 +233,7 @@ export default function CollectionDetailClient() {
               </Button>
               <Button
                 onClick={handleFavorite}
+                disabled={favoriteLoading}
                 variant={isFavorited ? "default" : "outline"}
                 className={
                   isFavorited
@@ -215,7 +276,7 @@ export default function CollectionDetailClient() {
             <div className="flex items-center space-x-1.5">
               <Eye size={16} />
               <span>
-                {collection.views.toLocaleString()} {t("stats.views")}
+                {views.toLocaleString()} {t("stats.views")}
               </span>
             </div>
             <div className="flex items-center space-x-1.5">
