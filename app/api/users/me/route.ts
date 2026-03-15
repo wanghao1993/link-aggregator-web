@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
 
     const { displayName, bio, website, location } = parsed.data;
 
-    const updates: Record<string, string | undefined> = {};
+    const updates: Record<string, string | null | undefined> = {};
     if (displayName !== undefined) updates.display_name = displayName;
     if (bio !== undefined) updates.bio = bio;
     if (website !== undefined) updates.website = website || null;

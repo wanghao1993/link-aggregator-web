@@ -129,6 +129,36 @@
       "redirecting": "Redirecting to home page...",
       "pageTitle": "Welcome Back",
       "pageSubtitle": "Sign in to your account to continue"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a password reset link",
+      "email": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "captcha": "Captcha",
+      "captchaPlaceholder": "Enter code",
+      "refreshCaptcha": "Click to refresh captcha",
+      "captchaInvalid": "Captcha is incorrect, please try again",
+      "sendResetLink": "Send Reset Link",
+      "emailSent": "Reset email sent",
+      "checkEmail": "Check Your Email",
+      "emailSentDesc": "We've sent a password reset link to {email}. Please check your email and click the link to reset your password.",
+      "noEmail": "If you don't see the email, check your spam folder or try another email address.",
+      "tryAnotherEmail": "Try Another Email",
+      "backToSignIn": "Back to Sign In"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Enter your new password below",
+      "newPassword": "New Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your new password",
+      "resetPassword": "Reset Password",
+      "invalidToken": "Reset link is invalid or expired",
+      "success": "Password reset successful!",
+      "passwordResetSuccess": "Password Reset Complete",
+      "redirectingToSignIn": "Redirecting to sign in page..."
     }
   },
   "dashboard": {

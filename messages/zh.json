@@ -129,6 +129,36 @@
       "redirecting": "正在跳转到首页...",
       "pageTitle": "欢迎回来",
       "pageSubtitle": "登录您的账号继续使用"
+    },
+    "forgotPassword": {
+      "title": "忘记密码",
+      "description": "输入您的邮箱地址，我们将发送重置密码链接",
+      "email": "邮箱地址",
+      "emailPlaceholder": "name@example.com",
+      "captcha": "验证码",
+      "captchaPlaceholder": "输入验证码",
+      "refreshCaptcha": "点击刷新验证码",
+      "captchaInvalid": "验证码错误，请重试",
+      "sendResetLink": "发送重置链接",
+      "emailSent": "重置邮件已发送",
+      "checkEmail": "请查收邮件",
+      "emailSentDesc": "我们已向 {email} 发送了密码重置链接，请查收邮件并点击链接重置密码。",
+      "noEmail": "如果没有收到邮件，请检查垃圾邮件文件夹或尝试其他邮箱。",
+      "tryAnotherEmail": "尝试其他邮箱",
+      "backToSignIn": "返回登录"
+    },
+    "resetPassword": {
+      "title": "重置密码",
+      "description": "请输入您的新密码",
+      "newPassword": "新密码",
+      "passwordPlaceholder": "至少8个字符",
+      "confirmPassword": "确认密码",
+      "confirmPasswordPlaceholder": "再次输入新密码",
+      "resetPassword": "重置密码",
+      "invalidToken": "重置链接无效或已过期",
+      "success": "密码重置成功！",
+      "passwordResetSuccess": "密码已重置",
+      "redirectingToSignIn": "正在跳转到登录页面..."
     }
   },
   "dashboard": {
