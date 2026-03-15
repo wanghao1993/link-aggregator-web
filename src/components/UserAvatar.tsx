@@ -10,6 +10,7 @@ interface UserAvatarProps {
   size?: 'sm' | 'md' | 'lg';
   showName?: boolean;
   showBadge?: boolean;
+  avatarUrl?: string;
 }
 
 const UserAvatar: React.FC<UserAvatarProps> = ({
@@ -23,7 +24,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   },
   size = 'md',
   showName = true,
-  showBadge = true
+  showBadge = true,
+  avatarUrl
 }) => {
   const t = useTranslations('common');
   console.log('UserAvatar rendered for user:', user.displayName);
@@ -33,6 +35,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
     md: 'w-10 h-10',
     lg: 'w-12 h-12'
   };
+  
+  const avatarSrc = avatarUrl || user.avatar;
   
   const getInitials = (name: string) => {
     return name
@@ -47,9 +51,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
     <div data-cmp="UserAvatar" className="flex items-center space-x-3">
       <div className="relative">
         <Avatar className={sizeClasses[size]}>
-          <AvatarImage src={user.avatar} alt={user.displayName} />
+          <AvatarImage src={avatarSrc} alt={user.displayName} />
           <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
-            {user.avatar ? getInitials(user.displayName) : <User size={size === 'sm' ? 14 : size === 'md' ? 16 : 18} />}
+            {avatarSrc ? getInitials(user.displayName) : <User size={size === 'sm' ? 14 : size === 'md' ? 16 : 18} />}
           </AvatarFallback>
         </Avatar>
         

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ArrowLeft, User, Globe, MapPin, FileText } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ArrowLeft, User, Globe, MapPin, FileText, Camera, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-context";
@@ -29,9 +30,12 @@ export default function ProfileSettings() {
   const t = useTranslations("profileSettings");
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [form, setForm] = useState<ProfileData>({
     displayName: "",
     bio: "",
@@ -55,10 +59,57 @@ export default function ProfileSettings() {
           website: data.website || "",
           location: data.location || "",
         });
+        setAvatarUrl(data.avatarUrl || "");
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [user, authLoading, router]);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error("File too large. Maximum size is 5MB.");
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const res = await fetch("/api/users/me/avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to upload avatar");
+      }
+
+      setAvatarUrl(data.avatarUrl);
+      toast.success("Avatar updated successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +130,15 @@ export default function ProfileSettings() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   if (authLoading || loading) {
@@ -109,6 +169,43 @@ export default function ProfileSettings() {
           <CardDescription>{t("subtitle")}</CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Avatar Upload */}
+          <div className="flex items-center gap-6 mb-8">
+            <div className="relative">
+              <Avatar className="w-24 h-24">
+                <AvatarImage src={avatarUrl} alt={form.displayName} />
+                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-2xl">
+                  {form.displayName ? getInitials(form.displayName) : <User className="w-10 h-10" />}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                disabled={uploadingAvatar}
+                className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {uploadingAvatar ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            <div>
+              <h3 className="font-medium">Profile Photo</h3>
+              <p className="text-sm text-muted-foreground">
+                JPG, PNG, GIF or WebP. Max 5MB.
+              </p>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="displayName">{t("displayName")}</Label>
