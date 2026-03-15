@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2, Link2, GripVertical } from "lucide-react";
+import { Plus, Trash2, Link2, GripVertical, Loader2, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,11 +27,13 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 const linkSchema = z.object({
   title: z.string().min(1),
   url: z.string().url(),
   description: z.string(),
+  favicon: z.string().optional(),
 });
 
 const collectionSchema = z.object({
@@ -62,6 +64,14 @@ interface CollectionFormProps {
   isEdit?: boolean;
 }
 
+interface LinkPreviewData {
+  title: string;
+  description: string;
+  image: string;
+  favicon: string;
+  siteName: string;
+}
+
 export default function CollectionForm({
   defaultValues,
   onSubmit,
@@ -70,6 +80,7 @@ export default function CollectionForm({
   const t = useTranslations("collectionForm");
   const ct = useTranslations("categories");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [fetchingPreview, setFetchingPreview] = useState<Record<number, boolean>>({});
 
   const form = useForm<CollectionFormValues>({
     resolver: zodResolver(collectionSchema),
@@ -78,7 +89,7 @@ export default function CollectionForm({
       description: "",
       category: "",
       tags: "",
-      links: [{ title: "", url: "", description: "" }],
+      links: [{ title: "", url: "", description: "", favicon: "" }],
     },
   });
 
@@ -86,6 +97,49 @@ export default function CollectionForm({
     control: form.control,
     name: "links",
   });
+
+  const fetchLinkPreview = useCallback(async (url: string, index: number) => {
+    if (!url || !url.startsWith("http")) return;
+
+    setFetchingPreview((prev) => ({ ...prev, [index]: true }));
+    try {
+      const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+      if (!response.ok) {
+        console.warn("Failed to fetch link preview");
+        return;
+      }
+
+      const data: LinkPreviewData = await response.json();
+
+      // Auto-fill only if fields are empty
+      const currentTitle = form.getValues(`links.${index}.title`);
+      const currentDesc = form.getValues(`links.${index}.description`);
+
+      if (data.title && !currentTitle) {
+        form.setValue(`links.${index}.title`, data.title);
+      }
+      if (data.description && !currentDesc) {
+        form.setValue(`links.${index}.description`, data.description);
+      }
+      if (data.favicon) {
+        form.setValue(`links.${index}.favicon`, data.favicon);
+      }
+
+      if (data.title || data.description) {
+        toast.success("Link info fetched automatically!");
+      }
+    } catch (error) {
+      console.error("Error fetching link preview:", error);
+    } finally {
+      setFetchingPreview((prev) => ({ ...prev, [index]: false }));
+    }
+  }, [form]);
+
+  const handleUrlBlur = (url: string, index: number) => {
+    if (url && url.startsWith("http")) {
+      fetchLinkPreview(url, index);
+    }
+  };
 
   const handleSubmit = async (data: CollectionFormValues) => {
     setIsSubmitting(true);
@@ -202,7 +256,7 @@ export default function CollectionForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => append({ title: "", url: "", description: "" })}
+              onClick={() => append({ title: "", url: "", description: "", favicon: "" })}
               className="glass-effect"
             >
               <Plus size={16} className="mr-1" />
@@ -239,6 +293,38 @@ export default function CollectionForm({
                         <GripVertical size={16} />
                       </div>
                       <div className="flex-1 space-y-4">
+                        {/* URL Field with auto-fetch */}
+                        <FormField
+                          control={form.control}
+                          name={`links.${index}.url`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("linkUrl")}</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                  <Input
+                                    placeholder={t("linkUrlPlaceholder")}
+                                    className="bg-background/50 pl-10 pr-10"
+                                    {...field}
+                                    onBlur={(e) => {
+                                      field.onBlur();
+                                      handleUrlBlur(e.target.value, index);
+                                    }}
+                                  />
+                                  {fetchingPreview[index] && (
+                                    <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
+                                  )}
+                                </div>
+                              </FormControl>
+                              <FormDescription className="text-xs">
+                                Paste URL and title/description will be fetched automatically
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
@@ -259,24 +345,39 @@ export default function CollectionForm({
                               </FormItem>
                             )}
                           />
+                          
+                          {/* Favicon preview */}
                           <FormField
                             control={form.control}
-                            name={`links.${index}.url`}
+                            name={`links.${index}.favicon`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>{t("linkUrl")}</FormLabel>
+                                <FormLabel>Site Icon</FormLabel>
                                 <FormControl>
-                                  <Input
-                                    placeholder={t("linkUrlPlaceholder")}
-                                    className="bg-background/50"
-                                    {...field}
-                                  />
+                                  <div className="flex items-center gap-2 h-10 bg-background/50 rounded-md border px-3">
+                                    {field.value ? (
+                                      <img
+                                        src={field.value}
+                                        alt="Site favicon"
+                                        className="w-5 h-5"
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                      />
+                                    ) : (
+                                      <Globe className="w-5 h-5 text-muted-foreground" />
+                                    )}
+                                    <span className="text-sm text-muted-foreground truncate">
+                                      {field.value ? "Icon loaded" : "Will be fetched from URL"}
+                                    </span>
+                                  </div>
                                 </FormControl>
-                                <FormMessage />
+                                <input type="hidden" {...field} />
                               </FormItem>
                             )}
                           />
                         </div>
+
                         <FormField
                           control={form.control}
                           name={`links.${index}.description`}

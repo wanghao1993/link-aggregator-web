@@ -23,12 +23,14 @@ import { useRouter, useParams } from "next/navigation";
 import ShareButton from "@/components/ShareButton";
 import ShareModal from "@/components/ShareModal";
 import { CollectionDetailSkeleton } from "@/components/skeletons";
+import LinkItemCard from "@/components/LinkItemCard";
 
 interface CollectionLink {
   id: string;
   title: string;
   url: string;
   description: string;
+  favicon?: string;
 }
 
 interface CollectionData {
@@ -275,42 +277,13 @@ export default function CollectionDetailClient() {
 
           <div className="space-y-4">
             {collection.links.map((link) => (
-              <Card
+              <LinkItemCard
                 key={link.id}
-                className="glass-effect border-border/30 bg-card/60 link-card-hover group"
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-lg shrink-0">
-                        🔗
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                          {link.title}
-                        </h3>
-                        {link.description && (
-                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                            {link.description}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground/60 truncate">
-                          {link.url}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-primary shrink-0 ml-4"
-                      onClick={() => window.open(link.url, "_blank")}
-                    >
-                      <ExternalLink size={18} />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                title={link.title}
+                url={link.url}
+                description={link.description}
+                favicon={link.favicon}
+              />
             ))}
           </div>
 

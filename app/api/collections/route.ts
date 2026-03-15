@@ -81,6 +81,7 @@ const linkSchema = z.object({
   title: z.string().min(1, "Link title is required"),
   url: z.string().url("Invalid URL"),
   description: z.string().optional().default(""),
+  favicon: z.string().optional().default(""),
 });
 
 const createCollectionSchema = z.object({
@@ -142,6 +143,7 @@ export async function POST(request: NextRequest) {
         title: link.title,
         url: link.url,
         description: link.description || "",
+        favicon: link.favicon || "",
         sort_order: index,
         created_at: new Date().toISOString(),
       }));

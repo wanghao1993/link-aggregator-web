@@ -6,6 +6,7 @@ const linkSchema = z.object({
   title: z.string().min(1),
   url: z.string().url(),
   description: z.string().optional().default(""),
+  favicon: z.string().optional().default(""),
 });
 
 const updateCollectionSchema = z.object({
@@ -38,7 +39,7 @@ export async function GET(
 
     const { data: links } = await supabaseAdmin
       .from("collection_links")
-      .select("id, title, url, description, sort_order")
+      .select("id, title, url, description, favicon, sort_order")
       .eq("collection_id", id)
       .order("sort_order", { ascending: true });
 
@@ -72,11 +73,13 @@ export async function GET(
           title: string;
           url: string;
           description: string;
+          favicon: string;
         }) => ({
           id: link.id,
           title: link.title,
           url: link.url,
           description: link.description,
+          favicon: link.favicon,
         })
       ),
     };
@@ -166,6 +169,7 @@ export async function PUT(
         title: link.title,
         url: link.url,
         description: link.description || "",
+        favicon: link.favicon || "",
         sort_order: index,
         created_at: new Date().toISOString(),
       }));
