@@ -11,14 +11,14 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Lock, Eye, EyeOff, CheckCircle, ArrowRight } from "lucide-react";
+import { Lock, Eye, EyeOff, CheckCircle, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
@@ -39,10 +39,9 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
-  // Get token from URL query params
-  const token = searchParams.get("token");
-  const type = searchParams.get("type");
+  const [verifying, setVerifying] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
 
   const form = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
@@ -53,39 +52,91 @@ export default function ResetPasswordPage() {
   });
 
   useEffect(() => {
-    // Check if we have a valid token
-    if (!token) {
-      // If no token, try to check if user is already authenticated via hash fragment
-      // Supabase sends the access_token in the URL hash after password reset redirect
-      const hash = window.location.hash;
-      if (!hash || !hash.includes("access_token")) {
-        toast.error(t("resetPassword.invalidToken"));
+    const verifyToken = async () => {
+      try {
+        // Get token from URL - Supabase sends it as 'token' or 'access_token' param
+        const token = searchParams.get("token") || searchParams.get("access_token");
+        const type = searchParams.get("type");
+        
+        // Also check hash fragment for access_token
+        const hash = window.location.hash;
+        let hashToken: string | null = null;
+        if (hash) {
+          const params = new URLSearchParams(hash.substring(1));
+          hashToken = params.get("access_token");
+        }
+
+        const accessToken = token || hashToken;
+
+        if (!accessToken) {
+          setError(t("resetPassword.invalidToken"));
+          setVerifying(false);
+          return;
+        }
+
+        // For recovery type, we need to exchange the token for a session
+        if (type === "recovery" || accessToken) {
+          // Use Supabase client to set the session with the token
+          const { data, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: searchParams.get("refresh_token") || "",
+          });
+
+          if (sessionError) {
+            console.error("Session error:", sessionError);
+            // Try verifyOtp as fallback for PKCE flow
+            const { error: otpError } = await supabase.auth.verifyOtp({
+              token_hash: accessToken,
+              type: "recovery",
+            });
+            
+            if (otpError) {
+              console.error("OTP error:", otpError);
+              setError(t("resetPassword.invalidToken"));
+              setVerifying(false);
+              return;
+            }
+          }
+
+          setSessionReady(true);
+          toast.success("Token verified. Please enter your new password.");
+        } else {
+          setError(t("resetPassword.invalidToken"));
+        }
+      } catch (err) {
+        console.error("Token verification error:", err);
+        setError(t("resetPassword.invalidToken"));
+      } finally {
+        setVerifying(false);
       }
-    }
-  }, [token, t]);
+    };
+
+    verifyToken();
+  }, [searchParams, t]);
 
   const handleSubmit = async (data: ResetPasswordFormData) => {
+    if (!sessionReady) {
+      toast.error("Session not ready. Please try the reset link again.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password: data.password,
-          token: token || "",
-        }),
+      // Update password using Supabase client (uses current session)
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: data.password,
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to reset password");
+      if (updateError) {
+        throw new Error(updateError.message);
       }
 
       setIsSuccess(true);
       toast.success(t("resetPassword.success"));
 
-      // Redirect to sign in after a short delay
+      // Sign out and redirect to sign in
+      await supabase.auth.signOut();
+      
       setTimeout(() => {
         router.push("/auth/signin");
       }, 2000);
@@ -97,6 +148,47 @@ export default function ResetPasswordPage() {
     }
   };
 
+  // Loading state while verifying token
+  if (verifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md mx-auto">
+          <CardContent className="py-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Verifying reset link...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md mx-auto">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Invalid Link</CardTitle>
+            <CardDescription>{error}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push("/auth/forgot-password")}
+            >
+              Request a new reset link
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Success state
   if (isSuccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -198,7 +290,7 @@ export default function ResetPasswordPage() {
               )}
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full">
+            <Button type="submit" disabled={isLoading || !sessionReady} className="w-full">
               {isLoading ? commonT("loading") : t("resetPassword.resetPassword")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

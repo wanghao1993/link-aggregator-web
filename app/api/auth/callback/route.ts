@@ -5,6 +5,8 @@ import { cookies } from 'next/headers';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
+  const token = searchParams.get('token');
+  const type = searchParams.get('type');
   const next = searchParams.get('next') ?? '/';
   const errorParam = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
@@ -13,6 +15,12 @@ export async function GET(request: NextRequest) {
   if (errorParam) {
     console.error('OAuth error:', errorParam, errorDescription);
     return NextResponse.redirect(`${origin}/auth/signin?error=${encodeURIComponent(errorDescription || errorParam)}`);
+  }
+
+  // Handle password reset recovery
+  if (type === 'recovery' && (code || token)) {
+    const resetUrl = `/auth/reset-password?token=${code || token}&type=recovery`;
+    return NextResponse.redirect(`${origin}${resetUrl}`);
   }
 
   if (code) {

@@ -31,21 +31,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user exists
-    const { data: userData, error: userError } = await supabaseAdmin
-      .from('users')
-      .select('email')
-      .eq('email', email)
-      .single();
-
-    // Don't reveal if user exists or not for security
-    // Always return success even if user doesn't exist
-
     // Send password reset email via Supabase
+    // The email will contain a link that redirects to /api/auth/callback?type=recovery&token=xxx
+    // which will then redirect to /auth/reset-password with the token
     const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(
       email,
       {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/reset-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/callback?type=recovery`,
       }
     );
 
