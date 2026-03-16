@@ -429,7 +429,7 @@ export default function TagsAdminPage() {
             <DialogTitle>Delete Tag</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground">
-            Are you sure you want to delete "{selectedTag?.name}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{selectedTag?.name}&quot;? This action cannot be undone.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>

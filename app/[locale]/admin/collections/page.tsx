@@ -312,7 +312,7 @@ export default function CollectionsAdminPage() {
             <DialogTitle>Delete Collection</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground">
-            Are you sure you want to delete "{selectedCollection?.title}"? This will also delete all links in this collection. This action cannot be undone.
+            Are you sure you want to delete &quot;{selectedCollection?.title}&quot;? This will also delete all links in this collection. This action cannot be undone.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>

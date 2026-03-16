@@ -417,7 +417,7 @@ export default function CategoriesAdminPage() {
             <DialogTitle>Delete Category</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground">
-            Are you sure you want to delete "{selectedCategory?.name}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{selectedCategory?.name}&quot;? This action cannot be undone.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
