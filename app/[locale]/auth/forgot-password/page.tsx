@@ -93,7 +93,7 @@ export default function ForgotPasswordPage() {
     } catch (error) {
       if (error instanceof Error && error.message === "captcha_invalid") return;
       console.error("Forgot password failed:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send reset email");
+      toast.error(error instanceof Error ? error.message : t("forgotPassword.sendError"));
       fetchCaptcha();
     } finally {
       setIsLoading(false);

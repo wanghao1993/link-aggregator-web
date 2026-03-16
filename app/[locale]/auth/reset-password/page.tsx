@@ -99,7 +99,7 @@ export default function ResetPasswordPage() {
           }
 
           setSessionReady(true);
-          toast.success("Token verified. Please enter your new password.");
+          toast.success(t("resetPassword.tokenVerified"));
         } else {
           setError(t("resetPassword.invalidToken"));
         }
@@ -116,7 +116,7 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (data: ResetPasswordFormData) => {
     if (!sessionReady) {
-      toast.error("Session not ready. Please try the reset link again.");
+      toast.error(t("resetPassword.sessionError"));
       return;
     }
 
@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
       }, 2000);
     } catch (error) {
       console.error("Reset password failed:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to reset password");
+      toast.error(error instanceof Error ? error.message : t("resetPassword.resetError"));
     } finally {
       setIsLoading(false);
     }

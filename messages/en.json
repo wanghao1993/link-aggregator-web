@@ -108,7 +108,9 @@
       "success": "Sign up successful!",
       "redirecting": "Redirecting to home page...",
       "pageTitle": "Join LinkHub",
-      "pageSubtitle": "Discover and share curated link collections"
+      "pageSubtitle": "Discover and share curated link collections",
+      "sendCodeError": "Failed to send verification code",
+      "registerError": "Registration failed"
     },
     "signIn": {
       "title": "Sign In",
@@ -128,7 +130,9 @@
       "success": "Sign in successful!",
       "redirecting": "Redirecting to home page...",
       "pageTitle": "Welcome Back",
-      "pageSubtitle": "Sign in to your account to continue"
+      "pageSubtitle": "Sign in to your account to continue",
+      "invalidCredentials": "Invalid email or password",
+      "signInError": "Sign in failed"
     },
     "forgotPassword": {
       "title": "Forgot Password",
@@ -145,7 +149,9 @@
       "emailSentDesc": "We've sent a password reset link to {email}. Please check your email and click the link to reset your password.",
       "noEmail": "If you don't see the email, check your spam folder or try another email address.",
       "tryAnotherEmail": "Try Another Email",
-      "backToSignIn": "Back to Sign In"
+      "backToSignIn": "Back to Sign In",
+      "sendError": "Failed to send reset email",
+      "loadCaptchaError": "Failed to load captcha"
     },
     "resetPassword": {
       "title": "Reset Password",
@@ -158,7 +164,11 @@
       "invalidToken": "Reset link is invalid or expired",
       "success": "Password reset successful!",
       "passwordResetSuccess": "Password Reset Complete",
-      "redirectingToSignIn": "Redirecting to sign in page..."
+      "redirectingToSignIn": "Redirecting to sign in page...",
+      "tokenVerified": "Token verified. Please enter your new password.",
+      "sessionError": "Session not ready. Please try the reset link again.",
+      "resetError": "Failed to reset password",
+      "passwordMismatch": "Passwords don't match"
     }
   },
   "dashboard": {
@@ -228,10 +238,17 @@
     "save": "Save Changes",
     "saving": "Saving...",
     "success": "Profile updated successfully",
-    "error": "Failed to update profile"
+    "error": "Failed to update profile",
+    "avatarUpdated": "Avatar updated successfully",
+    "avatarUpdateError": "Failed to upload avatar",
+    "invalidFileType": "Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.",
+    "fileTooLarge": "File too large. Maximum size is 5MB."
   },
   "profilePage": {
     "editProfile": "Edit Profile",
+    "loadError": "Failed to load profile",
+    "defaultName": "User",
+    "unknownAuthor": "Unknown",
     "stats": {
       "collections": "Collections Created",
       "totalViews": "Total Views",
@@ -243,7 +260,8 @@
       "description": "Manage your link collections",
       "collectionName": "My Collection {index}",
       "lastUpdated": "Last updated: {time}",
-      "views": "{count} views"
+      "views": "{count} views",
+      "empty": "No collections yet"
     }
   },
   "recentPage": {
@@ -252,7 +270,13 @@
   },
   "favoritesPage": {
     "title": "My Favorites",
-    "subtitle": "Manage your favorite link collections"
+    "subtitle": "Manage your favorite link collections",
+    "empty": "No favorites yet",
+    "emptyDesc": "Start exploring and add collections to your favorites!",
+    "loadError": "Failed to load favorites",
+    "removeSuccess": "Removed from favorites",
+    "removeError": "Failed to remove favorite",
+    "loginRequired": "Please sign in to view favorites"
   },
   "categoriesPage": {
     "title": "Browse Categories",
@@ -271,7 +295,12 @@
     },
     "back": "Back",
     "addToFavorites": "Favorite",
-    "noLinks": "No links yet"
+    "noLinks": "No links yet",
+    "removedFromFavorites": "Removed from favorites",
+    "addedToFavorites": "Added to favorites",
+    "favoriteError": "Failed to update favorite",
+    "loginRequired": "Please sign in to favorite collections",
+    "notFound": "Collection not found"
   },
   "collectionForm": {
     "createTitle": "Create Link Collection",
@@ -306,6 +335,10 @@
     "loginRequired": "Login Required",
     "loginRequiredDesc": "You need to sign in to create a link collection",
     "goToLogin": "Go to Login",
+    "linkInfoFetched": "Link info fetched automatically!",
+    "createError": "Failed to create collection",
+    "updateError": "Failed to update collection",
+    "loadError": "Failed to load collection",
     "validation": {
       "titleRequired": "Title is required",
       "titleMin": "Title must be at least 2 characters",

@@ -76,14 +76,14 @@ export default function ProfileSettings() {
     // Validate file type
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.");
+      toast.error(t("invalidFileType"));
       return;
     }
 
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error("File too large. Maximum size is 5MB.");
+      toast.error(t("fileTooLarge"));
       return;
     }
 
@@ -105,9 +105,9 @@ export default function ProfileSettings() {
       setAvatarUrl(data.avatarUrl);
       // Refresh profile in auth context to update avatar everywhere
       await refreshProfile();
-      toast.success("Avatar updated successfully");
+      toast.success(t("avatarUpdated"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload avatar");
+      toast.error(err instanceof Error ? err.message : t("avatarUpdateError"));
     } finally {
       setUploadingAvatar(false);
     }

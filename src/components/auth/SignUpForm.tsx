@@ -96,14 +96,14 @@ export default function SignUpForm({
         toast.success(t("signUp.codeSentSuccess"));
       } else {
         const data = await response.json();
-        throw new Error(data.error || "Failed to send verification code");
+        throw new Error(data.error || t("signUp.sendCodeError"));
       }
     } catch (error) {
       console.error("Failed to send verification code:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to send verification code"
+          : t("signUp.sendCodeError")
       );
     } finally {
       setIsLoading(false);
@@ -139,7 +139,7 @@ export default function SignUpForm({
     } catch (error) {
       console.error("Registration failed:", error);
       toast.error(
-        error instanceof Error ? error.message : "Registration failed"
+        error instanceof Error ? error.message : t("signUp.registerError")
       );
     } finally {
       setIsLoading(false);

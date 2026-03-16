@@ -156,9 +156,9 @@ export default function CollectionDetailClient() {
         if (res.ok) {
           setIsFavorited(false);
           setLikes((prev) => Math.max(0, prev - 1));
-          toast.success("Removed from favorites");
+          toast.success(t("removedFromFavorites"));
         } else if (res.status === 401) {
-          toast.error("Please sign in to favorite collections");
+          toast.error(t("loginRequired"));
         }
       } else {
         // Add to favorites
@@ -168,19 +168,19 @@ export default function CollectionDetailClient() {
         if (res.ok) {
           setIsFavorited(true);
           setLikes((prev) => prev + 1);
-          toast.success("Added to favorites");
+          toast.success(t("addedToFavorites"));
         } else if (res.status === 401) {
-          toast.error("Please sign in to favorite collections");
+          toast.error(t("loginRequired"));
         }
       }
     } catch (error) {
-      toast.error("Failed to update favorite");
+      toast.error(t("favoriteError"));
     } finally {
       setFavoriteLoading(false);
     }
   };
 
-  const authorName = collection.author?.name || "Unknown";
+  const authorName = collection.author?.name || t("notFound");
   const authorInitial = authorName.charAt(0).toUpperCase();
 
   return (

@@ -124,12 +124,12 @@ export default function Profile() {
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Failed to load profile</p>
+        <p className="text-muted-foreground">{t("loadError")}</p>
       </div>
     );
   }
 
-  const displayName = profile.displayName || profile.name || "User";
+  const displayName = profile.displayName || profile.name || t("defaultName");
   const username = profile.username || profile.email.split("@")[0];
   const totalViews = collections.reduce((sum, c) => sum + (c.views || 0), 0);
 

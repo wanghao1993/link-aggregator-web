@@ -108,7 +108,9 @@
       "success": "注册成功！",
       "redirecting": "正在跳转到首页...",
       "pageTitle": "加入链接聚合",
-      "pageSubtitle": "发现并分享精选链接合集"
+      "pageSubtitle": "发现并分享精选链接合集",
+      "sendCodeError": "发送验证码失败",
+      "registerError": "注册失败"
     },
     "signIn": {
       "title": "登录账号",
@@ -128,7 +130,9 @@
       "success": "登录成功！",
       "redirecting": "正在跳转到首页...",
       "pageTitle": "欢迎回来",
-      "pageSubtitle": "登录您的账号继续使用"
+      "pageSubtitle": "登录您的账号继续使用",
+      "invalidCredentials": "邮箱或密码错误",
+      "signInError": "登录失败"
     },
     "forgotPassword": {
       "title": "忘记密码",
@@ -145,7 +149,9 @@
       "emailSentDesc": "我们已向 {email} 发送了密码重置链接，请查收邮件并点击链接重置密码。",
       "noEmail": "如果没有收到邮件，请检查垃圾邮件文件夹或尝试其他邮箱。",
       "tryAnotherEmail": "尝试其他邮箱",
-      "backToSignIn": "返回登录"
+      "backToSignIn": "返回登录",
+      "sendError": "发送重置邮件失败",
+      "loadCaptchaError": "加载验证码失败"
     },
     "resetPassword": {
       "title": "重置密码",
@@ -158,7 +164,11 @@
       "invalidToken": "重置链接无效或已过期",
       "success": "密码重置成功！",
       "passwordResetSuccess": "密码已重置",
-      "redirectingToSignIn": "正在跳转到登录页面..."
+      "redirectingToSignIn": "正在跳转到登录页面...",
+      "tokenVerified": "验证成功，请输入新密码",
+      "sessionError": "会话未准备好，请重新点击重置链接",
+      "resetError": "重置密码失败",
+      "passwordMismatch": "两次密码不一致"
     }
   },
   "dashboard": {
@@ -228,10 +238,17 @@
     "save": "保存修改",
     "saving": "保存中...",
     "success": "资料更新成功",
-    "error": "更新资料失败"
+    "error": "更新资料失败",
+    "avatarUpdated": "头像更新成功",
+    "avatarUpdateError": "上传头像失败",
+    "invalidFileType": "文件类型不支持，仅支持 JPEG、PNG、GIF 和 WebP 格式",
+    "fileTooLarge": "文件太大，最大支持 5MB"
   },
   "profilePage": {
     "editProfile": "编辑资料",
+    "loadError": "加载个人资料失败",
+    "defaultName": "用户",
+    "unknownAuthor": "未知",
     "stats": {
       "collections": "创建的合集",
       "totalViews": "总浏览量",
@@ -243,7 +260,8 @@
       "description": "管理你创建的链接合集",
       "collectionName": "我的合集 {index}",
       "lastUpdated": "最后更新: {time}",
-      "views": "{count} 浏览"
+      "views": "{count} 浏览",
+      "empty": "暂无合集"
     }
   },
   "recentPage": {
@@ -252,7 +270,13 @@
   },
   "favoritesPage": {
     "title": "我的收藏",
-    "subtitle": "管理你收藏的链接合集"
+    "subtitle": "管理你收藏的链接合集",
+    "empty": "暂无收藏",
+    "emptyDesc": "开始探索并添加合集到你的收藏吧！",
+    "loadError": "加载收藏失败",
+    "removeSuccess": "已取消收藏",
+    "removeError": "取消收藏失败",
+    "loginRequired": "请登录后查看收藏"
   },
   "categoriesPage": {
     "title": "浏览分类",
@@ -271,7 +295,12 @@
     },
     "back": "返回",
     "addToFavorites": "收藏",
-    "noLinks": "暂无链接"
+    "noLinks": "暂无链接",
+    "removedFromFavorites": "已取消收藏",
+    "addedToFavorites": "已添加到收藏",
+    "favoriteError": "更新收藏状态失败",
+    "loginRequired": "请登录后收藏合集",
+    "notFound": "合集不存在"
   },
   "collectionForm": {
     "createTitle": "创建链接合集",
@@ -306,6 +335,10 @@
     "loginRequired": "请先登录",
     "loginRequiredDesc": "你需要登录才能创建链接合集",
     "goToLogin": "去登录",
+    "linkInfoFetched": "链接信息已自动获取！",
+    "createError": "创建合集失败",
+    "updateError": "更新合集失败",
+    "loadError": "加载合集失败",
     "validation": {
       "titleRequired": "请输入标题",
       "titleMin": "标题至少2个字符",

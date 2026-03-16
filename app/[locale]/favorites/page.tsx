@@ -49,7 +49,7 @@ export default function Favorites() {
       const res = await fetch("/api/users/me/favorites");
       if (!res.ok) {
         if (res.status === 401) {
-          toast.error("Please sign in to view favorites");
+          toast.error(t("loginRequired"));
           return;
         }
         throw new Error("Failed to fetch favorites");
@@ -57,7 +57,7 @@ export default function Favorites() {
       const data = await res.json();
       setFavorites(data.favorites || []);
     } catch (error) {
-      toast.error("Failed to load favorites");
+      toast.error(t("loadError"));
       console.error(error);
     } finally {
       setLoading(false);
@@ -72,12 +72,12 @@ export default function Favorites() {
       });
       if (res.ok) {
         setFavorites((prev) => prev.filter((f) => f.id !== id));
-        toast.success("Removed from favorites");
+        toast.success(t("removeSuccess"));
       } else {
-        toast.error("Failed to remove favorite");
+        toast.error(t("removeError"));
       }
     } catch (error) {
-      toast.error("Failed to remove favorite");
+      toast.error(t("removeError"));
     } finally {
       setRemoving(null);
     }
@@ -101,8 +101,8 @@ export default function Favorites() {
         ) : favorites.length === 0 ? (
           <div className="text-center py-20">
             <Heart className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No favorites yet</p>
-            <Button onClick={() => router.push("/")}>{tc("explore")}</Button>
+            <p className="text-muted-foreground mb-4">{t("empty")}</p>
+            <Button onClick={() => router.push("/")}>{tc("home")}</Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

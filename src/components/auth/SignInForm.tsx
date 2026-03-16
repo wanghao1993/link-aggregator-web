@@ -110,7 +110,7 @@ export default function SignInForm({
     } catch (error) {
       if (error instanceof Error && error.message === "captcha_invalid") return;
       console.error("Sign in failed:", error);
-      toast.error(error instanceof Error ? error.message : "Sign in failed");
+      toast.error(error instanceof Error ? error.message : t("signIn.signInError"));
       fetchCaptcha();
     } finally {
       setIsLoading(false);

@@ -126,7 +126,7 @@ export default function CollectionForm({
       }
 
       if (data.title || data.description) {
-        toast.success("Link info fetched automatically!");
+        toast.success(t("linkInfoFetched"));
       }
     } catch (error) {
       console.error("Error fetching link preview:", error);
