@@ -101,7 +101,7 @@ export default function EditCollectionPage() {
               </p>
             </div>
             <Button
-              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+              className="bg-brand-gradient hover:opacity-90 transition-opacity"
               asChild
             >
               <Link href="/auth/signin">{t("goToLogin")}</Link>
@@ -145,7 +145,7 @@ export default function EditCollectionPage() {
 
         <div className="mb-8 fade-in">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-brand-gradient rounded-xl flex items-center justify-center">
               <Pencil className="text-white" size={22} />
             </div>
             <div>

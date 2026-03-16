@@ -52,7 +52,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       <div className="relative">
         <Avatar className={sizeClasses[size]}>
           <AvatarImage src={avatarSrc} alt={user.displayName} />
-          <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">
+          <AvatarFallback className="bg-brand-gradient text-white">
             {avatarSrc ? getInitials(user.displayName) : <User size={size === 'sm' ? 14 : size === 'md' ? 16 : 18} />}
           </AvatarFallback>
         </Avatar>

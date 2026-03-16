@@ -83,7 +83,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
       <CardHeader className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-xl">
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl bg-brand-gradient">
               {collection.category.icon}
             </div>
             <div>
@@ -163,7 +163,7 @@ const LinkCard: React.FC<LinkCardProps> = ({
         {/* Action Button */}
         <Button
           onClick={(e) => { e.stopPropagation(); handleVisit(); }}
-          className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 group"
+          className="w-full bg-brand-gradient hover:opacity-90 transition-opacity group"
         >
           <span>{t('viewCollection')}</span>
           <ExternalLink size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />

@@ -55,7 +55,7 @@ export default function TagDetailClient() {
 
         <div className="mb-10 fade-in">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+            <div className="w-14 h-14 bg-brand-gradient rounded-xl flex items-center justify-center">
               <Hash className="text-white" size={28} />
             </div>
             <div>

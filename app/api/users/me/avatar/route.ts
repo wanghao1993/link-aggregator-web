@@ -1,6 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, getAuthUser } from '@/lib/supabase/server';
 
+/**
+ * Ensure user record exists in users table before creating profile
+ */
+async function ensureUserRecord(authUser: {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+}) {
+  // Check if user exists
+  const { data: existingUser } = await supabaseAdmin
+    .from("users")
+    .select("id")
+    .eq("id", authUser.id)
+    .single();
+
+  if (existingUser) {
+    return true;
+  }
+
+  // Create user record
+  const name = (authUser.user_metadata?.name as string) ||
+    authUser.email?.split("@")[0] || "";
+
+  const { error } = await supabaseAdmin
+    .from("users")
+    .upsert({
+      id: authUser.id,
+      name,
+      email: authUser.email || "",
+      email_verified: true,
+      updated_at: new Date().toISOString(),
+    }, {
+      onConflict: "id",
+      ignoreDuplicates: false,
+    });
+
+  if (error) {
+    console.error("Failed to ensure user record:", error);
+    return false;
+  }
+
+  return true;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authUser = await getAuthUser();
@@ -73,11 +117,42 @@ export async function POST(request: NextRequest) {
 
     const avatarUrl = urlData.publicUrl;
 
-    // Update profile with new avatar URL
-    const { error: updateError } = await supabaseAdmin
+    // Check if profile exists
+    const { data: existingProfile } = await supabaseAdmin
       .from("profiles")
-      .update({ avatar_url: avatarUrl })
-      .eq("user_id", authUser.id);
+      .select("user_id")
+      .eq("user_id", authUser.id)
+      .single();
+
+    let updateError;
+    if (existingProfile) {
+      // Update existing profile
+      const result = await supabaseAdmin
+        .from("profiles")
+        .update({ avatar_url: avatarUrl })
+        .eq("user_id", authUser.id);
+      updateError = result.error;
+    } else {
+      // Ensure user record exists before creating profile (foreign key constraint)
+      const userExists = await ensureUserRecord(authUser);
+      if (!userExists) {
+        return NextResponse.json(
+          { error: "Failed to create user record" },
+          { status: 500 }
+        );
+      }
+
+      // Create profile if it doesn't exist (for OAuth users)
+      const result = await supabaseAdmin
+        .from("profiles")
+        .insert({
+          user_id: authUser.id,
+          avatar_url: avatarUrl,
+          username: authUser.email?.split("@")[0] || "",
+          display_name: (authUser.user_metadata?.name as string) || "",
+        });
+      updateError = result.error;
+    }
 
     if (updateError) {
       console.error("Update profile error:", updateError);
@@ -86,6 +161,14 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Also update user metadata in auth
+    await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+      user_metadata: {
+        ...authUser.user_metadata,
+        avatar_url: avatarUrl,
+      },
+    });
 
     return NextResponse.json({
       message: "Avatar uploaded successfully",

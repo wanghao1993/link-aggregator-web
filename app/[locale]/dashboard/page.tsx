@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-slate-900">
+    <div className="min-h-screen bg-base">
       <div className="container mx-auto px-4 py-8">
         {/* 头部 */}
         <div className="mb-8">
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-4">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                  <div className="h-12 w-12 rounded-full bg-brand-gradient flex items-center justify-center text-white font-bold text-lg">
                     {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase()}
                   </div>
                   <div>

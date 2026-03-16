@@ -1,0 +1,363 @@
+/**
+ * LinkHub Theme Configuration
+ *
+ * This file defines the theme variables that can be easily customized.
+ * To create a custom theme, simply modify the CSS variables below.
+ *
+ * Theme: Default (Teal/Professional)
+ * - Primary: Teal (#0D9488) - Professional, trustworthy, unique
+ * - Accent: Amber (#F59E0B) - Warm, inviting, action-oriented
+ */
+
+/* ============================================
+   THEME TOKENS - Customize these for your brand
+   ============================================ */
+
+:root {
+  /* ----------------------------------------
+     Brand Colors - Primary Identity
+     ---------------------------------------- */
+  --color-brand-primary: 13 148 136;    /* Teal 600 - Main brand color */
+  --color-brand-secondary: 20 184 166;  /* Teal 500 - Lighter variant */
+  --color-brand-accent: 245 158 11;     /* Amber 500 - CTA, highlights */
+
+  /* ----------------------------------------
+     Semantic Colors
+     ---------------------------------------- */
+  --color-success: 34 197 94;           /* Green 500 */
+  --color-warning: 245 158 11;          /* Amber 500 */
+  --color-error: 239 68 68;             /* Red 500 */
+  --color-info: 59 130 246;             /* Blue 500 */
+
+  /* ----------------------------------------
+     Neutral Scale
+     ---------------------------------------- */
+  --color-neutral-50: 250 250 250;
+  --color-neutral-100: 245 245 245;
+  --color-neutral-200: 229 229 229;
+  --color-neutral-300: 212 212 212;
+  --color-neutral-400: 163 163 163;
+  --color-neutral-500: 115 115 115;
+  --color-neutral-600: 82 82 82;
+  --color-neutral-700: 64 64 64;
+  --color-neutral-800: 38 38 38;
+  --color-neutral-900: 23 23 23;
+  --color-neutral-950: 10 10 10;
+
+  /* ----------------------------------------
+     Spacing Scale
+     ---------------------------------------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* ----------------------------------------
+     Typography Scale
+     ---------------------------------------- */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* ----------------------------------------
+     Border Radius
+     ---------------------------------------- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ----------------------------------------
+     Shadows
+     ---------------------------------------- */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ----------------------------------------
+     Transitions
+     ---------------------------------------- */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* ----------------------------------------
+     Z-Index Scale
+     ---------------------------------------- */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-tooltip: 70;
+}
+
+/* ============================================
+   LIGHT THEME (Default)
+   ============================================ */
+
+:root,
+[data-theme="light"] {
+  /* Background & Surface */
+  --bg-base: rgb(250 250 252);
+  --bg-surface: rgb(255 255 255);
+  --bg-surface-hover: rgb(249 250 251);
+  --bg-surface-active: rgb(243 244 246);
+  --bg-muted: rgb(249 250 251);
+  --bg-subtle: rgb(243 244 246);
+
+  /* Text Colors */
+  --text-primary: rgb(23 23 23);
+  --text-secondary: rgb(82 82 82);
+  --text-muted: rgb(115 115 115);
+  --text-placeholder: rgb(163 163 163);
+  --text-inverse: rgb(255 255 255);
+
+  /* Border Colors */
+  --border-default: rgb(229 229 229);
+  --border-subtle: rgb(245 245 245);
+  --border-strong: rgb(212 212 212);
+  --border-focus: rgb(var(--color-brand-primary));
+
+  /* Brand Colors - Computed */
+  --color-primary: rgb(var(--color-brand-primary));
+  --color-primary-hover: rgb(15 118 110);
+  --color-primary-light: rgba(var(--color-brand-primary) / 0.1);
+  --color-primary-lighter: rgba(var(--color-brand-primary) / 0.05);
+
+  --color-accent: rgb(var(--color-brand-accent));
+  --color-accent-hover: rgb(217 119 6);
+  --color-accent-light: rgba(var(--color-brand-accent) / 0.1);
+
+  /* Component-specific tokens */
+  --card-bg: rgb(255 255 255);
+  --card-border: rgb(229 229 229);
+  --card-shadow: var(--shadow-md);
+
+  --input-bg: rgb(255 255 255);
+  --input-border: rgb(212 212 212);
+  --input-placeholder: rgb(163 163 163);
+
+  --button-primary-bg: rgb(var(--color-brand-primary));
+  --button-primary-hover: rgb(15 118 110);
+  --button-primary-text: rgb(255 255 255);
+
+  --button-accent-bg: rgb(var(--color-brand-accent));
+  --button-accent-hover: rgb(217 119 6);
+  --button-accent-text: rgb(255 255 255);
+
+  /* Gradients - Using brand colors */
+  --gradient-primary: linear-gradient(135deg, rgb(var(--color-brand-primary)) 0%, rgb(var(--color-brand-secondary)) 100%);
+  --gradient-accent: linear-gradient(135deg, rgb(var(--color-brand-accent)) 0%, rgb(251 146 60) 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(var(--color-brand-primary) / 0.05) 0%, rgba(var(--color-brand-accent) / 0.05) 100%);
+
+  /* Glass effect */
+  --glass-bg: rgba(255 255 255 / 0.8);
+  --glass-border: rgba(229 229 229 / 0.8);
+  --glass-blur: 12px;
+
+  /* Category colors - themed */
+  --cat-ai: rgb(139 92 246);
+  --cat-web: rgb(59 130 246);
+  --cat-design: rgb(236 72 153);
+  --cat-tools: rgb(34 197 94);
+  --cat-mobile: rgb(99 102 241);
+  --cat-devops: rgb(107 114 128);
+  --cat-data: rgb(16 185 129);
+  --cat-security: rgb(239 68 68);
+  --cat-productivity: rgb(249 115 22);
+}
+
+/* ============================================
+   DARK THEME
+   ============================================ */
+
+.dark,
+[data-theme="dark"] {
+  /* Background & Surface */
+  --bg-base: rgb(15 23 42);
+  --bg-surface: rgb(30 41 59);
+  --bg-surface-hover: rgb(51 65 85);
+  --bg-surface-active: rgb(71 85 105);
+  --bg-muted: rgb(30 41 59);
+  --bg-subtle: rgb(51 65 85);
+
+  /* Text Colors */
+  --text-primary: rgb(248 250 252);
+  --text-secondary: rgb(203 213 225);
+  --text-muted: rgb(148 163 184);
+  --text-placeholder: rgb(100 116 139);
+  --text-inverse: rgb(15 23 42);
+
+  /* Border Colors */
+  --border-default: rgb(51 65 85);
+  --border-subtle: rgb(30 41 59);
+  --border-strong: rgb(71 85 105);
+  --border-focus: rgb(var(--color-brand-primary));
+
+  /* Brand Colors - Computed */
+  --color-primary: rgb(20 184 166);
+  --color-primary-hover: rgb(94 234 212);
+  --color-primary-light: rgba(var(--color-brand-primary) / 0.2);
+  --color-primary-lighter: rgba(var(--color-brand-primary) / 0.1);
+
+  --color-accent: rgb(251 191 36);
+  --color-accent-hover: rgb(253 230 138);
+  --color-accent-light: rgba(var(--color-brand-accent) / 0.2);
+
+  /* Component-specific tokens */
+  --card-bg: rgba(30 41 59 / 0.8);
+  --card-border: rgb(51 65 85);
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+
+  --input-bg: rgb(30 41 59);
+  --input-border: rgb(51 65 85);
+  --input-placeholder: rgb(100 116 139);
+
+  --button-primary-bg: rgb(20 184 166);
+  --button-primary-hover: rgb(94 234 212);
+  --button-primary-text: rgb(15 23 42);
+
+  --button-accent-bg: rgb(245 158 11);
+  --button-accent-hover: rgb(251 191 36);
+  --button-accent-text: rgb(15 23 42);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, rgb(20 184 166) 0%, rgb(94 234 212) 100%);
+  --gradient-accent: linear-gradient(135deg, rgb(245 158 11) 0%, rgb(251 191 36) 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(20 184 166 / 0.1) 0%, rgba(245 158 11 / 0.1) 100%);
+
+  /* Glass effect */
+  --glass-bg: rgba(30 41 59 / 0.8);
+  --glass-border: rgba(51 65 85 / 0.8);
+  --glass-blur: 12px;
+
+  /* Category colors - themed for dark mode */
+  --cat-ai: rgb(167 139 250);
+  --cat-web: rgb(96 165 250);
+  --cat-design: rgb(244 114 182);
+  --cat-tools: rgb(74 222 128);
+  --cat-mobile: rgb(129 140 248);
+  --cat-devops: rgb(156 163 175);
+  --cat-data: rgb(52 211 153);
+  --cat-security: rgb(248 113 113);
+  --cat-productivity: rgb(251 146 60);
+}
+
+/* ============================================
+   SEMANTIC UTILITIES
+   ============================================ */
+
+/* Background utilities */
+.bg-base { background-color: var(--bg-base); }
+.bg-surface { background-color: var(--bg-surface); }
+.bg-muted { background-color: var(--bg-muted); }
+
+/* Text utilities */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+/* Border utilities */
+.border-default { border-color: var(--border-default); }
+
+/* Brand color utilities */
+.text-brand { color: var(--color-primary); }
+.bg-brand { background-color: var(--color-primary); }
+.bg-brand-light { background-color: var(--color-primary-light); }
+
+.text-accent { color: var(--color-accent); }
+.bg-accent { background-color: var(--color-accent); }
+.bg-accent-light { background-color: var(--color-accent-light); }
+
+/* Gradient utilities */
+.bg-gradient-primary { background: var(--gradient-primary); }
+.bg-gradient-accent { background: var(--gradient-accent); }
+
+/* ============================================
+   COMPONENT BASE STYLES
+   ============================================ */
+
+/* Glass card - consistent across themes */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Button base */
+.btn-primary {
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  transition: background var(--transition-fast);
+}
+
+.btn-primary:hover {
+  background: var(--button-primary-hover);
+}
+
+.btn-accent {
+  background: var(--button-accent-bg);
+  color: var(--button-accent-text);
+  transition: background var(--transition-fast);
+}
+
+.btn-accent:hover {
+  background: var(--button-accent-hover);
+}
+
+/* Focus ring */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Category color mapping */
+.category-ai { --category-color: var(--cat-ai); }
+.category-web { --category-color: var(--cat-web); }
+.category-design { --category-color: var(--cat-design); }
+.category-tools { --category-color: var(--cat-tools); }
+.category-mobile { --category-color: var(--cat-mobile); }
+.category-devops { --category-color: var(--cat-devops); }
+.category-data { --category-color: var(--cat-data); }
+.category-security { --category-color: var(--cat-security); }
+.category-productivity { --category-color: var(--cat-productivity); }

@@ -170,28 +170,28 @@ export default function Home() {
             title={t("stats.totalCollections")}
             value={String(totalCount)}
             icon={Link2}
-            color="purple"
+            color="primary"
             loading={loading}
           />
           <StatsCard
             title={t("stats.activeUsers")}
             value="-"
             icon={Users}
-            color="blue"
+            color="info"
             loading={loading}
           />
           <StatsCard
             title={t("stats.monthlyViews")}
             value="-"
             icon={TrendingUp}
-            color="green"
+            color="success"
             loading={loading}
           />
           <StatsCard
             title={t("stats.featuredCollections")}
             value="-"
             icon={Star}
-            color="orange"
+            color="warning"
             loading={loading}
           />
         </div>

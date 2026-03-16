@@ -48,7 +48,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         
         <Button
           onClick={handleSearch}
-          className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 px-6"
+          className="bg-brand-gradient hover:opacity-90 transition-opacity px-6"
         >
           {t('searchButton')}
         </Button>

@@ -27,7 +27,9 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import ThemeColorSelector from "@/components/ThemeColorSelector";
 import NotificationBell from "@/components/NotificationBell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslations } from "next-intl";
 import { locales } from "@/locales";
 import { useAuth } from "@/lib/supabase/auth-context";
@@ -39,7 +41,7 @@ const Header: React.FC = () => {
   const headerT = useTranslations("header");
   const tagsT = useTranslations("tags");
   const ucT = useTranslations("userCard");
-  const { user, isLoading: authLoading, signOut } = useAuth();
+  const { user, profile, isLoading: authLoading, signOut } = useAuth();
 
   const isActive = (path: string) => pathname === path;
 
@@ -51,11 +53,16 @@ const Header: React.FC = () => {
     { path: "/favorites", label: t("favorites"), icon: Heart },
   ];
 
+  // Use profile data first, fallback to user metadata
   const displayName =
-    user?.user_metadata?.name || user?.email?.split("@")[0] || "";
+    profile?.displayName ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "";
   const email = user?.email || "";
+  const avatarUrl = profile?.avatarUrl || user?.user_metadata?.avatar_url;
   const initial =
-    user?.user_metadata?.name?.[0]?.toUpperCase() ||
+    displayName?.[0]?.toUpperCase() ||
     user?.email?.[0]?.toUpperCase() ||
     "?";
 
@@ -68,7 +75,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform bg-brand-gradient">
               <Search className="text-white" size={20} />
             </div>
             <div className="hidden sm:block">
@@ -125,13 +132,14 @@ const Header: React.FC = () => {
             </div>
 
             <ThemeToggle />
+            <ThemeColorSelector />
 
             {!authLoading && user ? (
               <div className="flex items-center gap-3">
                 <NotificationBell />
                 <Button
                   size="sm"
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                  className="bg-brand-gradient hover:opacity-90 transition-opacity"
                   asChild
                 >
                   <Link href="/create">
@@ -144,9 +152,12 @@ const Header: React.FC = () => {
                 <HoverCard openDelay={100} closeDelay={200}>
                   <HoverCardTrigger asChild>
                     <button className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                      <div className="h-9 w-9 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold cursor-pointer hover:scale-105 transition-transform">
-                        {initial}
-                      </div>
+                      <Avatar className="h-9 w-9 cursor-pointer hover:scale-105 transition-transform">
+                        <AvatarImage src={avatarUrl} alt={displayName} />
+                        <AvatarFallback className="bg-brand-gradient text-white text-sm font-bold">
+                          {initial}
+                        </AvatarFallback>
+                      </Avatar>
                     </button>
                   </HoverCardTrigger>
                   <HoverCardContent
@@ -157,9 +168,12 @@ const Header: React.FC = () => {
                     {/* Profile Header */}
                     <div className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-11 w-11 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold shrink-0">
-                          {initial}
-                        </div>
+                        <Avatar className="h-11 w-11 shrink-0">
+                          <AvatarImage src={avatarUrl} alt={displayName} />
+                          <AvatarFallback className="bg-brand-gradient text-white font-bold">
+                            {initial}
+                          </AvatarFallback>
+                        </Avatar>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-foreground truncate">
                             {displayName}

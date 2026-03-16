@@ -198,7 +198,7 @@ export default function CollectionDetailClient() {
         <div className="mb-8 fade-in">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center text-3xl">
+              <div className="w-16 h-16 bg-brand-gradient rounded-xl flex items-center justify-center text-3xl">
                 📁
               </div>
               <div>
@@ -311,7 +311,7 @@ export default function CollectionDetailClient() {
             <CardContent>
               <div className="flex items-center space-x-4">
                 <Avatar className="w-12 h-12">
-                  <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold">
+                  <AvatarFallback className="bg-brand-gradient text-white font-bold">
                     {authorInitial}
                   </AvatarFallback>
                 </Avatar>

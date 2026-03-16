@@ -421,7 +421,7 @@ export default function CollectionForm({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 min-w-[160px]"
+            className="bg-brand-gradient hover:opacity-90 transition-opacity min-w-[160px]"
           >
             {isSubmitting
               ? isEdit

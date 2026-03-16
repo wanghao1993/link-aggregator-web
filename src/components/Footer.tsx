@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link href={`/${locale}`} className="flex items-center space-x-3 mb-4">
-              <div className="w-9 h-9 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-brand-gradient">
                 <Search className="text-white" size={16} />
               </div>
               <span className="text-lg font-bold gradient-text">

@@ -28,7 +28,7 @@ interface ProfileData {
 
 export default function ProfileSettings() {
   const t = useTranslations("profileSettings");
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, refreshProfile } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -103,6 +103,8 @@ export default function ProfileSettings() {
       }
 
       setAvatarUrl(data.avatarUrl);
+      // Refresh profile in auth context to update avatar everywhere
+      await refreshProfile();
       toast.success("Avatar updated successfully");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to upload avatar");
@@ -124,6 +126,8 @@ export default function ProfileSettings() {
         const data = await res.json();
         throw new Error(data.error || t("error"));
       }
+      // Refresh profile in auth context
+      await refreshProfile();
       toast.success(t("success"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("error"));
@@ -174,7 +178,7 @@ export default function ProfileSettings() {
             <div className="relative">
               <Avatar className="w-24 h-24">
                 <AvatarImage src={avatarUrl} alt={form.displayName} />
-                <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-2xl">
+                <AvatarFallback className="bg-brand-gradient text-white text-2xl">
                   {form.displayName ? getInitials(form.displayName) : <User className="w-10 h-10" />}
                 </AvatarFallback>
               </Avatar>
@@ -281,7 +285,7 @@ export default function ProfileSettings() {
             <Button
               type="submit"
               disabled={saving}
-              className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+              className="w-full bg-brand-gradient hover:opacity-90 transition-opacity"
             >
               {saving ? t("saving") : t("save")}
             </Button>

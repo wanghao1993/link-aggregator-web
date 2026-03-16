@@ -17,7 +17,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   value = '0',
   icon: Icon = () => <div className="w-6 h-6 bg-muted rounded" />,
   change = 0,
-  color = 'purple',
+  color = 'primary',
   loading = false,
 }) => {
   if (loading) {
@@ -25,18 +25,18 @@ const StatsCard: React.FC<StatsCardProps> = ({
   }
 
   console.log('StatsCard rendered:', title, value);
-  
-  const getColorGradient = (color: string) => {
-    const gradients = {
-      purple: 'from-purple-500 to-blue-500',
-      blue: 'from-blue-500 to-cyan-500',
-      green: 'from-green-500 to-emerald-500',
-      orange: 'from-orange-500 to-red-500',
-      pink: 'from-pink-500 to-purple-500'
+
+  const getColorClass = (color: string) => {
+    const colors = {
+      primary: 'bg-brand-gradient',
+      accent: 'bg-accent-gradient',
+      success: 'bg-gradient-to-r from-green-500 to-emerald-500',
+      info: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      warning: 'bg-gradient-to-r from-orange-500 to-amber-500'
     };
-    return gradients[color as keyof typeof gradients] || gradients.purple;
+    return colors[color as keyof typeof colors] || colors.primary;
   };
-  
+
   return (
     <Card data-cmp="StatsCard" className="glass-effect border-border/30 bg-card/40 hover:bg-card/60 transition-all link-card-hover">
       <CardContent className="p-6">
@@ -55,7 +55,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
             </div>
           </div>
           
-          <div className={`p-3 rounded-lg bg-gradient-to-r ${getColorGradient(color)}`}>
+          <div className={`p-3 rounded-lg ${getColorClass(color)}`}>
             <Icon className="text-white" size={24} />
           </div>
         </div>
