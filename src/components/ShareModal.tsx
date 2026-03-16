@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Copy, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
+
+// Dynamically import QRCodeSVG to avoid SSR issues
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then((mod) => mod.QRCodeSVG),
+  { ssr: false, loading: () => <div className="w-[180px] h-[180px] bg-muted animate-pulse rounded" /> }
+);
 
 interface ShareModalProps {
   open: boolean;
@@ -51,17 +58,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const t = useTranslations("share");
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     setShareUrl(url || (typeof window !== "undefined" ? window.location.href : ""));
   }, [url, open]);
-
-  useEffect(() => {
-    if (!open || !shareUrl || !canvasRef.current) return;
-
-    generateQrCode(canvasRef.current, shareUrl);
-  }, [open, shareUrl]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -159,13 +159,18 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
         <Separator />
 
-        <div className="flex flex-col items-center gap-2">
-          <canvas
-            ref={canvasRef}
-            width={160}
-            height={160}
-            className="rounded-lg border border-border/30"
-          />
+        {/* QR Code */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="p-4 bg-white rounded-xl shadow-sm border border-border/30">
+            <QRCodeSVG
+              value={shareUrl}
+              size={180}
+              level="H"
+              includeMargin={false}
+              bgColor="#ffffff"
+              fgColor="#000000"
+            />
+          </div>
           <p className="text-xs text-muted-foreground">{t("scanQrCode")}</p>
         </div>
       </DialogContent>
@@ -174,103 +179,3 @@ const ShareModal: React.FC<ShareModalProps> = ({
 };
 
 export default ShareModal;
-
-function generateQrCode(canvas: HTMLCanvasElement, data: string) {
-  const size = 160;
-  const moduleCount = 33;
-  const moduleSize = Math.floor(size / (moduleCount + 8));
-  const offset = Math.floor((size - moduleSize * moduleCount) / 2);
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, size, size);
-
-  const modules = encodeToModules(data, moduleCount);
-
-  ctx.fillStyle = "#000000";
-  for (let row = 0; row < moduleCount; row++) {
-    for (let col = 0; col < moduleCount; col++) {
-      if (modules[row][col]) {
-        ctx.fillRect(
-          offset + col * moduleSize,
-          offset + row * moduleSize,
-          moduleSize,
-          moduleSize
-        );
-      }
-    }
-  }
-}
-
-/**
- * Minimal QR-like pattern generator. For production, use a library like `qrcode`.
- * This generates a visual pattern with finder patterns that resembles a QR code
- * but encodes the URL in a simplified way.
- */
-function encodeToModules(data: string, size: number): boolean[][] {
-  const modules: boolean[][] = Array.from({ length: size }, () =>
-    Array(size).fill(false)
-  );
-
-  // Finder patterns (top-left, top-right, bottom-left)
-  const drawFinder = (startRow: number, startCol: number) => {
-    for (let r = 0; r < 7; r++) {
-      for (let c = 0; c < 7; c++) {
-        const isOuter = r === 0 || r === 6 || c === 0 || c === 6;
-        const isInner = r >= 2 && r <= 4 && c >= 2 && c <= 4;
-        modules[startRow + r][startCol + c] = isOuter || isInner;
-      }
-    }
-  };
-
-  drawFinder(0, 0);
-  drawFinder(0, size - 7);
-  drawFinder(size - 7, 0);
-
-  // Timing patterns
-  for (let i = 8; i < size - 8; i++) {
-    modules[6][i] = i % 2 === 0;
-    modules[i][6] = i % 2 === 0;
-  }
-
-  // Data area - encode URL characters as a deterministic pattern
-  let bitIndex = 0;
-  const bytes: number[] = [];
-  for (let i = 0; i < data.length; i++) {
-    bytes.push(data.charCodeAt(i));
-  }
-  // Pad or hash to fill modules
-  let hash = 0;
-  for (const b of bytes) {
-    hash = ((hash << 5) - hash + b) | 0;
-  }
-
-  for (let col = size - 1; col >= 0; col -= 2) {
-    if (col === 6) col = 5;
-    for (let row = 0; row < size; row++) {
-      for (let c = 0; c < 2; c++) {
-        const cc = col - c;
-        if (cc < 0) continue;
-        // Skip finder pattern areas
-        if (
-          (row < 8 && cc < 8) ||
-          (row < 8 && cc >= size - 8) ||
-          (row >= size - 8 && cc < 8)
-        ) continue;
-        if (row === 6 || cc === 6) continue;
-
-        const byteIdx = bitIndex >> 3;
-        const bitIdx = 7 - (bitIndex & 7);
-        const byte = byteIdx < bytes.length
-          ? bytes[byteIdx]
-          : ((hash >> (bitIndex % 31)) ^ (bitIndex * 7)) & 0xff;
-        modules[row][cc] = ((byte >> bitIdx) & 1) === 1;
-        bitIndex++;
-      }
-    }
-  }
-
-  return modules;
-}

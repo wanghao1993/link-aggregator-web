@@ -3,26 +3,24 @@
 import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
-  Heart,
   Eye,
   Bookmark,
+  Heart,
+  Link2,
+  Share2,
+  Calendar,
+  ExternalLink,
+  Sparkles,
   Clock,
   Tag,
-  User,
-  Link2,
-  QrCode,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
-import ShareButton from "@/components/ShareButton";
 import ShareModal from "@/components/ShareModal";
 import { CollectionDetailSkeleton } from "@/components/skeletons";
-import LinkItemCard from "@/components/LinkItemCard";
 import { toast } from "sonner";
 
 interface CollectionLink {
@@ -88,7 +86,6 @@ export default function CollectionDetailClient() {
       }
     }
 
-    // Check if favorited
     async function checkFavorite() {
       try {
         const res = await fetch(`/api/collections/${id}/favorite`);
@@ -101,11 +98,9 @@ export default function CollectionDetailClient() {
       }
     }
 
-    // Record view
     async function recordView() {
       try {
         await fetch(`/api/collections/${id}/view`, { method: "POST" });
-        // Update local view count
         setViews((prev) => prev + 1);
       } catch (error) {
         console.error("Record view error:", error);
@@ -124,12 +119,14 @@ export default function CollectionDetailClient() {
   if (error || !collection) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            {tc("error")}
-          </h1>
-          <Button onClick={() => router.back()} variant="outline">
-            <ArrowLeft size={16} className="mr-2" />
+        <div className="text-center p-8 max-w-md">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+            <Link2 className="w-12 h-12 text-muted-foreground/50" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">{tc("error")}</h1>
+          <p className="text-muted-foreground mb-8">{t("notFound")}</p>
+          <Button onClick={() => router.back()} variant="outline" size="lg">
+            <ArrowLeft size={18} className="mr-2" />
             {t("back")}
           </Button>
         </div>
@@ -140,7 +137,7 @@ export default function CollectionDetailClient() {
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("zh-CN", {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     });
   };
@@ -149,7 +146,6 @@ export default function CollectionDetailClient() {
     setFavoriteLoading(true);
     try {
       if (isFavorited) {
-        // Remove from favorites
         const res = await fetch(`/api/collections/${id}/favorite`, {
           method: "DELETE",
         });
@@ -161,7 +157,6 @@ export default function CollectionDetailClient() {
           toast.error(t("loginRequired"));
         }
       } else {
-        // Add to favorites
         const res = await fetch(`/api/collections/${id}/favorite`, {
           method: "POST",
         });
@@ -180,183 +175,182 @@ export default function CollectionDetailClient() {
     }
   };
 
-  const authorName = collection.author?.name || t("notFound");
-  const authorInitial = authorName.charAt(0).toUpperCase();
+  const authorName = collection.author?.name || "Unknown";
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mb-6 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={18} className="mr-2" />
-          {t("back")}
-        </Button>
+    <div className="min-h-screen pb-16">
+      {/* Header Bar */}
+      <div className="sticky top-16 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="text-muted-foreground hover:text-foreground -ml-2"
+          >
+            <ArrowLeft size={18} className="mr-1" />
+            {t("back")}
+          </Button>
 
-        <div className="mb-8 fade-in">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-brand-gradient rounded-xl flex items-center justify-center text-3xl">
-                📁
-              </div>
-              <div>
-                <Badge
-                  variant="secondary"
-                  className="mb-2 bg-accent/50 text-accent-foreground"
-                >
-                  {collection.category}
-                </Badge>
-                <h1 className="text-3xl font-bold text-foreground">
-                  {collection.title}
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <ShareButton
-                title={collection.title}
-                description={collection.description}
-                variant="outline"
-                size="default"
-                className="border-border/50"
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShareModalOpen(true)}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+            >
+              <Share2 size={16} className="mr-1" />
+              {ts("title")}
+            </Button>
+            <Button
+              onClick={handleFavorite}
+              disabled={favoriteLoading}
+              size="sm"
+              variant={isFavorited ? "default" : "outline"}
+              className={isFavorited ? "bg-red-500 hover:bg-red-600" : ""}
+            >
+              <Bookmark
+                size={16}
+                className="mr-1"
+                fill={isFavorited ? "currentColor" : "none"}
               />
-              <Button
-                onClick={() => setShareModalOpen(true)}
-                variant="outline"
-                size="icon"
-                className="border-border/50"
-                title={ts("shareCollection")}
-              >
-                <QrCode size={18} />
-              </Button>
-              <Button
-                onClick={handleFavorite}
-                disabled={favoriteLoading}
-                variant={isFavorited ? "default" : "outline"}
-                className={
-                  isFavorited
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "border-border/50 hover:border-red-500 hover:text-red-500"
-                }
-              >
-                <Bookmark
-                  size={18}
-                  className="mr-2"
-                  fill={isFavorited ? "currentColor" : "none"}
-                />
-                {t("addToFavorites")}
-              </Button>
-            </div>
+              {isFavorited ? "Saved" : "Save"}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        {/* Decorative Background */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/20 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-6">
+          {/* Meta Info */}
+          <div className="flex items-center gap-3 mb-4 text-sm text-muted-foreground">
+            <Badge variant="secondary" className="bg-primary/10 text-primary border-0 font-medium">
+              {collection.category}
+            </Badge>
+            <span className="flex items-center gap-1">
+              <Clock size={14} />
+              {formatDate(collection.updatedAt)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Eye size={14} />
+              {views.toLocaleString()}
+            </span>
           </div>
 
-          <p className="text-lg text-muted-foreground leading-relaxed mb-6">
+          {/* Title */}
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 leading-tight">
+            {collection.title}
+          </h1>
+
+          {/* Description */}
+          <p className="text-lg text-muted-foreground leading-relaxed mb-6 max-w-3xl">
             {collection.description}
           </p>
 
-          <div className="flex flex-wrap gap-2 mb-6">
-            {collection.tags.map((tag, index) => (
-              <Badge
-                key={index}
-                variant="outline"
-                className="border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-colors cursor-pointer"
+          {/* Author & Tags Row */}
+          <div className="flex flex-wrap items-center gap-4">
+            {collection.author && (
+              <button
                 onClick={() => {
                   const locale = (params.locale as string) || "en";
-                  router.push(`/${locale}/tags/${encodeURIComponent(tag)}`);
+                  router.push(`/${locale}/profile/${collection.author!.id}`);
                 }}
+                className="flex items-center gap-2 group"
               >
-                <Tag size={12} className="mr-1" />
-                {tag}
-              </Badge>
-            ))}
-          </div>
-
-          <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-1.5">
-              <Eye size={16} />
-              <span>
-                {views.toLocaleString()} {t("stats.views")}
-              </span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <Heart size={16} />
-              <span>
-                {likes} {t("stats.likes")}
-              </span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <Bookmark size={16} />
-              <span>
-                {collection.links.length} {t("stats.linksCount")}
-              </span>
-            </div>
-            <div className="flex items-center space-x-1.5">
-              <Clock size={16} />
-              <span>{formatDate(collection.updatedAt)}</span>
-            </div>
-          </div>
-        </div>
-
-        <Separator className="mb-8 border-border/30" />
-
-        {collection.author && (
-          <Card className="glass-effect border-border/30 bg-card/60 mb-8 fade-in">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center space-x-2">
-                <User size={20} />
-                <span>{t("author")}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-4">
-                <Avatar className="w-12 h-12">
-                  <AvatarFallback className="bg-brand-gradient text-white font-bold">
-                    {authorInitial}
+                <Avatar className="w-8 h-8 ring-2 ring-border/50 group-hover:ring-primary/50 transition-all">
+                  <AvatarFallback className="bg-brand-gradient text-white text-xs font-bold">
+                    {authorName.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <span className="font-semibold text-foreground">
-                    {authorName}
+                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  {authorName}
+                </span>
+              </button>
+            )}
+
+            {collection.tags.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {collection.tags.slice(0, 4).map((tag, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      const locale = (params.locale as string) || "en";
+                      router.push(`/${locale}/tags/${encodeURIComponent(tag)}`);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-muted/50 hover:bg-primary/10 hover:text-primary transition-colors"
+                  >
+                    <Tag size={10} />
+                    {tag}
+                  </button>
+                ))}
+                {collection.tags.length > 4 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{collection.tags.length - 4}
                   </span>
-                  <p className="text-sm text-muted-foreground">
-                    {collection.author.email}
-                  </p>
-                </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </div>
+        </div>
+      </div>
 
-        <div className="mb-8 fade-in">
-          <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center space-x-2">
-            <Link2 size={24} />
-            <span>
-              {t("links")} ({collection.links.length})
-            </span>
+      {/* Stats Bar */}
+      <div className="border-y border-border/50 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-6 py-3 text-sm overflow-x-auto">
+            <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">
+              <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center">
+                <Eye size={12} className="text-blue-500" />
+              </div>
+              <span className="font-medium text-foreground">{views.toLocaleString()}</span>
+              <span>{t("stats.views")}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">
+              <div className="w-6 h-6 rounded-md bg-red-500/10 flex items-center justify-center">
+                <Heart size={12} className="text-red-500" />
+              </div>
+              <span className="font-medium text-foreground">{likes}</span>
+              <span>{t("stats.likes")}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">
+              <div className="w-6 h-6 rounded-md bg-green-500/10 flex items-center justify-center">
+                <Link2 size={12} className="text-green-500" />
+              </div>
+              <span className="font-medium text-foreground">{collection.links.length}</span>
+              <span>{t("stats.linksCount")}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Links Section */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <Sparkles size={20} className="text-primary" />
+            {t("links")}
           </h2>
+        </div>
 
-          <div className="space-y-4">
-            {collection.links.map((link) => (
-              <LinkItemCard
-                key={link.id}
-                title={link.title}
-                url={link.url}
-                description={link.description}
-                favicon={link.favicon}
-              />
+        {collection.links.length > 0 ? (
+          <div className="grid gap-3">
+            {collection.links.map((link, index) => (
+              <LinkCard key={link.id} link={link} index={index} />
             ))}
           </div>
-
-          {collection.links.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Link2 className="text-muted-foreground" size={24} />
-              </div>
-              <p className="text-muted-foreground">{t("noLinks")}</p>
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="text-center py-20 bg-muted/20 rounded-2xl border border-dashed border-border/50">
+            <Link2 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+            <p className="text-muted-foreground">{t("noLinks")}</p>
+          </div>
+        )}
       </div>
 
       <ShareModal
@@ -366,5 +360,61 @@ export default function CollectionDetailClient() {
         description={collection.description}
       />
     </div>
+  );
+}
+
+// Link Card Component
+function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
+  const getDomain = (urlString: string) => {
+    try {
+      return new URL(urlString).hostname.replace(/^www\./, "");
+    } catch {
+      return urlString;
+    }
+  };
+
+  return (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative flex items-center gap-4 p-4 bg-card hover:bg-muted/50 border border-border/50 hover:border-primary/20 rounded-2xl transition-all duration-200"
+    >
+      {/* Index */}
+      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
+        {index + 1}
+      </div>
+
+      {/* Favicon */}
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 overflow-hidden border border-border/30">
+        {link.favicon ? (
+          <img
+            src={link.favicon}
+            alt=""
+            className="w-6 h-6 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <Link2 className="w-4 h-4 text-muted-foreground" />
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <h4 className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+          {link.title}
+        </h4>
+        <p className="text-sm text-muted-foreground truncate">
+          {getDomain(link.url)}
+        </p>
+      </div>
+
+      {/* Arrow */}
+      <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:bg-primary/10 shrink-0">
+        <ExternalLink size={14} className="text-muted-foreground group-hover:text-primary" />
+      </div>
+    </a>
   );
 }

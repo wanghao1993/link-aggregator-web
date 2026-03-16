@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
 import { getRequestConfig } from "next-intl/server";
 import { locales } from "@/locales";
-import { cookies } from "next/headers";
 
-export default getRequestConfig(async () => {
-  const store = await cookies();
-  const locale = store.get("locale")?.value || "en";
+export default getRequestConfig(async ({ requestLocale }) => {
+  // Get locale from the request (set by next-intl middleware)
+  let locale = await requestLocale;
+
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as any)) notFound();
+  if (!locale || !locales.includes(locale as any)) {
+    locale = "zh";
+  }
 
   return {
     locale,
