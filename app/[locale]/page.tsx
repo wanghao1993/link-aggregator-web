@@ -1,21 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { TrendingUp, Users, Link2, Star, Tag } from "lucide-react";
+import { TrendingUp, Users, Link2, Star } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
-import CategoryFilter from "@/components/CategoryFilter";
 import LinkCard from "@/components/LinkCard";
 import StatsCard from "@/components/StatsCard";
-import { Badge } from "@/components/ui/badge";
 import { LinkCollection, Category } from "@/types/link";
-import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
-import { LinkCardSkeleton, StatsCardSkeleton } from "@/components/skeletons";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
+import { LinkCardSkeleton } from "@/components/skeletons";
 
-interface TagItem {
-  name: string;
-  count: number;
+interface Stats {
+  totalCollections: number;
+  activeUsers: number;
+  monthlyViews: number;
+  featuredCollections: number;
 }
 
 interface ApiCollection {
@@ -92,25 +90,34 @@ function toCollection(
   };
 }
 
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + "M";
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + "K";
+  }
+  return String(num);
+}
+
 export default function Home() {
   const t = useTranslations("home");
-  const tt = useTranslations("tags");
   const catT = useTranslations("categories");
-  const locale = useLocale();
-  const router = useRouter();
 
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [popularTags, setPopularTags] = useState<TagItem[]>([]);
   const [collections, setCollections] = useState<LinkCollection[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [stats, setStats] = useState<Stats>({
+    totalCollections: 0,
+    activeUsers: 0,
+    monthlyViews: 0,
+    featuredCollections: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchCollections = useCallback(
-    async (category: string, search: string) => {
+    async (search: string) => {
       try {
         const params = new URLSearchParams();
-        if (category && category !== "all") params.set("category", category);
         if (search) params.set("search", search);
         const res = await fetch(`/api/collections?${params.toString()}`);
         if (res.ok) {
@@ -119,7 +126,6 @@ export default function Home() {
             toCollection(c, catT)
           );
           setCollections(mapped);
-          setTotalCount(data.total);
         }
       } catch {
         /* ignore */
@@ -128,23 +134,31 @@ export default function Home() {
     [catT]
   );
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([
-      fetch("/api/tags")
-        .then((r) => r.json())
-        .then((d) => setPopularTags(d.tags?.slice(0, 8) || []))
-        .catch(() => {}),
-      fetchCollections(selectedCategory, searchQuery),
-    ]).finally(() => setLoading(false));
+    Promise.all([fetchStats(), fetchCollections(searchQuery)]).finally(() =>
+      setLoading(false)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!loading) {
-      fetchCollections(selectedCategory, searchQuery);
+      fetchCollections(searchQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, searchQuery]);
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen">
@@ -168,93 +182,39 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           <StatsCard
             title={t("stats.totalCollections")}
-            value={String(totalCount)}
+            value={formatNumber(stats.totalCollections)}
             icon={Link2}
             color="primary"
             loading={loading}
           />
           <StatsCard
             title={t("stats.activeUsers")}
-            value="-"
+            value={formatNumber(stats.activeUsers)}
             icon={Users}
             color="info"
             loading={loading}
           />
           <StatsCard
             title={t("stats.monthlyViews")}
-            value="-"
+            value={formatNumber(stats.monthlyViews)}
             icon={TrendingUp}
             color="success"
             loading={loading}
           />
           <StatsCard
             title={t("stats.featuredCollections")}
-            value="-"
+            value={formatNumber(stats.featuredCollections)}
             icon={Star}
             color="warning"
             loading={loading}
           />
         </div>
 
-        {/* Category Filter */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-6">
-            {t("categories.title")}
-          </h2>
-          <CategoryFilter
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
-        </div>
-
-        {/* Popular Tags */}
-        {(loading || popularTags.length > 0) && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <Tag size={22} className="text-primary" />
-                {tt("popular")}
-              </h2>
-              <button
-                onClick={() => router.push(`/${locale}/tags`)}
-                className="text-sm text-primary hover:underline"
-              >
-                {tt("allTags")} →
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {loading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-9 w-20 rounded-full" />
-                  ))
-                : popularTags.map((tag) => (
-                    <Badge
-                      key={tag.name}
-                      variant="outline"
-                      className="px-4 py-2 text-sm cursor-pointer border-border/30 hover:bg-primary/10 hover:border-primary/50 hover:text-primary transition-all"
-                      onClick={() =>
-                        router.push(
-                          `/${locale}/tags/${encodeURIComponent(tag.name)}`
-                        )
-                      }
-                    >
-                      {tag.name}
-                      <span className="ml-1.5 opacity-60 text-xs">
-                        {tag.count}
-                      </span>
-                    </Badge>
-                  ))}
-            </div>
-          </div>
-        )}
-
         {/* Collections Grid */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-foreground">
-              {selectedCategory === "all"
-                ? t("collections.title")
-                : t("collections.filteredTitle")}
+              {t("collections.title")}
             </h2>
             <p className="text-muted-foreground">
               {t("collections.foundCount", { count: collections.length })}

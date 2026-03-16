@@ -174,6 +174,7 @@
     "quickActions": {
       "title": "快速操作",
       "description": "常用功能快捷入口",
+      "createCollection": "创建合集",
       "viewCalendar": "查看日历",
       "accountSettings": "账户设置",
       "editProfile": "编辑资料",
@@ -181,9 +182,10 @@
     },
     "stats": {
       "title": "统计信息",
-      "activeProjects": "进行中的项目",
-      "completedTasks": "已完成的任务",
-      "upcomingEvents": "即将到来的事件"
+      "myCollections": "我的合集",
+      "totalViews": "总浏览量",
+      "totalLikes": "总点赞数",
+      "featuredCollections": "精选"
     },
     "notifications": {
       "title": "通知",
