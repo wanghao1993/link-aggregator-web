@@ -52,7 +52,7 @@ export default function Favorites() {
           toast.error(t("loginRequired"));
           return;
         }
-        throw new Error("Failed to fetch favorites");
+        throw new Error(t("loadError"));
       }
       const data = await res.json();
       setFavorites(data.favorites || []);

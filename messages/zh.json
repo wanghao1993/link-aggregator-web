@@ -162,13 +162,18 @@
       "confirmPasswordPlaceholder": "再次输入新密码",
       "resetPassword": "重置密码",
       "invalidToken": "重置链接无效或已过期",
+      "invalidLink": "链接无效",
+      "requestNewLink": "请求新的重置链接",
+      "verifying": "正在验证重置链接...",
       "success": "密码重置成功！",
       "passwordResetSuccess": "密码已重置",
       "redirectingToSignIn": "正在跳转到登录页面...",
       "tokenVerified": "验证成功，请输入新密码",
       "sessionError": "会话未准备好，请重新点击重置链接",
       "resetError": "重置密码失败",
-      "passwordMismatch": "两次密码不一致"
+      "passwordMismatch": "两次密码不一致",
+      "passwordMinLength": "密码至少需要8个字符",
+      "confirmPasswordRequired": "请确认密码"
     }
   },
   "dashboard": {

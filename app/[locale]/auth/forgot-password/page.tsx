@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
           fetchCaptcha();
           throw new Error("captcha_invalid");
         }
-        throw new Error(result.error || "Failed to send reset email");
+        throw new Error(result.error || t("forgotPassword.sendError"));
       }
 
       setSentEmail(data.email);

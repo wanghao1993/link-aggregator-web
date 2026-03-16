@@ -34,7 +34,7 @@ export default function CreateCollectionPage() {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || "Failed to create collection");
+      throw new Error(err.error || t("createError"));
     }
 
     const result = await res.json();

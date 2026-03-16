@@ -11,6 +11,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: "seo" });
+  const notFoundT = await getTranslations({ locale, namespace: "notFound" });
 
   const { data: collection } = await supabaseAdmin
     .from("collections")
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single();
 
   if (!collection) {
-    return { title: "Not Found" };
+    return { title: notFoundT("message") };
   }
 
   const metadata = generateSeoMetadata({

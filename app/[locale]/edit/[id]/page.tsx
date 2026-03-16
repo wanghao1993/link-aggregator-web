@@ -29,7 +29,7 @@ export default function EditCollectionPage() {
     async function fetchCollection() {
       try {
         const res = await fetch(`/api/collections/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch collection");
+        if (!res.ok) throw new Error(t("loadError"));
         const data = await res.json();
         setDefaultValues({
           title: data.title,
@@ -45,7 +45,7 @@ export default function EditCollectionPage() {
           ),
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(err instanceof Error ? err.message : t("loadError"));
       } finally {
         setLoading(false);
       }
@@ -70,7 +70,7 @@ export default function EditCollectionPage() {
 
     if (!res.ok) {
       const err = await res.json();
-      throw new Error(err.error || "Failed to update collection");
+      throw new Error(err.error || t("updateError"));
     }
 
     router.push(`/collection/${id}`);

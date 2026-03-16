@@ -162,13 +162,18 @@
       "confirmPasswordPlaceholder": "Re-enter your new password",
       "resetPassword": "Reset Password",
       "invalidToken": "Reset link is invalid or expired",
+      "invalidLink": "Invalid Link",
+      "requestNewLink": "Request a new reset link",
+      "verifying": "Verifying reset link...",
       "success": "Password reset successful!",
       "passwordResetSuccess": "Password Reset Complete",
       "redirectingToSignIn": "Redirecting to sign in page...",
       "tokenVerified": "Token verified. Please enter your new password.",
       "sessionError": "Session not ready. Please try the reset link again.",
       "resetError": "Failed to reset password",
-      "passwordMismatch": "Passwords don't match"
+      "passwordMismatch": "Passwords don't match",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "confirmPasswordRequired": "Please confirm your password"
     }
   },
   "dashboard": {

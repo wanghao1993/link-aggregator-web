@@ -21,11 +21,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 
 const resetPasswordSchema = z.object({
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
+  password: z.string().min(8),
+  confirmPassword: z.string().min(1),
 });
 
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
@@ -120,6 +117,18 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    // Validate passwords match
+    if (data.password !== data.confirmPassword) {
+      toast.error(t("resetPassword.passwordMismatch"));
+      return;
+    }
+
+    // Validate password length
+    if (data.password.length < 8) {
+      toast.error(t("resetPassword.passwordMinLength"));
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Update password using Supabase client (uses current session)
@@ -155,7 +164,7 @@ export default function ResetPasswordPage() {
         <Card className="w-full max-w-md mx-auto">
           <CardContent className="py-12 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Verifying reset link...</p>
+            <p className="text-muted-foreground">{t("resetPassword.verifying")}</p>
           </CardContent>
         </Card>
       </div>
@@ -171,7 +180,7 @@ export default function ResetPasswordPage() {
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
               <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
-            <CardTitle className="text-2xl font-bold">Invalid Link</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t("resetPassword.invalidLink")}</CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
@@ -180,7 +189,7 @@ export default function ResetPasswordPage() {
               className="w-full"
               onClick={() => router.push("/auth/forgot-password")}
             >
-              Request a new reset link
+              {t("resetPassword.requestNewLink")}
             </Button>
           </CardContent>
         </Card>

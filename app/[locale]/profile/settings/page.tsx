@@ -99,7 +99,7 @@ export default function ProfileSettings() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to upload avatar");
+        throw new Error(data.error || t("avatarUpdateError"));
       }
 
       setAvatarUrl(data.avatarUrl);
