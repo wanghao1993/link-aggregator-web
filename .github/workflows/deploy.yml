@@ -50,7 +50,7 @@ jobs:
             package.json \
             pnpm-lock.yaml \
             next.config.ts \
-            ecosystem.config.js
+            ecosystem.config.cjs
 
       - name: Deploy to server
         uses: appleboy/scp-action@v0.1.7
@@ -88,7 +88,7 @@ jobs:
             pnpm install --prod --frozen-lockfile
 
             # Reload PM2 process
-            pm2 reload ecosystem.config.js --env production
+            pm2 reload ecosystem.config.cjs --env production
 
             # Save PM2 configuration
             pm2 save
