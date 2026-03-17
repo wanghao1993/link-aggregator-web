@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ExternalLink, Heart, Eye, Clock, User } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import ShareButton from '@/components/ShareButton';
 import { LinkCardSkeleton } from '@/components/skeletons';
+import { useAuth } from '@/lib/supabase/auth-context';
 
 interface LinkCardProps {
   collection?: LinkCollection;
@@ -49,16 +50,73 @@ const LinkCard: React.FC<LinkCardProps> = ({
     likes: 89,
     isFavorited: false
   },
-  onFavorite = () => console.log('Favorite toggled'),
+  onFavorite,
   onVisit
 }) => {
   const t = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
+  const { user } = useAuth();
+  const [isFavorited, setIsFavorited] = useState(collection.isFavorited);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
+  // Fetch favorite status on mount
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (!user) return;
+      try {
+        const res = await fetch(`/api/collections/${collection.id}/favorite`);
+        if (res.ok) {
+          const data = await res.json();
+          setIsFavorited(data.isFavorited);
+        }
+      } catch {
+        // ignore
+      }
+    };
+    checkFavoriteStatus();
+  }, [collection.id, user]);
 
   if (loading) {
     return <LinkCardSkeleton />;
   }
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // 如果未登录，跳转到登录页面
+    if (!user) {
+      router.push(`/${locale}/auth/signin?redirect=/${locale}/collection/${collection.id}`);
+      return;
+    }
+
+    // 如果提供了自定义回调，使用它
+    if (onFavorite) {
+      onFavorite();
+      return;
+    }
+
+    // 否则执行默认收藏逻辑
+    setIsFavoriteLoading(true);
+    try {
+      const method = isFavorited ? 'DELETE' : 'POST';
+      const res = await fetch(`/api/collections/${collection.id}/favorite`, {
+        method,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setIsFavorited(data.isFavorited ?? !isFavorited);
+      } else if (res.status === 401) {
+        // 未授权，跳转到登录页面
+        router.push(`/${locale}/auth/signin?redirect=/${locale}/collection/${collection.id}`);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setIsFavoriteLoading(false);
+    }
+  };
 
   const handleVisit = () => {
     if (onVisit) {
@@ -106,10 +164,11 @@ const LinkCard: React.FC<LinkCardProps> = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={(e) => { e.stopPropagation(); onFavorite(); }}
-              className={`${collection.isFavorited ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
+              onClick={handleFavorite}
+              disabled={isFavoriteLoading}
+              className={`${isFavorited ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
             >
-              <Heart size={18} fill={collection.isFavorited ? 'currentColor' : 'none'} />
+              <Heart size={18} fill={isFavorited ? 'currentColor' : 'none'} />
             </Button>
           </div>
         </div>
