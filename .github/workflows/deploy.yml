@@ -85,7 +85,7 @@ jobs:
             cd current
 
             # Install production dependencies
-            pnpm install --prod --frozen-lockfile
+            pnpm install --prod
 
             # Reload PM2 process
             pm2 reload ecosystem.config.cjs --env production
