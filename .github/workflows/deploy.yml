@@ -12,57 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build application
-        run: pnpm build
-        env:
-          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-          GITHUB_CLIENT_SECRET: ${{ secrets.GITHUB_CLIENT_SECRET }}
-          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-      - name: Create deployment package
-        run: |
-          tar -czvf deploy.tar.gz \
-            .next \
-            public \
-            package.json \
-            pnpm-lock.yaml \
-            next.config.ts \
-            ecosystem.config.cjs
-
-      - name: Deploy to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
-          source: "deploy.tar.gz"
-          target: ${{ secrets.DEPLOY_PATH }}
-
-      - name: Execute deployment script
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -78,39 +28,28 @@ jobs:
 
             cd ${{ secrets.DEPLOY_PATH }}
 
-            # Backup current deployment
-            if [ -d "current" ]; then
-              mv current backup_$(date +%Y%m%d_%H%M%S)
-            fi
+            # Debug info
+            echo "Node version: $(node -v)"
+            echo "pnpm version: $(pnpm -v)"
+            echo "Current directory: $(pwd)"
 
-            # Extract new deployment
-            mkdir -p current
-            tar -xzvf deploy.tar.gz -C current
-            rm deploy.tar.gz
+            # Pull latest code
+            git fetch origin
+            git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
 
-            cd current
+            # Install dependencies
+            pnpm install
+
+            # Build application
+            pnpm build
 
             # Create logs directory
             mkdir -p logs
 
-            # Debug: check pnpm
-            echo "Node version: $(node -v)"
-            echo "pnpm version: $(pnpm -v)"
-            echo "Current directory: $(pwd)"
-            echo "Installing dependencies..."
-
-            # Install production dependencies
-            pnpm install --prod
-
-            # Verify node_modules exists
-            ls -la node_modules 2>/dev/null || echo "WARNING: node_modules not found!"
-
-            # Reload PM2 process
+            # Reload PM2
             pm2 reload ecosystem.config.cjs --env production
 
-            # Save PM2 configuration
+            # Save PM2 config
             pm2 save
 
-            # Clean up old backups (keep last 3)
-            cd ..
-            ls -t | grep backup_ | tail -n +4 | xargs -r rm -rf
+            echo "Deployment completed!"
