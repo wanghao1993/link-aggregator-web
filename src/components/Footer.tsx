@@ -30,7 +30,6 @@ const Footer: React.FC = () => {
     { href: `/${locale}/categories`, label: commonT("categories") },
     { href: `/${locale}/tags`, label: tagsT("title") },
     { href: `/${locale}/create`, label: t("createCollection") },
-    { href: `/${locale}/recent`, label: commonT("recent") },
   ];
 
   const communityLinks = [

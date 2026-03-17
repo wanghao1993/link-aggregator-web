@@ -7,7 +7,6 @@ import {
   Search,
   Heart,
   Grid3X3,
-  Clock,
   Home,
   Globe,
   LogIn,
@@ -59,7 +58,6 @@ const Header: React.FC = () => {
     { path: "/", label: t("home"), icon: Home },
     { path: "/categories", label: t("categories"), icon: Grid3X3 },
     { path: "/tags", label: tagsT("title"), icon: Tag },
-    { path: "/recent", label: t("recent"), icon: Clock },
     { path: "/favorites", label: t("favorites"), icon: Heart },
   ];
 
