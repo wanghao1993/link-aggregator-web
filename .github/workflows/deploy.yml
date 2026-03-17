@@ -70,6 +70,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
+            set -e
+
+            # Load Node.js environment (for BT panel)
+            export PATH="/www/server/nodejs/v22.19.0/bin:$PATH"
+            source ~/.bashrc 2>/dev/null || true
+
             cd ${{ secrets.DEPLOY_PATH }}
 
             # Backup current deployment
@@ -87,8 +93,17 @@ jobs:
             # Create logs directory
             mkdir -p logs
 
+            # Debug: check pnpm
+            echo "Node version: $(node -v)"
+            echo "pnpm version: $(pnpm -v)"
+            echo "Current directory: $(pwd)"
+            echo "Installing dependencies..."
+
             # Install production dependencies
             pnpm install --prod
+
+            # Verify node_modules exists
+            ls -la node_modules 2>/dev/null || echo "WARNING: node_modules not found!"
 
             # Reload PM2 process
             pm2 reload ecosystem.config.cjs --env production
