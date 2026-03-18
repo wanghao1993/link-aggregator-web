@@ -19,7 +19,6 @@ import { useTranslations, useLocale } from "next-intl";
 const Footer: React.FC = () => {
   const t = useTranslations("footer");
   const commonT = useTranslations("common");
-  const tagsT = useTranslations("tags");
   const headerT = useTranslations("header");
   const locale = useLocale();
 
@@ -28,7 +27,6 @@ const Footer: React.FC = () => {
   const productLinks = [
     { href: `/${locale}`, label: t("explore") },
     { href: `/${locale}/categories`, label: commonT("categories") },
-    { href: `/${locale}/tags`, label: tagsT("title") },
     { href: `/${locale}/create`, label: t("createCollection") },
   ];
 

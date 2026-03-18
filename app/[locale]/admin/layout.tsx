@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
-  Tag,
   Layers,
   Users,
   Settings,
@@ -29,7 +28,6 @@ interface AdminUser {
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/categories", label: "Categories", icon: Layers },
-  { href: "/admin/tags", label: "Tags", icon: Tag },
   { href: "/admin/collections", label: "Collections", icon: FolderOpen },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },

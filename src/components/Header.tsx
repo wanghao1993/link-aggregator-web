@@ -12,7 +12,6 @@ import {
   LogIn,
   LogOut,
   Plus,
-  Tag,
   Settings,
   LayoutDashboard,
   FolderOpen,
@@ -47,7 +46,6 @@ const Header: React.FC = () => {
   const router = useRouter();
   const t = useTranslations("common");
   const headerT = useTranslations("header");
-  const tagsT = useTranslations("tags");
   const ucT = useTranslations("userCard");
   const { user, profile, isLoading: authLoading, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,7 +55,6 @@ const Header: React.FC = () => {
   const navItems = [
     { path: "/", label: t("home"), icon: Home },
     { path: "/categories", label: t("categories"), icon: Grid3X3 },
-    { path: "/tags", label: tagsT("title"), icon: Tag },
     { path: "/favorites", label: t("favorites"), icon: Heart },
   ];
 
