@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin, getAuthUser } from '@/lib/supabase/server';
 
 // GET /api/categories/[slug] - Get category by slug with collections
 export async function GET(
@@ -8,43 +8,24 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    console.log('Fetching category with slug:', slug);
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Missing Supabase credentials');
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
+    const authUser = await getAuthUser();
 
     // Get category by slug
-    const { data: category, error: catError } = await supabase
+    const { data: category, error: catError } = await supabaseAdmin
       .from('categories')
       .select('*')
       .eq('slug', slug)
       .eq('is_active', true)
       .single();
 
-    console.log('Category query result:', { category, error: catError });
-
-    if (catError) {
-      console.error('Category query error:', catError);
-      return NextResponse.json({ error: 'Category not found', details: catError.message }, { status: 404 });
-    }
-
-    if (!category) {
+    if (catError || !category) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });
     }
 
     // Get collections in this category
-    const { data: collections, error: collError } = await supabase
+    const { data: collections, error: collError } = await supabaseAdmin
       .from('collections')
-      .select('id, title, description, category, tags, views, likes, created_at, updated_at')
+      .select('id, title, description, category, tags, views, likes, created_at, updated_at, user_id')
       .eq('category', category.name_key)
       .eq('is_public', true)
       .order('created_at', { ascending: false })
@@ -54,9 +35,51 @@ export async function GET(
       console.error('Collections query error:', collError);
     }
 
+    const collectionIds = (collections || []).map((c) => c.id);
+
+    // Batch fetch favorites for current user
+    let favoritedIds = new Set<string>();
+    if (authUser && collectionIds.length > 0) {
+      const { data: favorites } = await supabaseAdmin
+        .from('collection_favorites')
+        .select('collection_id')
+        .eq('user_id', authUser.id)
+        .in('collection_id', collectionIds);
+      if (favorites) {
+        favoritedIds = new Set(favorites.map((f) => f.collection_id));
+      }
+    }
+
+    // Get users for collections
+    const userIds = [...new Set((collections || []).map((c) => c.user_id).filter(Boolean))];
+    let usersMap: Record<string, { id: string; name: string; email: string }> = {};
+    if (userIds.length > 0) {
+      const { data: users } = await supabaseAdmin
+        .from('users')
+        .select('id, name, email')
+        .in('id', userIds);
+      if (users) {
+        usersMap = Object.fromEntries(users.map((u) => [u.id, u]));
+      }
+    }
+
+    const formattedCollections = (collections || []).map((c) => ({
+      id: c.id,
+      title: c.title,
+      description: c.description,
+      category: c.category,
+      tags: c.tags || [],
+      views: c.views,
+      likes: c.likes,
+      isFavorited: favoritedIds.has(c.id),
+      created_at: c.created_at,
+      updated_at: c.updated_at,
+      users: usersMap[c.user_id] || null,
+    }));
+
     return NextResponse.json({
       category,
-      collections: collections || [],
+      collections: formattedCollections,
     });
   } catch (error) {
     console.error('Error fetching category:', error);

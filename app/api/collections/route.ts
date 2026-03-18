@@ -37,10 +37,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const collectionIds = (collections || []).map((c) => c.id);
     const userIds = [
       ...new Set((collections || []).map((c) => c.user_id).filter(Boolean)),
     ];
 
+    // Batch fetch users
     let usersMap: Record<string, { id: string; name: string; email: string }> =
       {};
     if (userIds.length > 0) {
@@ -53,6 +55,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Batch fetch favorites for current user
+    let favoritedIds = new Set<string>();
+    const authUser = await getAuthUser();
+    if (authUser && collectionIds.length > 0) {
+      const { data: favorites } = await supabaseAdmin
+        .from("collection_favorites")
+        .select("collection_id")
+        .eq("user_id", authUser.id)
+        .in("collection_id", collectionIds);
+      if (favorites) {
+        favoritedIds = new Set(favorites.map((f) => f.collection_id));
+      }
+    }
+
     const formatted = (collections || []).map((c) => ({
       id: c.id,
       title: c.title,
@@ -62,6 +78,7 @@ export async function GET(request: NextRequest) {
       isPublic: c.is_public,
       views: c.views,
       likes: c.likes,
+      isFavorited: favoritedIds.has(c.id),
       createdAt: c.created_at,
       updatedAt: c.updated_at,
       author: usersMap[c.user_id] || null,
@@ -111,6 +128,28 @@ export async function POST(request: NextRequest) {
 
     const { title, description, category, tags, links } = parsed.data;
     const user = { id: authUser.id };
+
+    // Auto-create tags that don't exist
+    if (tags.length > 0) {
+      const { data: existingTags } = await supabaseAdmin
+        .from("tags")
+        .select("name")
+        .in("name", tags);
+
+      const existingTagNames = new Set((existingTags || []).map((t) => t.name));
+      const newTags = tags.filter((tag) => !existingTagNames.has(tag));
+
+      if (newTags.length > 0) {
+        const tagRows = newTags.map((tagName) => ({
+          name: tagName,
+          slug: tagName.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+          is_active: true,
+          usage_count: 0,
+        }));
+
+        await supabaseAdmin.from("tags").insert(tagRows);
+      }
+    }
 
     const { data: collection, error: collectionError } = await supabaseAdmin
       .from("collections")

@@ -57,25 +57,8 @@ const LinkCard: React.FC<LinkCardProps> = ({
   const locale = useLocale();
   const router = useRouter();
   const { user } = useAuth();
-  const [isFavorited, setIsFavorited] = useState(collection.isFavorited);
+  const [isFavorited, setIsFavorited] = useState(collection.isFavorited ?? false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
-
-  // Fetch favorite status on mount
-  useEffect(() => {
-    const checkFavoriteStatus = async () => {
-      if (!user) return;
-      try {
-        const res = await fetch(`/api/collections/${collection.id}/favorite`);
-        if (res.ok) {
-          const data = await res.json();
-          setIsFavorited(data.isFavorited);
-        }
-      } catch {
-        // ignore
-      }
-    };
-    checkFavoriteStatus();
-  }, [collection.id, user]);
 
   if (loading) {
     return <LinkCardSkeleton />;

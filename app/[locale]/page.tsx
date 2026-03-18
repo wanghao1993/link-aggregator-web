@@ -25,6 +25,7 @@ interface ApiCollection {
   isPublic: boolean;
   views: number;
   likes: number;
+  isFavorited: boolean;
   createdAt: string;
   updatedAt: string;
   author: { id: string; name: string; email: string } | null;
@@ -77,7 +78,7 @@ function toCollection(
     isPublic: api.isPublic,
     views: api.views,
     likes: api.likes,
-    isFavorited: false,
+    isFavorited: api.isFavorited ?? false,
     links: [],
     author: {
       id: api.author?.id || "",

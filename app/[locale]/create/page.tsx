@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-context";
-import { ArrowLeft, LogIn, LinkIcon } from "lucide-react";
+import { ArrowLeft, LogIn, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import CollectionForm, {
@@ -19,17 +19,10 @@ export default function CreateCollectionPage() {
   const commonT = useTranslations("common");
 
   const handleSubmit = async (data: CollectionFormValues) => {
-    const tags = data.tags
-      ? data.tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : [];
-
     const res = await fetch("/api/collections", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...data, tags }),
+      body: JSON.stringify(data),
     });
 
     if (!res.ok) {
@@ -44,31 +37,26 @@ export default function CreateCollectionPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">{commonT("loading")}</p>
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="glass-effect border-border/30 bg-card/60 max-w-md w-full mx-4">
-          <CardContent className="pt-8 pb-8 text-center space-y-6">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-              <LogIn size={28} className="text-primary" />
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-sm w-full">
+          <CardContent className="pt-8 pb-8 text-center space-y-4">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+              <LogIn size={28} className="text-muted-foreground" />
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-foreground mb-2">
-                {t("loginRequired")}
-              </h2>
-              <p className="text-muted-foreground">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold">{t("loginRequired")}</h2>
+              <p className="text-sm text-muted-foreground">
                 {t("loginRequiredDesc")}
               </p>
             </div>
-            <Button
-              className="bg-brand-gradient hover:opacity-90 transition-opacity"
-              asChild
-            >
+            <Button className="w-full" asChild>
               <Link href="/auth/signin">{t("goToLogin")}</Link>
             </Button>
           </CardContent>
@@ -78,28 +66,26 @@ export default function CreateCollectionPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen pb-16">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-6 text-muted-foreground hover:text-foreground"
+          className="mb-6 -ml-2"
         >
-          <ArrowLeft size={18} className="mr-2" />
+          <ArrowLeft size={16} className="mr-2" />
           {commonT("back")}
         </Button>
 
-        <div className="mb-8 fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-brand-gradient rounded-xl flex items-center justify-center">
-              <LinkIcon className="text-white" size={22} />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold gradient-text">
-                {t("createTitle")}
-              </h1>
-              <p className="text-muted-foreground">{t("createSubtitle")}</p>
-            </div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Link2 className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold">{t("createTitle")}</h1>
+            <p className="text-sm text-muted-foreground">
+              {t("createSubtitle")}
+            </p>
           </div>
         </div>
 
