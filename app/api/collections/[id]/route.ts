@@ -139,6 +139,28 @@ export async function PUT(
 
     const { title, description, category, tags, links } = parsed.data;
 
+    // Auto-create tags that don't exist
+    if (tags.length > 0) {
+      const { data: existingTags } = await supabaseAdmin
+        .from("tags")
+        .select("name")
+        .in("name", tags);
+
+      const existingTagNames = new Set((existingTags || []).map((t) => t.name));
+      const newTags = tags.filter((tag) => !existingTagNames.has(tag));
+
+      if (newTags.length > 0) {
+        const tagRows = newTags.map((tagName) => ({
+          name: tagName,
+          slug: tagName.toLowerCase().replace(/[^a-z0-9]/g, "-"),
+          is_active: true,
+          usage_count: 0,
+        }));
+
+        await supabaseAdmin.from("tags").insert(tagRows);
+      }
+    }
+
     const { error: updateError } = await supabaseAdmin
       .from("collections")
       .update({

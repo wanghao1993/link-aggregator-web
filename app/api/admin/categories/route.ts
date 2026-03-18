@@ -15,12 +15,11 @@ export async function GET(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
-      if (userData?.role !== 'admin' && userData?.role !== 'super_admin') {
-        // Non-admin: only return active categories
+      if (userData?.role === 'admin' || userData?.role === 'super_admin') {
+        // Admin: return ALL categories (including inactive)
         const { data, error } = await supabaseAdmin
           .from('categories')
           .select('*')
-          .eq('is_active', true)
           .order('sort_order');
 
         if (error) throw error;
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Admin or anonymous: return active categories (admin will use admin API)
+    // Non-admin or anonymous: only return active categories
     const { data, error } = await supabaseAdmin
       .from('categories')
       .select('*')

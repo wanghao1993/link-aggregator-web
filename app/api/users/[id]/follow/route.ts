@@ -106,7 +106,7 @@ export async function POST(
       const followerName =
         authUser.user_metadata?.name || authUser.email?.split("@")[0] || "Someone";
 
-      createNotification({
+      await createNotification({
         userId: targetUserId,
         type: "follow",
         title: `${followerName} followed you`,
