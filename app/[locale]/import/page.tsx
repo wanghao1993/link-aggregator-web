@@ -4,19 +4,30 @@ import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-context";
 import { parseBookmarkHtml, countBookmarks, flattenBookmarks } from "@/lib/bookmarks/parser";
-import type { ParsedBookmarkFolder, BookmarkParseResult } from "@/types/bookmark";
-import { ArrowLeft, Upload, FileText, Folder, Link2, Loader2, Check, X, AlertCircle } from "lucide-react";
+import type { BookmarkParseResult } from "@/types/bookmark";
+import { ArrowLeft, Upload, FileText, Folder, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import Link from "next/link";
+
+interface ImportedCollection {
+  id: string;
+  title: string;
+  linkCount: number;
+}
+
+interface ImportResult {
+  success: boolean;
+  collections?: ImportedCollection[];
+  error?: string;
+}
 
 interface ParsedData {
   result: BookmarkParseResult;
@@ -48,17 +59,17 @@ export default function ImportBookmarksPage() {
   const { user, isLoading: authLoading } = useAuth();
   const t = useTranslations("bookmarkImport");
   const commonT = useTranslations("common");
-  const ct = useTranslations("categories");
   
-  const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importResult, setImportResult] = useState<{ success: boolean; collections?: any[]; error?: string } | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
+    setFile(selectedFile);
 
     if (!selectedFile.name.toLowerCase().endsWith('.html')) {
       toast.error(t("invalidFileType"));
@@ -152,10 +163,10 @@ export default function ImportBookmarksPage() {
         collections: data.collections
       });
       toast.success(t("importSuccess"));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Import error:", error);
-      setImportResult({ success: false, error: error.message });
-      toast.error(error.message || t("importError"));
+      setImportResult({ success: false, error: (error as Error).message });
+      toast.error((error as Error).message || t("importError"));
     } finally {
       setIsImporting(false);
     }
@@ -242,7 +253,7 @@ export default function ImportBookmarksPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                {importResult.collections?.map((col: any) => (
+                {importResult.collections?.map((col: ImportedCollection) => (
                   <Link
                     key={col.id}
                     href={`/collection/${col.id}`}
@@ -299,16 +310,46 @@ export default function ImportBookmarksPage() {
               </div>
               
               <Separator className="my-6" />
-              
+
               <div className="text-sm text-muted-foreground">
-                <h4 className="font-medium text-foreground mb-2">{t("supportedBrowsers")}</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Google Chrome</li>
-                  <li>Mozilla Firefox</li>
-                  <li>Apple Safari</li>
-                  <li>Microsoft Edge</li>
-                </ul>
-                <p className="mt-3 text-xs">{t("exportHelp")}</p>
+                <h4 className="font-medium text-foreground mb-3">{t("helpTitle")}</h4>
+
+                <div className="space-y-4">
+                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <h5 className="font-medium text-blue-400 mb-2">🔹 Google Chrome</h5>
+                    <ol className="list-decimal list-inside space-y-1 text-xs">
+                      <li>打开书签管理器：<kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Ctrl+Shift+O</kbd> (Mac: <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">⌘+Option+B</kbd>)</li>
+                      <li>点击右上角 <strong>⋮</strong> 菜单</li>
+                      <li>选择 <strong>导出书签</strong></li>
+                    </ol>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                    <h5 className="font-medium text-orange-400 mb-2">🦊 Mozilla Firefox</h5>
+                    <ol className="list-decimal list-inside space-y-1 text-xs">
+                      <li>点击菜单 → <strong>书签</strong></li>
+                      <li>选择 <strong>管理书签</strong></li>
+                      <li>点击 <strong>导入与备份</strong> → <strong>将书签导出为 HTML</strong></li>
+                    </ol>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                    <h5 className="font-medium text-cyan-400 mb-2">🌐 Microsoft Edge</h5>
+                    <ol className="list-decimal list-inside space-y-1 text-xs">
+                      <li>打开收藏夹：<kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Ctrl+Shift+O</kbd></li>
+                      <li>点击 <strong>⋯</strong> 菜单</li>
+                      <li>选择 <strong>导出收藏夹</strong></li>
+                    </ol>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-gray-500/10 border border-gray-500/20">
+                    <h5 className="font-medium text-gray-400 mb-2">🧭 Apple Safari</h5>
+                    <ol className="list-decimal list-inside space-y-1 text-xs">
+                      <li>菜单栏 → <strong>文件</strong></li>
+                      <li>选择 <strong>导出书签…</strong></li>
+                    </ol>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
