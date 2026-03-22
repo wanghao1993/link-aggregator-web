@@ -7,15 +7,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const search = searchParams.get("search");
+    const userId = searchParams.get("userId");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
     const offset = parseInt(searchParams.get("offset") || "0");
 
     let query = supabaseAdmin
       .from("collections")
       .select("*", { count: "exact" })
-      .eq("is_public", true)
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
+
+    if (userId) {
+      query = query.eq("user_id", userId);
+    } else {
+      query = query.eq("is_public", true);
+    }
 
     if (category && category !== "all") {
       query = query.eq("category", category);
