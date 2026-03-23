@@ -12,6 +12,7 @@ import {
   Globe,
   Tag,
   CheckCircle2,
+  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import TagInput from "@/components/TagInput";
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 
 const linkSchema = z.object({
   title: z.string().min(1),
@@ -50,6 +52,7 @@ const collectionSchema = z.object({
   category: z.string().min(1),
   tags: z.array(z.string()).max(3, "Maximum 3 tags allowed"),
   links: z.array(linkSchema).min(1),
+  is_public: z.boolean(),
 });
 
 export type CollectionFormValues = z.infer<typeof collectionSchema>;
@@ -100,6 +103,7 @@ export default function CollectionForm({
       category: "",
       tags: [],
       links: [{ title: "", url: "", description: "", favicon: "" }],
+      is_public: true,
     },
   });
 
@@ -257,6 +261,30 @@ export default function CollectionForm({
                 </FormControl>
                 <FormDescription>{t("tagsHelp")}</FormDescription>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="is_public"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base flex items-center gap-2">
+                    {field.value ? <Globe size={16} /> : <Lock size={16} />}
+                    {field.value ? t("public") : t("private")}
+                  </FormLabel>
+                  <FormDescription>
+                    {field.value ? t("publicDesc") : t("privateDesc")}
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
               </FormItem>
             )}
           />

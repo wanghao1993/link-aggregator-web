@@ -44,6 +44,7 @@ export default function EditCollectionPage() {
               favicon: link.favicon || "",
             })
           ),
+          is_public: data.isPublic,
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : t("loadError"));

@@ -346,6 +346,10 @@
     "createError": "Failed to create collection",
     "updateError": "Failed to update collection",
     "loadError": "Failed to load collection",
+    "public": "Public",
+    "publicDesc": "Anyone can see this collection",
+    "private": "Private",
+    "privateDesc": "Only you can see this collection",
     "validation": {
       "titleRequired": "Title is required",
       "titleMin": "Title must be at least 2 characters",

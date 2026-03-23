@@ -15,6 +15,7 @@ const updateCollectionSchema = z.object({
   category: z.string().min(1),
   tags: z.array(z.string()).default([]),
   links: z.array(linkSchema).min(1, "At least one link is required"),
+  is_public: z.boolean().optional(),
 });
 
 export async function GET(
@@ -137,7 +138,7 @@ export async function PUT(
       );
     }
 
-    const { title, description, category, tags, links } = parsed.data;
+    const { title, description, category, tags, links, is_public } = parsed.data;
 
     // Auto-create tags that don't exist
     if (tags.length > 0) {
@@ -168,6 +169,7 @@ export async function PUT(
         description,
         category,
         tags,
+        is_public,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id);

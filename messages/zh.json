@@ -346,6 +346,10 @@
     "createError": "创建合集失败",
     "updateError": "更新合集失败",
     "loadError": "加载合集失败",
+    "public": "公开",
+    "publicDesc": "所有人都可以看到此合集",
+    "private": "私有",
+    "privateDesc": "只有你自己可以看到此合集",
     "validation": {
       "titleRequired": "请输入标题",
       "titleMin": "标题至少2个字符",

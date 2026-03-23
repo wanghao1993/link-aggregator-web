@@ -113,6 +113,7 @@ const createCollectionSchema = z.object({
   category: z.string().min(1),
   tags: z.array(z.string()).default([]),
   links: z.array(linkSchema).min(1, "At least one link is required"),
+  is_public: z.boolean().default(true),
 });
 
 export async function POST(request: NextRequest) {
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, category, tags, links } = parsed.data;
+    const { title, description, category, tags, links, is_public } = parsed.data;
     const user = { id: authUser.id };
 
     // Auto-create tags that don't exist
@@ -165,7 +166,7 @@ export async function POST(request: NextRequest) {
         category,
         tags,
         user_id: user.id,
-        is_public: true,
+        is_public: is_public ?? true,
         views: 0,
         likes: 0,
         created_at: new Date().toISOString(),
