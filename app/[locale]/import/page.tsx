@@ -1,205 +1,173 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/supabase/auth-context";
-import { parseBookmarkHtml, countBookmarks, flattenBookmarks } from "@/lib/bookmarks/parser";
-import type { BookmarkParseResult } from "@/types/bookmark";
-import { ArrowLeft, Upload, FileText, Folder, Loader2, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import Link from "next/link";
-
-interface ImportedCollection {
-  id: string;
-  title: string;
-  linkCount: number;
-}
-
-interface ImportResult {
-  success: boolean;
-  collections?: ImportedCollection[];
-  error?: string;
-}
-
-interface ParsedData {
-  result: BookmarkParseResult;
-  folderData: FolderPreview[];
-}
-
-interface FolderPreview {
-  title: string;
-  bookmarkCount: number;
-  selected: boolean;
-  category: string;
-  tags: string;
-}
+import { Link2, Loader2, Globe } from "lucide-react";
 
 const CATEGORIES = [
-  { value: "ai", label: "AI" },
-  { value: "web", label: "Web" },
-  { value: "design", label: "Design" },
-  { value: "mobile", label: "Mobile" },
-  { value: "devops", label: "DevOps" },
-  { value: "data", label: "Data" },
-  { value: "security", label: "Security" },
-  { value: "productivity", label: "Productivity" },
-  { value: "tools", label: "Tools" },
-];
+  "ai",
+  "web",
+  "design",
+  "mobile",
+  "devops",
+  "data",
+  "security",
+  "productivity",
+  "tools",
+] as const;
 
-export default function ImportBookmarksPage() {
+interface Collection {
+  id: string;
+  title: string;
+  category: string;
+}
+
+export default function QuickImportPage() {
+  const t = useTranslations("quickImport");
+  const ct = useTranslations("categories");
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
-  const t = useTranslations("bookmarkImport");
-  const commonT = useTranslations("common");
-  
-  const [parsedData, setParsedData] = useState<ParsedData | null>(null);
-  const [isParsing, setIsParsing] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-    setFile(selectedFile);
+  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [favicon, setFavicon] = useState("");
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [collectionId, setCollectionId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [fetchingPreview, setFetchingPreview] = useState(false);
 
-    if (!selectedFile.name.toLowerCase().endsWith('.html')) {
-      toast.error(t("invalidFileType"));
-      return;
-    }
+  // Fetch collections and URL preview
+  useEffect(() => {
+    if (!user) return;
 
-    setFile(selectedFile);
-    setIsParsing(true);
-    setParsedData(null);
-    setImportResult(null);
-
-    try {
-      const text = await selectedFile.text();
-      const result = parseBookmarkHtml(text);
-      
-      const folderData: FolderPreview[] = result.roots.map(folder => ({
-        title: folder.title,
-        bookmarkCount: countBookmarks([folder]),
-        selected: true,
-        category: "tools",
-        tags: "imported,bookmarks"
-      }));
-
-      setParsedData({ result, folderData });
-      toast.success(t("parseSuccess"));
-    } catch (error) {
-      console.error("Parse error:", error);
-      toast.error(t("parseError"));
-    } finally {
-      setIsParsing(false);
-    }
-  }, [t]);
-
-  const handleFolderToggle = useCallback((index: number) => {
-    if (!parsedData) return;
-    const newFolderData = [...parsedData.folderData];
-    newFolderData[index].selected = !newFolderData[index].selected;
-    setParsedData({ ...parsedData, folderData: newFolderData });
-  }, [parsedData]);
-
-  const handleFolderChange = useCallback((index: number, field: 'category' | 'tags', value: string) => {
-    if (!parsedData) return;
-    const newFolderData = [...parsedData.folderData];
-    newFolderData[index][field] = value;
-    setParsedData({ ...parsedData, folderData: newFolderData });
-  }, [parsedData]);
-
-  const handleImport = useCallback(async () => {
-    if (!parsedData || !user) return;
-
-    const selectedFolders = parsedData.folderData.filter(f => f.selected);
-    if (selectedFolders.length === 0) {
-      toast.error(t("selectAtLeastOne"));
-      return;
-    }
-
-    setIsImporting(true);
-
-    try {
-      const foldersToImport = selectedFolders.map(folder => {
-        const originalFolder = parsedData.result.roots.find(f => f.title === folder.title);
-        const bookmarks = originalFolder ? flattenBookmarks([originalFolder]) : [];
-        
-        return {
-          folderTitle: folder.title,
-          category: folder.category,
-          tags: folder.tags.split(",").map(t => t.trim()).filter(Boolean),
-          bookmarks: bookmarks.map(bm => ({
-            title: bm.title,
-            url: bm.url,
-            description: "",
-            icon: bm.icon || ""
-          }))
-        };
+    // Fetch user's collections
+    fetch("/api/users/me/collections")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.collections) {
+          setCollections(data.collections);
+          if (data.collections.length > 0) {
+            setCollectionId(data.collections[0].id);
+          }
+        }
       });
 
-      const res = await fetch("/api/bookmarks/import", {
+    // Get URL params
+    const params = new URLSearchParams(window.location.search);
+    const urlParam = params.get("url");
+    const titleParam = params.get("title");
+
+    if (urlParam) {
+      setUrl(decodeURIComponent(urlParam));
+    }
+    if (titleParam) {
+      setTitle(decodeURIComponent(titleParam));
+    }
+  }, [user]);
+
+  // Fetch link preview when URL changes
+  useEffect(() => {
+    if (!url || !url.startsWith("http")) return;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(async () => {
+      setFetchingPreview(true);
+      try {
+        const res = await fetch(
+          `/api/link-preview?url=${encodeURIComponent(url)}`,
+          { signal: controller.signal }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.title && !title) setTitle(data.title);
+          if (data.description && !description) setDescription(data.description);
+          if (data.favicon) setFavicon(data.favicon);
+        }
+      } catch {
+        // Ignore errors
+      } finally {
+        setFetchingPreview(false);
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [url, title, description]);
+
+  const handleSubmit = async () => {
+    if (!user) {
+      router.push("/auth/signin");
+      return;
+    }
+
+    if (!url || !collectionId) {
+      toast.error(t("fillRequired"));
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/collections/${collectionId}/links`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folders: foldersToImport })
+        body: JSON.stringify({
+          url,
+          title: title || undefined,
+          description: description || undefined,
+          favicon: favicon || undefined,
+        }),
       });
-
-      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || t("importError"));
+        const err = await res.json();
+        throw new Error(err.error || t("saveFailed"));
       }
 
-      setImportResult({
-        success: true,
-        collections: data.collections
-      });
-      toast.success(t("importSuccess"));
-    } catch (error: unknown) {
-      console.error("Import error:", error);
-      setImportResult({ success: false, error: (error as Error).message });
-      toast.error((error as Error).message || t("importError"));
+      toast.success(t("saveSuccess"));
+      window.close();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("saveFailed"));
     } finally {
-      setIsImporting(false);
+      setLoading(false);
     }
-  }, [parsedData, user, t]);
+  };
 
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">{commonT("loading")}</p>
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="glass-effect border-border/30 bg-card/60 max-w-md w-full mx-4">
-          <CardContent className="pt-8 pb-8 text-center space-y-6">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-              <Upload size={28} className="text-primary" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-foreground mb-2">
-                {t("loginRequired")}
-              </h2>
-              <p className="text-muted-foreground">
-                {t("loginRequiredDesc")}
-              </p>
-            </div>
-            <Button
-              className="bg-brand-gradient hover:opacity-90 transition-opacity"
-              asChild
-            >
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="max-w-sm w-full">
+          <CardHeader>
+            <CardTitle>{t("loginRequired")}</CardTitle>
+            <CardDescription>{t("loginRequiredDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="w-full">
               <Link href="/auth/signin">{t("goToLogin")}</Link>
             </Button>
           </CardContent>
@@ -208,256 +176,83 @@ export default function ImportBookmarksPage() {
     );
   }
 
-  const selectedCount = parsedData?.folderData.filter(f => f.selected).length || 0;
-  const totalBookmarks = parsedData?.folderData.reduce((sum, f) => sum + (f.selected ? f.bookmarkCount : 0), 0) || 0;
-
   return (
-    <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mb-6 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={18} className="mr-2" />
-          {commonT("back")}
-        </Button>
-
-        <div className="mb-8 fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-brand-gradient rounded-xl flex items-center justify-center">
-              <Upload className="text-white" size={22} />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold gradient-text">
-                {t("pageTitle")}
-              </h1>
-              <p className="text-muted-foreground">{t("pageSubtitle")}</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center gap-2 mb-6">
+          <Link2 className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-semibold">{t("title")}</h1>
         </div>
 
-        {/* 导入成功结果 */}
-        {importResult?.success && (
-          <Card className="mb-6 border-green-500/30 bg-green-500/10">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                  <Check className="text-green-500" size={20} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-green-500">{t("importSuccess")}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t("importedCount", { count: importResult.collections?.length || 0 })}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {importResult.collections?.map((col: ImportedCollection) => (
-                  <Link
-                    key={col.id}
-                    href={`/collection/${col.id}`}
-                    className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors"
-                  >
-                    <span className="font-medium">{col.title}</span>
-                    <Badge variant="secondary">{col.linkCount} {t("links")}</Badge>
-                  </Link>
-                ))}
-              </div>
-              <Button
-                className="mt-4 w-full"
-                onClick={() => {
-                  setFile(null);
-                  setParsedData(null);
-                  setImportResult(null);
-                }}
-              >
-                {t("importMore")}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* 文件上传 */}
-        {!parsedData && !importResult && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="border-2 border-dashed border-border rounded-xl p-8 text-center">
-                <input
-                  type="file"
-                  accept=".html"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="bookmark-file"
-                  disabled={isParsing}
+        <Card>
+          <CardContent className="pt-6 space-y-4">
+            {/* URL */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("url")}</label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  className="pl-9"
                 />
-                <label htmlFor="bookmark-file" className="cursor-pointer">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {isParsing ? (
-                      <Loader2 className="text-primary animate-spin" size={28} />
-                    ) : (
-                      <FileText className="text-primary" size={28} />
-                    )}
-                  </div>
-                  <h3 className="font-semibold mb-2">{t("uploadTitle")}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {t("uploadDesc")}
-                  </p>
-                  <Button disabled={isParsing}>
-                    {isParsing ? t("parsing") : t("selectFile")}
-                  </Button>
-                </label>
-              </div>
-              
-              <Separator className="my-6" />
-
-              <div className="text-sm text-muted-foreground">
-                <h4 className="font-medium text-foreground mb-3">{t("helpTitle")}</h4>
-
-                <div className="space-y-4">
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                    <h5 className="font-medium text-blue-400 mb-2">🔹 Google Chrome</h5>
-                    <ol className="list-decimal list-inside space-y-1 text-xs">
-                      <li>打开书签管理器：<kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Ctrl+Shift+O</kbd> (Mac: <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">⌘+Option+B</kbd>)</li>
-                      <li>点击右上角 <strong>⋮</strong> 菜单</li>
-                      <li>选择 <strong>导出书签</strong></li>
-                    </ol>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                    <h5 className="font-medium text-orange-400 mb-2">🦊 Mozilla Firefox</h5>
-                    <ol className="list-decimal list-inside space-y-1 text-xs">
-                      <li>点击菜单 → <strong>书签</strong></li>
-                      <li>选择 <strong>管理书签</strong></li>
-                      <li>点击 <strong>导入与备份</strong> → <strong>将书签导出为 HTML</strong></li>
-                    </ol>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <h5 className="font-medium text-cyan-400 mb-2">🌐 Microsoft Edge</h5>
-                    <ol className="list-decimal list-inside space-y-1 text-xs">
-                      <li>打开收藏夹：<kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">Ctrl+Shift+O</kbd></li>
-                      <li>点击 <strong>⋯</strong> 菜单</li>
-                      <li>选择 <strong>导出收藏夹</strong></li>
-                    </ol>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-gray-500/10 border border-gray-500/20">
-                    <h5 className="font-medium text-gray-400 mb-2">🧭 Apple Safari</h5>
-                    <ol className="list-decimal list-inside space-y-1 text-xs">
-                      <li>菜单栏 → <strong>文件</strong></li>
-                      <li>选择 <strong>导出书签…</strong></li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* 解析结果预览 */}
-        {parsedData && !importResult && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText size={20} />
-                  {t("parseResult")}
-                  <Badge variant="secondary" className="ml-auto">
-                    {parsedData.result.totalFolders} {t("folders")}, {parsedData.result.totalBookmarks} {t("bookmarks")}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {parsedData.folderData.map((folder, index) => (
-                    <div
-                      key={index}
-                      className={`p-4 rounded-lg border transition-colors ${
-                        folder.selected
-                          ? "border-primary/50 bg-primary/5"
-                          : "border-border bg-background/50 opacity-60"
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <input
-                          type="checkbox"
-                          checked={folder.selected}
-                          onChange={() => handleFolderToggle(index)}
-                          className="mt-1 w-4 h-4"
-                        />
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-2">
-                            <Folder size={16} className="text-muted-foreground" />
-                            <span className="font-medium">{folder.title}</span>
-                            <Badge variant="outline" className="ml-auto">
-                              {folder.bookmarkCount} {t("links")}
-                            </Badge>
-                          </div>
-                          
-                          {folder.selected && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs">{t("category")}</Label>
-                                <Select
-                                  value={folder.category}
-                                  onValueChange={(v) => handleFolderChange(index, "category", v)}
-                                >
-                                  <SelectTrigger className="h-8">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {CATEGORIES.map(cat => (
-                                      <SelectItem key={cat.value} value={cat.value}>
-                                        {cat.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div>
-                                <Label className="text-xs">{t("tags")}</Label>
-                                <Input
-                                  value={folder.tags}
-                                  onChange={(e) => handleFolderChange(index, "tags", e.target.value)}
-                                  placeholder="imported,bookmarks"
-                                  className="h-8"
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-muted-foreground">
-                {t("selectedInfo", { count: selectedCount, links: totalBookmarks })}
-              </div>
-              <Button
-                onClick={handleImport}
-                disabled={selectedCount === 0 || isImporting}
-                className="bg-brand-gradient"
-              >
-                {isImporting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("importing")}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {t("importBtn", { count: selectedCount })}
-                  </>
+                {fetchingPreview && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
                 )}
-              </Button>
+              </div>
             </div>
-          </div>
-        )}
+
+            {/* Title */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("linkTitle")}</label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={t("linkTitlePlaceholder")}
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("description")}</label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("descriptionPlaceholder")}
+                rows={3}
+              />
+            </div>
+
+            {/* Collection */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("collection")}</label>
+              <Select value={collectionId} onValueChange={setCollectionId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("selectCollection")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {collections.map((col) => (
+                    <SelectItem key={col.id} value={col.id}>
+                      {col.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button onClick={handleSubmit} disabled={loading} className="w-full">
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t("saving")}
+                </>
+              ) : (
+                t("save")
+              )}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

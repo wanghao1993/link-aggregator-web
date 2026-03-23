@@ -229,7 +229,8 @@
     "dashboard": "Dashboard",
     "myCollections": "My Collections",
     "signOut": "Sign Out",
-    "importBookmarks": "Import Bookmarks"
+    "importBookmarks": "Import Bookmarks",
+    "bookmarklet": "Bookmarklet"
   },
   "profileSettings": {
     "title": "Profile Settings",
@@ -504,5 +505,43 @@
       "localDatabase": "Using local Supabase instance",
       "apiReady": "All API endpoints are configured"
     }
+  },
+  "bookmarklet": {
+    "title": "Bookmarklet",
+    "subtitle": "Save links with one click",
+    "howToUse": "How to use",
+    "step1": "Copy the bookmarklet code below",
+    "step2": "Create a new bookmark in your browser",
+    "step3": "Paste the code as the bookmark URL",
+    "step4": "Click the bookmark on any page to save it to Link",
+    "dragToBookmark": "Drag to Bookmark Bar",
+    "bookmarkletDesc": "Or right-click and add to bookmarks",
+    "saveToLink": "Save to Link",
+    "copied": "Copied to clipboard!",
+    "copyFailed": "Failed to copy",
+    "loginRequired": "Login Required",
+    "loginRequiredDesc": "Please sign in to use bookmarklet",
+    "goToLogin": "Sign In",
+    "extensionTitle": "Chrome Extension",
+    "extensionDesc": "For a better experience, try our Chrome extension",
+    "downloadExtension": "Download Extension"
+  },
+  "quickImport": {
+    "title": "Quick Save",
+    "url": "URL",
+    "linkTitle": "Title",
+    "linkTitlePlaceholder": "Enter title",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter description",
+    "collection": "Collection",
+    "selectCollection": "Select a collection",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveSuccess": "Link saved!",
+    "saveFailed": "Failed to save link",
+    "fillRequired": "Please fill in required fields",
+    "loginRequired": "Login Required",
+    "loginRequiredDesc": "Please sign in to save links",
+    "goToLogin": "Sign In"
   }
 }

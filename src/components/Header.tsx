@@ -18,6 +18,7 @@ import {
   UserCircle,
   Menu,
   BookmarkIcon,
+  Bookmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -152,6 +153,14 @@ const Header: React.FC = () => {
       >
         <BookmarkIcon size={18} className="text-muted-foreground" />
         {ucT("importBookmarks")}
+      </Link>
+      <Link
+        href="/bookmarklet"
+        onClick={onClick}
+        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
+      >
+        <Bookmark size={18} className="text-muted-foreground" />
+        {ucT("bookmarklet")}
       </Link>
     </>
   );
