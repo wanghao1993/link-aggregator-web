@@ -4,9 +4,16 @@ import { useState } from "react";
 import { useAuth } from "@/lib/supabase/auth-context";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Bookmark, Copy, Check, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 const BOOKMARKLET_BASE = "https://link.wanghao1993.com";
 
@@ -21,7 +28,7 @@ export default function BookmarkletPage() {
       var url = encodeURIComponent(window.location.href);
       var title = encodeURIComponent(document.title);
       var base = "${BOOKMARKLET_BASE}";
-      var auth = "${user?.id || ''}";
+      var auth = "${user?.id || ""}";
       if (!auth) {
         alert("Please sign in to Link first!");
         window.open(base + "/auth/signin", "_blank");
@@ -29,7 +36,9 @@ export default function BookmarkletPage() {
       }
       window.open(base + "/import?url=" + url + "&title=" + title, "_blank");
     })();
-  `.trim().replace(/\s+/g, " ");
+  `
+    .trim()
+    .replace(/\s+/g, " ");
 
   const bookmarklet = `javascript:${bookmarkletCode}`;
 
@@ -62,7 +71,7 @@ export default function BookmarkletPage() {
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
-              <a href="/auth/signin">{t("goToLogin")}</a>
+              <Link href="/auth/signin">{t("goToLogin")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -121,7 +130,11 @@ export default function BookmarkletPage() {
                 className="absolute top-2 right-2"
                 onClick={handleCopy}
               >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
               </Button>
             </div>
           </CardContent>
@@ -134,9 +147,14 @@ export default function BookmarkletPage() {
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <a href="https://github.com/wanghao1993/link-aggregator-web/releases" target="_blank" rel="noopener noreferrer">
-                {t("downloadExtension")} <ExternalLink className="w-4 h-4 ml-2" />
-              </a>
+              <Link
+                href="https://github.com/wanghao1993/link-aggregator-web/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t("downloadExtension")}{" "}
+                <ExternalLink className="w-4 h-4 ml-2" />
+              </Link>
             </Button>
           </CardContent>
         </Card>
