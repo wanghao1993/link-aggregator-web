@@ -1,6 +1,5 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { StatsCardSkeleton } from '@/components/skeletons';
 
 interface StatsCardProps {
@@ -24,43 +23,54 @@ const StatsCard: React.FC<StatsCardProps> = ({
     return <StatsCardSkeleton />;
   }
 
-  console.log('StatsCard rendered:', title, value);
-
-  const getColorClass = (color: string) => {
-    const colors = {
-      primary: 'bg-brand-gradient',
-      accent: 'bg-accent-gradient',
-      success: 'bg-gradient-to-r from-green-500 to-emerald-500',
-      info: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      warning: 'bg-gradient-to-r from-orange-500 to-amber-500'
+  // 背景色映射
+  const getIconBgColor = (color: string) => {
+    const colors: Record<string, string> = {
+      primary: 'bg-teal-100 dark:bg-teal-900/30',
+      success: 'bg-green-100 dark:bg-green-900/30',
+      info: 'bg-blue-100 dark:bg-blue-900/30',
+      warning: 'bg-amber-100 dark:bg-amber-900/30',
+      accent: 'bg-amber-100 dark:bg-amber-900/30',
     };
-    return colors[color as keyof typeof colors] || colors.primary;
+    return colors[color] || colors.primary;
+  };
+
+  // 图标颜色映射
+  const getIconColor = (color: string) => {
+    const colors: Record<string, string> = {
+      primary: 'text-teal-600 dark:text-teal-400',
+      success: 'text-green-600 dark:text-green-400',
+      info: 'text-blue-600 dark:text-blue-400',
+      warning: 'text-amber-600 dark:text-amber-400',
+      accent: 'text-amber-600 dark:text-amber-400',
+    };
+    return colors[color] || colors.primary;
   };
 
   return (
-    <Card data-cmp="StatsCard" className="glass-effect border-border/30 bg-card/40 hover:bg-card/60 transition-all link-card-hover">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <div className="flex items-baseline space-x-2">
-              <p className="text-2xl font-bold text-foreground">{value}</p>
-              {change !== 0 && (
-                <span className={`text-sm font-medium ${
-                  change > 0 ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {change > 0 ? '+' : ''}{change}%
-                </span>
-              )}
-            </div>
-          </div>
-          
-          <div className={`p-3 rounded-lg ${getColorClass(color)}`}>
-            <Icon className="text-white" size={24} />
-          </div>
+    <div className="bg-card border border-border/50 rounded-2xl p-6 transition-all hover:shadow-lg hover:-translate-y-0.5">
+      {/* 图标 */}
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${getIconBgColor(color)}`}>
+        <Icon className={getIconColor(color)} size={22} />
+      </div>
+
+      {/* 数值 */}
+      <div className="text-3xl font-semibold tracking-tight text-foreground mb-1">
+        {value}
+      </div>
+
+      {/* 标签 */}
+      <div className="text-sm text-muted-foreground">
+        {title}
+      </div>
+
+      {/* 变化指示器 */}
+      {change !== 0 && (
+        <div className={`text-xs font-medium mt-2 ${change > 0 ? 'text-green-500' : 'text-red-500'}`}>
+          {change > 0 ? '↑' : '↓'} {Math.abs(change)}%
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };
 

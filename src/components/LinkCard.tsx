@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ExternalLink, Heart, Eye, Clock, User } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { ExternalLink, Heart, Eye, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LinkCollection } from '@/types/link';
@@ -16,6 +15,55 @@ interface LinkCardProps {
   onFavorite?: () => void;
   onVisit?: () => void;
 }
+
+// 分类颜色配置
+const CATEGORY_COLORS: Record<string, { bg: string; text: string; iconBg: string }> = {
+  ai: {
+    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-600 dark:text-purple-400',
+    iconBg: 'from-purple-500 to-violet-500'
+  },
+  web: {
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-600 dark:text-blue-400',
+    iconBg: 'from-blue-500 to-cyan-500'
+  },
+  design: {
+    bg: 'bg-pink-100 dark:bg-pink-900/30',
+    text: 'text-pink-600 dark:text-pink-400',
+    iconBg: 'from-pink-500 to-rose-500'
+  },
+  tools: {
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-600 dark:text-green-400',
+    iconBg: 'from-green-500 to-emerald-500'
+  },
+  mobile: {
+    bg: 'bg-indigo-100 dark:bg-indigo-900/30',
+    text: 'text-indigo-600 dark:text-indigo-400',
+    iconBg: 'from-indigo-500 to-violet-500'
+  },
+  devops: {
+    bg: 'bg-slate-100 dark:bg-slate-900/30',
+    text: 'text-slate-600 dark:text-slate-400',
+    iconBg: 'from-slate-500 to-gray-500'
+  },
+  data: {
+    bg: 'bg-teal-100 dark:bg-teal-900/30',
+    text: 'text-teal-600 dark:text-teal-400',
+    iconBg: 'from-teal-500 to-cyan-500'
+  },
+  security: {
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-600 dark:text-red-400',
+    iconBg: 'from-red-500 to-rose-500'
+  },
+  productivity: {
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-600 dark:text-amber-400',
+    iconBg: 'from-amber-500 to-orange-500'
+  },
+};
 
 const LinkCard: React.FC<LinkCardProps> = ({
   loading = false,
@@ -66,20 +114,17 @@ const LinkCard: React.FC<LinkCardProps> = ({
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // 如果未登录，跳转到登录页面
+
     if (!user) {
       router.push(`/${locale}/auth/signin?redirect=/${locale}/collection/${collection.id}`);
       return;
     }
 
-    // 如果提供了自定义回调，使用它
     if (onFavorite) {
       onFavorite();
       return;
     }
 
-    // 否则执行默认收藏逻辑
     setIsFavoriteLoading(true);
     try {
       const method = isFavorited ? 'DELETE' : 'POST';
@@ -91,7 +136,6 @@ const LinkCard: React.FC<LinkCardProps> = ({
         const data = await res.json();
         setIsFavorited(data.isFavorited ?? !isFavorited);
       } else if (res.status === 401) {
-        // 未授权，跳转到登录页面
         router.push(`/${locale}/auth/signin?redirect=/${locale}/collection/${collection.id}`);
       }
     } catch {
@@ -107,107 +151,97 @@ const LinkCard: React.FC<LinkCardProps> = ({
     }
     router.push(`/${locale}/collection/${collection.id}`);
   };
-  
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return t('timeAgo.daysAgo', { count: 1 });
-    if (diffDays < 7) return t('timeAgo.daysAgo', { count: diffDays });
-    if (diffDays < 30) return t('timeAgo.weeksAgo', { count: Math.ceil(diffDays / 7) });
-    return t('timeAgo.monthsAgo', { count: Math.ceil(diffDays / 30) });
-  };
-  
+
+  // 获取分类颜色配置
+  const categoryColor = CATEGORY_COLORS[collection.category.id] || CATEGORY_COLORS.tools;
+
   return (
-    <Card data-cmp="LinkCard" className="glass-effect link-card-hover border-border/30 bg-card/60 fade-in cursor-pointer" onClick={handleVisit}>
-      <CardHeader className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl bg-brand-gradient">
-              {collection.category.icon}
-            </div>
-            <div>
-              <Badge variant="secondary" className="mb-2 bg-accent/50 text-accent-foreground">
-                {collection.category.name}
-              </Badge>
-              <CardTitle className="text-lg text-foreground hover:text-primary transition-colors cursor-pointer">
-                {collection.title}
-              </CardTitle>
-            </div>
+    <div
+      className="group bg-card border border-border/50 rounded-2xl p-6 transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+      onClick={handleVisit}
+    >
+      {/* 卡片头部 */}
+      <div className="flex items-start gap-4 mb-4">
+        {/* 分类图标 */}
+        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${categoryColor.iconBg} flex items-center justify-center text-2xl shrink-0`}>
+          {collection.category.icon}
+        </div>
+
+        {/* 分类和标题 */}
+        <div className="flex-1 min-w-0">
+          <Badge
+            variant="secondary"
+            className={`mb-2 ${categoryColor.bg} ${categoryColor.text} border-0 text-xs font-medium`}
+          >
+            {collection.category.name}
+          </Badge>
+          <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+            {collection.title}
+          </h3>
+        </div>
+
+        {/* 操作按钮 */}
+        <div className="flex items-center gap-1 shrink-0">
+          <ShareButton
+            url={typeof window !== 'undefined' ? `${window.location.origin}/${locale}/collection/${collection.id}` : ''}
+            title={collection.title}
+            description={collection.description}
+            className="w-8 h-8 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          />
+          <button
+            onClick={handleFavorite}
+            disabled={isFavoriteLoading}
+            className={`w-8 h-8 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors ${
+              isFavorited ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'
+            }`}
+          >
+            <Heart size={16} fill={isFavorited ? 'currentColor' : 'none'} />
+          </button>
+        </div>
+      </div>
+
+      {/* 描述 */}
+      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-4">
+        {collection.description}
+      </p>
+
+      {/* 标签 */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {collection.tags.slice(0, 3).map((tag, index) => (
+          <span
+            key={index}
+            className={`text-xs ${index === 0 ? 'text-primary font-medium' : 'text-muted-foreground'}`}
+          >
+            #{tag}
+          </span>
+        ))}
+      </div>
+
+      {/* 底部信息 */}
+      <div className="flex items-center justify-between pt-4 border-t border-border/50">
+        {/* 作者 */}
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-[10px] text-white font-medium">
+            {collection.author.displayName?.[0]?.toUpperCase() || '?'}
           </div>
-          
-          <div className="flex items-center space-x-1">
-            <ShareButton
-              url={typeof window !== 'undefined' ? `${window.location.origin}/${locale}/collection/${collection.id}` : ''}
-              title={collection.title}
-              description={collection.description}
-              className="text-muted-foreground hover:text-primary"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleFavorite}
-              disabled={isFavoriteLoading}
-              className={`${isFavorited ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500`}
-            >
-              <Heart size={18} fill={isFavorited ? 'currentColor' : 'none'} />
-            </Button>
+          <span className="text-xs text-muted-foreground">
+            {collection.author.displayName}
+          </span>
+        </div>
+
+        {/* 统计 */}
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Eye size={14} />
+            <span>{collection.views.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Heart size={14} />
+            <span>{collection.likes}</span>
           </div>
         </div>
-        
-        <CardDescription className="text-muted-foreground leading-relaxed">
-          {collection.description}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {collection.tags.map((tag, index) => (
-            <Badge
-              key={index}
-              variant="outline"
-              className="text-xs border-border/30 text-muted-foreground"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
-        
-        {/* Stats */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <User size={14} />
-              <span>{collection.author.displayName}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Eye size={14} />
-              <span>{collection.views.toLocaleString()}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Heart size={14} />
-              <span>{collection.likes}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-1">
-            <Clock size={14} />
-            <span>{formatDate(collection.updatedAt)}</span>
-          </div>
-        </div>
-        
-        {/* Action Button */}
-        <Button
-          onClick={(e) => { e.stopPropagation(); handleVisit(); }}
-          className="w-full bg-brand-gradient hover:opacity-90 transition-opacity group"
-        >
-          <span>{t('viewCollection')}</span>
-          <ExternalLink size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
-        </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

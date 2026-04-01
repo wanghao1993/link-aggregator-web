@@ -9,25 +9,25 @@
   },
   "home": {
     "hero": {
-      "title": "发现精选链接合集",
-      "subtitle": "探索社区精心策划的高质量资源合集,找到你需要的一切工具和知识"
+      "title": "精心策划的链接合集",
+      "subtitle": "探索、收藏和分享来自社区精选的高质量资源链接，让知识管理更简单高效"
     },
     "search": {
-      "placeholder": "搜索链接合集、标签或作者..."
+      "placeholder": "搜索合集、标签或关键词..."
     },
     "stats": {
-      "totalCollections": "总合集数",
+      "totalCollections": "精选合集",
       "activeUsers": "活跃用户",
-      "monthlyViews": "本月浏览",
-      "featuredCollections": "精选合集"
+      "monthlyViews": "月浏览量",
+      "featuredCollections": "精选推荐"
     },
     "categories": {
       "title": "浏览分类"
     },
     "collections": {
-      "title": "精选合集",
+      "title": "探索精选合集",
       "filteredTitle": "筛选结果",
-      "foundCount": "共找到 {count} 个合集",
+      "foundCount": "发现 {count} 个精选合集",
       "noResults": {
         "title": "没有找到匹配的合集",
         "description": "尝试调整搜索条件或浏览其他分类"

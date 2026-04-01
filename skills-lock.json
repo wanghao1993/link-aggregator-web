@@ -6,6 +6,11 @@
       "sourceType": "github",
       "computedHash": "d2b5bcc7c09fdb649129ffc7dd7b647ec1b155736974b974292675afd588cb39"
     },
+    "frontend-design": {
+      "source": "smithery.ai",
+      "sourceType": "well-known",
+      "computedHash": "02a36ed61efe8cc2792b87138d4fdf1c8927ab424351565d7439664c816674e1"
+    },
     "vercel-composition-patterns": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
