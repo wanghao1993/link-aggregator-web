@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const search = searchParams.get("search");
+    const sort = searchParams.get("sort");
     const userId = searchParams.get("userId");
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
     const offset = parseInt(searchParams.get("offset") || "0");
@@ -14,8 +15,16 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from("collections")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
+
+    // Apply sorting
+    if (sort === "latest") {
+      query = query.order("created_at", { ascending: false });
+    } else if (sort === "popular") {
+      query = query.order("likes", { ascending: false });
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
 
     if (userId) {
       query = query.eq("user_id", userId);
@@ -28,12 +37,41 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
+      // Search in title, description, or tags array
       query = query.or(
         `title.ilike.%${search}%,description.ilike.%${search}%`
       );
     }
 
     const { data: collections, error, count } = await query;
+
+    // Also search in tags array
+    let filteredCollections = collections || [];
+    if (search) {
+      const collectionIdsWithTitleDesc = new Set((collections || []).map(c => c.id));
+
+      // Query for collections with matching tags
+      let tagQuery = supabaseAdmin
+        .from("collections")
+        .select("*")
+        .contains("tags", [search]);
+
+      if (userId) {
+        tagQuery = tagQuery.eq("user_id", userId);
+      } else {
+        tagQuery = tagQuery.eq("is_public", true);
+      }
+
+      const { data: tagMatches } = await tagQuery;
+
+      if (tagMatches && tagMatches.length > 0) {
+        // Add collections that match by tag but not already in results
+        const additionalCollections = tagMatches.filter(c => !collectionIdsWithTitleDesc.has(c.id));
+        if (additionalCollections.length > 0) {
+          filteredCollections = [...(collections || []), ...additionalCollections];
+        }
+      }
+    }
 
     if (error) {
       console.error("Failed to list collections:", error);
@@ -43,9 +81,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const collectionIds = (collections || []).map((c) => c.id);
+    const collectionIds = filteredCollections.map((c) => c.id);
     const userIds = [
-      ...new Set((collections || []).map((c) => c.user_id).filter(Boolean)),
+      ...new Set(filteredCollections.map((c) => c.user_id).filter(Boolean)),
     ];
 
     // Batch fetch users
@@ -75,7 +113,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const formatted = (collections || []).map((c) => ({
+    const formatted = filteredCollections.map((c) => ({
       id: c.id,
       title: c.title,
       description: c.description,

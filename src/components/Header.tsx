@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -19,14 +19,28 @@ import {
   Menu,
   BookmarkIcon,
   Bookmark,
+  ChevronDown,
+  Palette,
+  Sun,
+  Moon,
+  Monitor,
+  Type,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -42,6 +56,31 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslations } from "next-intl";
 import { locales } from "@/locales";
 import { useAuth } from "@/lib/supabase/auth-context";
+import { useTheme } from "next-themes";
+import { themes, applyTheme, getCurrentTheme, type ThemeConfig } from "@/styles/themes";
+
+// Available fonts - CSS variables set by next/font in layout.tsx
+const fonts = [
+  { name: "default", label: "Default", fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif" },
+  { name: "inter", label: "Inter", fontFamily: "var(--font-inter)" },
+  { name: "roboto", label: "Roboto", fontFamily: "var(--font-roboto)" },
+  { name: "lato", label: "Lato", fontFamily: "var(--font-lato)" },
+  { name: "poppins", label: "Poppins", fontFamily: "var(--font-poppins)" },
+  { name: "noto-sans", label: "Noto Sans SC", fontFamily: "var(--font-noto-sans-sc)" },
+];
+
+function applyFont(fontName: string) {
+  const font = fonts.find(f => f.name === fontName);
+  if (!font) return;
+  const root = document.documentElement;
+  root.style.setProperty("--font-sans", font.fontFamily);
+  root.style.setProperty("--fontSans", font.fontFamily);
+  localStorage.setItem("font-preference", fontName);
+}
+
+function getCurrentFont(): string {
+  return localStorage.getItem("font-preference") || "default";
+}
 
 const Header: React.FC = () => {
   const pathname = usePathname();
@@ -49,8 +88,19 @@ const Header: React.FC = () => {
   const t = useTranslations("common");
   const headerT = useTranslations("header");
   const ucT = useTranslations("userCard");
+  const prefT = useTranslations("preferences");
+  const themeT = useTranslations("theme");
   const { user, profile, isLoading: authLoading, signOut } = useAuth();
+  const { setTheme, theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentColorTheme, setCurrentColorTheme] = useState("default");
+  const [currentFont, setCurrentFont] = useState("default");
+
+  // Initialize theme color and font on mount
+  useEffect(() => {
+    setCurrentColorTheme(getCurrentTheme());
+    setCurrentFont(getCurrentFont());
+  }, []);
 
   const isActive = (path: string) => pathname === path;
 
@@ -84,6 +134,21 @@ const Header: React.FC = () => {
     router.push("/");
   };
 
+  const handleSelectColorTheme = (themeName: string) => {
+    applyTheme(themeName);
+    setCurrentColorTheme(themeName);
+  };
+
+  const handleSelectFont = (fontName: string) => {
+    applyFont(fontName);
+    setCurrentFont(fontName);
+  };
+
+  const getThemePreviewColor = (themeConfig: ThemeConfig): string => {
+    const [r, g, b] = themeConfig.colors.primary.split(" ").map(Number);
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
   // Navigation link component for reuse
   const NavLink = ({
     path,
@@ -109,60 +174,6 @@ const Header: React.FC = () => {
       <Icon size={18} />
       <span>{label}</span>
     </Link>
-  );
-
-  // User menu items
-  const UserMenuItems = ({ onClick }: { onClick?: () => void }) => (
-    <>
-      <Link
-        href="/profile"
-        onClick={onClick}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
-      >
-        <UserCircle size={18} className="text-muted-foreground" />
-        {ucT("viewProfile")}
-      </Link>
-      <Link
-        href="/profile/settings"
-        onClick={onClick}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
-      >
-        <Settings size={18} className="text-muted-foreground" />
-        {ucT("editProfile")}
-      </Link>
-      <Link
-        href="/dashboard"
-        onClick={onClick}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
-      >
-        <LayoutDashboard size={18} className="text-muted-foreground" />
-        {ucT("dashboard")}
-      </Link>
-      <Link
-        href="/profile"
-        onClick={onClick}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
-      >
-        <FolderOpen size={18} className="text-muted-foreground" />
-        {ucT("myCollections")}
-      </Link>
-      <Link
-        href="/import"
-        onClick={onClick}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
-      >
-        <BookmarkIcon size={18} className="text-muted-foreground" />
-        {ucT("importBookmarks")}
-      </Link>
-      <Link
-        href="/bookmarklet"
-        onClick={onClick}
-        className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
-      >
-        <Bookmark size={18} className="text-muted-foreground" />
-        {ucT("bookmarklet")}
-      </Link>
-    </>
   );
 
   return (
@@ -223,9 +234,6 @@ const Header: React.FC = () => {
               </select>
             </div>
 
-            <ThemeToggle />
-            <ThemeColorSelector />
-
             {!authLoading && user ? (
               <div className="flex items-center gap-3">
                 <NotificationBell />
@@ -240,9 +248,9 @@ const Header: React.FC = () => {
                   </Link>
                 </Button>
 
-                {/* User HoverCard */}
-                <HoverCard openDelay={100} closeDelay={200}>
-                  <HoverCardTrigger asChild>
+                {/* User Dropdown Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <button className="flex items-center gap-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                       <Avatar className="h-9 w-9 cursor-pointer hover:scale-105 transition-transform">
                         <AvatarImage src={avatarUrl} alt={displayName} />
@@ -250,13 +258,10 @@ const Header: React.FC = () => {
                           {initial}
                         </AvatarFallback>
                       </Avatar>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
-                  </HoverCardTrigger>
-                  <HoverCardContent
-                    align="end"
-                    className="w-72 p-0"
-                    sideOffset={8}
-                  >
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-72">
                     {/* Profile Header */}
                     <div className="p-4">
                       <div className="flex items-center gap-3">
@@ -277,26 +282,159 @@ const Header: React.FC = () => {
                       </div>
                     </div>
 
-                    <Separator />
+                    <DropdownMenuSeparator />
 
                     {/* Menu Items */}
-                    <div className="py-1">
-                      <UserMenuItems />
-                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center gap-3">
+                        <UserCircle size={18} className="text-muted-foreground" />
+                        {ucT("viewProfile")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile/settings" className="flex items-center gap-3">
+                        <Settings size={18} className="text-muted-foreground" />
+                        {ucT("editProfile")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard" className="flex items-center gap-3">
+                        <LayoutDashboard size={18} className="text-muted-foreground" />
+                        {ucT("dashboard")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center gap-3">
+                        <FolderOpen size={18} className="text-muted-foreground" />
+                        {ucT("myCollections")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/import" className="flex items-center gap-3">
+                        <BookmarkIcon size={18} className="text-muted-foreground" />
+                        {ucT("importBookmarks")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/bookmarklet" className="flex items-center gap-3">
+                        <Bookmark size={18} className="text-muted-foreground" />
+                        {ucT("bookmarklet")}
+                      </Link>
+                    </DropdownMenuItem>
 
-                    <Separator />
+                    <DropdownMenuSeparator />
 
-                    <div className="py-1">
-                      <button
-                        onClick={handleSignOut}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/10 transition-colors w-full"
-                      >
-                        <LogOut size={16} />
-                        {ucT("signOut")}
-                      </button>
-                    </div>
-                  </HoverCardContent>
-                </HoverCard>
+                    {/* Preferences Section */}
+                    <DropdownMenuLabel className="text-xs text-muted-foreground">
+                      {prefT("title")}
+                    </DropdownMenuLabel>
+
+                    {/* Theme Mode */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="flex items-center">
+                        {theme === "light" ? (
+                          <Sun className="mr-2 h-4 w-4" />
+                        ) : theme === "dark" ? (
+                          <Moon className="mr-2 h-4 w-4" />
+                        ) : (
+                          <Monitor className="mr-2 h-4 w-4" />
+                        )}
+                        <span>{prefT("appearance")}</span>
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {themeT(theme === "light" ? "light" : theme === "dark" ? "dark" : "system")}
+                        </span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={() => setTheme("light")}>
+                            <Sun className="mr-2 h-4 w-4" />
+                            {themeT("light")}
+                            {theme === "light" && <Check className="ml-auto h-4 w-4" />}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setTheme("dark")}>
+                            <Moon className="mr-2 h-4 w-4" />
+                            {themeT("dark")}
+                            {theme === "dark" && <Check className="ml-auto h-4 w-4" />}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setTheme("system")}>
+                            <Monitor className="mr-2 h-4 w-4" />
+                            {themeT("system")}
+                            {theme === "system" && <Check className="ml-auto h-4 w-4" />}
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+
+                    {/* Theme Color */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="flex items-center">
+                        <div
+                          className="w-4 h-4 rounded-full mr-2"
+                          style={{ backgroundColor: getThemePreviewColor(themes.find(t => t.name === currentColorTheme) || themes[0]) }}
+                        />
+                        <span>{prefT("themeColor")}</span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent className="w-48">
+                          <div className="grid grid-cols-4 gap-1 p-1">
+                            {themes.map((themeConfig) => (
+                              <button
+                                key={themeConfig.name}
+                                onClick={() => handleSelectColorTheme(themeConfig.name)}
+                                className={`
+                                  relative w-8 h-8 rounded-md transition-transform hover:scale-110
+                                  focus:outline-none focus-visible:ring-2 focus-visible:ring-primary
+                                  ${currentColorTheme === themeConfig.name ? "ring-2 ring-primary ring-offset-1" : ""}
+                                `}
+                                style={{ backgroundColor: getThemePreviewColor(themeConfig) }}
+                                title={themeConfig.label}
+                              >
+                                {currentColorTheme === themeConfig.name && (
+                                  <Check className="absolute inset-0 m-auto h-3 w-3 text-white" />
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+
+                    {/* Font */}
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger className="flex items-center">
+                        <Type className="mr-2 h-4 w-4" />
+                        <span>{prefT("font")}</span>
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {fonts.find(f => f.name === currentFont)?.label || "Default"}
+                        </span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          {fonts.map((font) => (
+                            <DropdownMenuItem
+                              key={font.name}
+                              onClick={() => handleSelectFont(font.name)}
+                              style={{ fontFamily: font.fontFamily }}
+                            >
+                              {font.label}
+                              {currentFont === font.name && <Check className="ml-auto h-4 w-4" />}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      className="text-red-500 focus:text-red-500"
+                    >
+                      <LogOut size={18} className="mr-2" />
+                      {ucT("signOut")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : !authLoading ? (
               <Button
@@ -407,9 +545,42 @@ const Header: React.FC = () => {
                     <>
                       <Separator />
                       <div className="p-2">
-                        <UserMenuItems
-                          onClick={() => setMobileMenuOpen(false)}
-                        />
+                        <SheetClose asChild>
+                          <Link
+                            href="/profile"
+                            className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
+                          >
+                            <UserCircle size={18} className="text-muted-foreground" />
+                            {ucT("viewProfile")}
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link
+                            href="/profile/settings"
+                            className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
+                          >
+                            <Settings size={18} className="text-muted-foreground" />
+                            {ucT("editProfile")}
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link
+                            href="/dashboard"
+                            className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
+                          >
+                            <LayoutDashboard size={18} className="text-muted-foreground" />
+                            {ucT("dashboard")}
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link
+                            href="/import"
+                            className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-accent/50 transition-colors rounded-lg"
+                          >
+                            <BookmarkIcon size={18} className="text-muted-foreground" />
+                            {ucT("importBookmarks")}
+                          </Link>
+                        </SheetClose>
                       </div>
                       <Separator />
                       <div className="p-2">
@@ -428,7 +599,7 @@ const Header: React.FC = () => {
                   <div className="mt-auto border-t p-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">
-                        Theme
+                        {prefT("themeColor")}
                       </span>
                       <div className="flex items-center gap-2">
                         <ThemeColorSelector />

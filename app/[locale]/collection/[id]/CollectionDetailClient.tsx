@@ -13,6 +13,7 @@ import {
   Sparkles,
   Clock,
   Tag,
+  Globe,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -68,17 +69,30 @@ export default function CollectionDetailClient() {
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchCollection() {
+    async function initCollection() {
       try {
-        const res = await fetch(`/api/collections/${id}`);
-        if (!res.ok) {
+        // Parallel fetch: collection data, favorite status, and view recording
+        const [collectionRes, favoriteRes] = await Promise.all([
+          fetch(`/api/collections/${id}`),
+          fetch(`/api/collections/${id}/favorite`),
+          fetch(`/api/collections/${id}/view`, { method: "POST" }),
+        ]);
+
+        // Handle collection response
+        if (!collectionRes.ok) {
           setError(true);
           return;
         }
-        const data: CollectionData = await res.json();
+        const data: CollectionData = await collectionRes.json();
         setCollection(data);
         setLikes(data.likes);
-        setViews(data.views);
+        setViews(data.views + 1); // Increment for the view we just recorded
+
+        // Handle favorite response
+        if (favoriteRes.ok) {
+          const favoriteData = await favoriteRes.json();
+          setIsFavorited(favoriteData.isFavorited);
+        }
       } catch {
         setError(true);
       } finally {
@@ -86,30 +100,7 @@ export default function CollectionDetailClient() {
       }
     }
 
-    async function checkFavorite() {
-      try {
-        const res = await fetch(`/api/collections/${id}/favorite`);
-        if (res.ok) {
-          const data = await res.json();
-          setIsFavorited(data.isFavorited);
-        }
-      } catch (error) {
-        console.error("Check favorite error:", error);
-      }
-    }
-
-    async function recordView() {
-      try {
-        await fetch(`/api/collections/${id}/view`, { method: "POST" });
-        setViews((prev) => prev + 1);
-      } catch (error) {
-        console.error("Record view error:", error);
-      }
-    }
-
-    fetchCollection();
-    checkFavorite();
-    recordView();
+    initCollection();
   }, [id]);
 
   if (loading) {
@@ -365,6 +356,8 @@ export default function CollectionDetailClient() {
 
 // Link Card Component
 function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
+  const [showFallback, setShowFallback] = React.useState(false);
+
   const getDomain = (urlString: string) => {
     try {
       return new URL(urlString).hostname.replace(/^www\./, "");
@@ -373,12 +366,25 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
     }
   };
 
+  // Get favicon URL - prefer stored favicon, fallback to Google's favicon service
+  const getFaviconUrl = (urlString: string, storedFavicon?: string) => {
+    if (storedFavicon) return storedFavicon;
+    try {
+      const domain = new URL(urlString).hostname;
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    } catch {
+      return null;
+    }
+  };
+
+  const faviconUrl = getFaviconUrl(link.url, link.favicon);
+
   return (
     <a
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex items-center gap-4 p-4 bg-card hover:bg-muted/50 border border-border/50 hover:border-primary/20 rounded-2xl transition-all duration-200"
+      className="group relative flex items-start gap-4 p-4 bg-card hover:bg-muted/50 border border-border/50 hover:border-primary/20 rounded-2xl transition-all duration-200"
     >
       {/* Index */}
       <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
@@ -386,18 +392,17 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
       </div>
 
       {/* Favicon */}
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 overflow-hidden border border-border/30">
-        {link.favicon ? (
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 overflow-hidden border border-border/30 relative">
+        {faviconUrl && !showFallback ? (
           <img
-            src={link.favicon}
+            src={faviconUrl}
             alt=""
             className="w-6 h-6 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
+            onError={() => setShowFallback(true)}
           />
-        ) : (
-          <Link2 className="w-4 h-4 text-muted-foreground" />
+        ) : null}
+        {(!faviconUrl || showFallback) && (
+          <Globe className="w-5 h-5 text-muted-foreground" />
         )}
       </div>
 
@@ -406,13 +411,18 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
         <h4 className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
           {link.title}
         </h4>
-        <p className="text-sm text-muted-foreground truncate">
+        <p className="text-sm text-muted-foreground/70 truncate mb-1">
           {getDomain(link.url)}
         </p>
+        {link.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+            {link.description}
+          </p>
+        )}
       </div>
 
       {/* Arrow */}
-      <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:bg-primary/10 shrink-0">
+      <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:bg-primary/10 shrink-0 self-center">
         <ExternalLink size={14} className="text-muted-foreground group-hover:text-primary" />
       </div>
     </a>

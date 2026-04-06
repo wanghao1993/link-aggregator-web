@@ -10,10 +10,12 @@
   "home": {
     "hero": {
       "title": "Discover Curated Link Collections",
-      "subtitle": "Explore high-quality resource collections curated by the community, find all the tools and knowledge you need"
+      "subtitle": "Explore high-quality resource collections curated by the community, find all the tools and knowledge you need",
+      "badge": "Discover Quality Resources"
     },
     "search": {
-      "placeholder": "Search collections, tags, or authors..."
+      "placeholder": "Search collections, tags, or authors...",
+      "hotTags": "Hot"
     },
     "stats": {
       "totalCollections": "Total Collections",
@@ -28,6 +30,9 @@
       "title": "Featured Collections",
       "filteredTitle": "Filtered Results",
       "foundCount": "Found {count} collections",
+      "filterAll": "All",
+      "filterLatest": "Latest",
+      "filterPopular": "Popular",
       "noResults": {
         "title": "No matching collections found",
         "description": "Try adjusting your search criteria or browse other categories"
@@ -230,7 +235,14 @@
     "myCollections": "My Collections",
     "signOut": "Sign Out",
     "importBookmarks": "Import Bookmarks",
-    "bookmarklet": "Bookmarklet"
+    "bookmarklet": "Bookmarklet",
+    "preferences": "Preferences"
+  },
+  "preferences": {
+    "title": "Preferences",
+    "appearance": "Appearance",
+    "themeColor": "Theme Color",
+    "font": "Font"
   },
   "profileSettings": {
     "title": "Profile Settings",

@@ -27,7 +27,7 @@ export default function SignInPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-background to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="text-center space-y-4">
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
             <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,8 +42,8 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-      <div className="absolute top-4 left-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-background to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4 pt-20">
+      <div className="fixed top-20 left-4 z-40">
         <Button variant="ghost" asChild>
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />

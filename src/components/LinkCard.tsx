@@ -16,6 +16,39 @@ interface LinkCardProps {
   onVisit?: () => void;
 }
 
+// Hoisted default collection to module level - prevents object recreation on every render
+const DEFAULT_COLLECTION: LinkCollection = {
+  id: '1',
+  title: 'AI & Machine Learning Resources',
+  description: '精心策划的AI和机器学习工具、论文和教程合集',
+  author: {
+    id: '1',
+    username: 'demo_user',
+    displayName: 'Demo User',
+    email: 'demo@example.com',
+    avatar: '',
+    isVerified: true,
+    joinedAt: new Date('2023-01-01')
+  },
+  links: [],
+  category: {
+    id: 'ai',
+    name: 'AI/ML',
+    description: 'Artificial Intelligence and Machine Learning',
+    icon: '🤖',
+    color: 'purple',
+    slug: 'ai-ml',
+    isActive: true
+  },
+  tags: ['AI', 'Machine Learning', 'Tools'],
+  createdAt: new Date('2024-01-15'),
+  updatedAt: new Date('2024-01-20'),
+  isPublic: true,
+  views: 1250,
+  likes: 89,
+  isFavorited: false
+};
+
 // 分类颜色配置
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; iconBg: string }> = {
   ai: {
@@ -67,37 +100,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string; iconBg: string
 
 const LinkCard: React.FC<LinkCardProps> = ({
   loading = false,
-  collection = {
-    id: '1',
-    title: 'AI & Machine Learning Resources',
-    description: '精心策划的AI和机器学习工具、论文和教程合集',
-    author: {
-      id: '1',
-      username: 'demo_user',
-      displayName: 'Demo User',
-      email: 'demo@example.com',
-      avatar: '',
-      isVerified: true,
-      joinedAt: new Date('2023-01-01')
-    },
-    links: [],
-    category: {
-      id: 'ai',
-      name: 'AI/ML',
-      description: 'Artificial Intelligence and Machine Learning',
-      icon: '🤖',
-      color: 'purple',
-      slug: 'ai-ml',
-      isActive: true
-    },
-    tags: ['AI', 'Machine Learning', 'Tools'],
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-20'),
-    isPublic: true,
-    views: 1250,
-    likes: 89,
-    isFavorited: false
-  },
+  collection = DEFAULT_COLLECTION,
   onFavorite,
   onVisit
 }) => {

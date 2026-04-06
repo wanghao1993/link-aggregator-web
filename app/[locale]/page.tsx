@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { TrendingUp, Users, Link2, Star, Sparkles, Search } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+  TrendingUp,
+  Users,
+  Link2,
+  Star,
+  Sparkles,
+  Search,
+  Loader2,
+} from "lucide-react";
 import LinkCard from "@/components/LinkCard";
 import StatsCard from "@/components/StatsCard";
 import { LinkCardSkeleton } from "@/components/skeletons";
@@ -18,6 +26,13 @@ interface Stats {
   activeUsers: number;
   monthlyViews: number;
   featuredCollections: number;
+}
+
+interface HotTag {
+  id: string;
+  name: string;
+  slug: string;
+  color?: string;
 }
 
 interface ApiCollection {
@@ -39,7 +54,12 @@ interface ApiCollection {
 // Constants (hoisted to module level)
 // ============================================
 
-const CATEGORY_META: Record<string, { icon: string; color: string; slug: string }> = {
+const PAGE_SIZE = 12;
+
+const CATEGORY_META: Record<
+  string,
+  { icon: string; color: string; slug: string }
+> = {
   ai: { icon: "🤖", color: "purple", slug: "ai-ml" },
   web: { icon: "💻", color: "blue", slug: "web-dev" },
   design: { icon: "🎨", color: "pink", slug: "design" },
@@ -53,17 +73,9 @@ const CATEGORY_META: Record<string, { icon: string; color: string; slug: string 
 
 const DEFAULT_CATEGORY_META = { icon: "📁", color: "gray", slug: "" };
 
-const HOT_TAGS = [
-  { id: "ai", label: "AI工具" },
-  { id: "web", label: "前端开发" },
-  { id: "design", label: "设计资源" },
-  { id: "tools", label: "开发工具" },
-] as const;
-
 const FILTER_OPTIONS = [
-  { id: "all", label: "全部" },
-  { id: "latest", label: "最新" },
-  { id: "popular", label: "最热" },
+  { id: "popular", labelKey: "filterPopular" },
+  { id: "latest", labelKey: "filterLatest" },
 ] as const;
 
 // ============================================
@@ -89,7 +101,10 @@ function toCategory(catId: string, catT: (key: string) => string): Category {
   };
 }
 
-function toCollection(api: ApiCollection, catT: (key: string) => string): LinkCollection {
+function toCollection(
+  api: ApiCollection,
+  catT: (key: string) => string,
+): LinkCollection {
   const author = api.author;
   return {
     id: api.id,
@@ -123,10 +138,12 @@ export default function Home() {
   const t = useTranslations("home");
   const catT = useTranslations("categories");
   const commonT = useTranslations("common");
+  const collectionT = useTranslations("home.collections");
 
   const [inputValue, setInputValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [collections, setCollections] = useState<LinkCollection[]>([]);
+  const [hotTags, setHotTags] = useState<HotTag[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalCollections: 0,
     activeUsers: 0,
@@ -134,30 +151,68 @@ export default function Home() {
     featuredCollections: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("popular");
+
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Ref for infinite scroll
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Memoize toCollection function to avoid recreation
   const mapCollection = useCallback(
     (api: ApiCollection) => toCollection(api, catT),
-    [catT]
+    [catT],
   );
 
-  // Fetch collections
+  // Fetch collections with pagination
   const fetchCollections = useCallback(
-    async (search: string) => {
+    async (
+      search: string,
+      filter: string,
+      pageNum: number,
+      isSearchUpdate: boolean = false,
+      append: boolean = false,
+    ) => {
+      if (isSearchUpdate) setSearchLoading(true);
+      if (append) setLoadingMore(true);
+
       try {
         const params = new URLSearchParams();
         if (search) params.set("search", search);
+        if (filter && filter !== "all") params.set("sort", filter);
+        params.set("limit", String(PAGE_SIZE));
+        params.set("offset", String(pageNum * PAGE_SIZE));
+
         const res = await fetch(`/api/collections?${params.toString()}`);
         if (res.ok) {
           const data = await res.json();
-          setCollections((data.collections as ApiCollection[]).map(mapCollection));
+          const newCollections = (data.collections as ApiCollection[]).map(
+            mapCollection,
+          );
+
+          if (append) {
+            setCollections((prev) => [...prev, ...newCollections]);
+          } else {
+            setCollections(newCollections);
+          }
+
+          setTotalCount(data.total || 0);
+          setHasMore((pageNum + 1) * PAGE_SIZE < (data.total || 0));
         }
       } catch {
         /* ignore */
+      } finally {
+        if (isSearchUpdate) setSearchLoading(false);
+        if (append) setLoadingMore(false);
       }
     },
-    [mapCollection]
+    [mapCollection],
   );
 
   // Fetch stats
@@ -172,37 +227,113 @@ export default function Home() {
     }
   }, []);
 
+  // Fetch hot tags
+  const fetchHotTags = useCallback(async () => {
+    try {
+      const res = await fetch("/api/tags?limit=8");
+      if (res.ok) {
+        const data = await res.json();
+        setHotTags(data.tags || []);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // Load more function
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchCollections(searchQuery, activeFilter, nextPage, false, true);
+    }
+  }, [page, loadingMore, hasMore, searchQuery, activeFilter, fetchCollections]);
+
+  // Setup intersection observer for infinite scroll
+  useEffect(() => {
+    if (loading) return;
+
+    const options = {
+      root: null,
+      rootMargin: "100px",
+      threshold: 0.1,
+    };
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      const target = entries[0];
+      if (target.isIntersecting && hasMore && !loadingMore) {
+        loadMore();
+      }
+    }, options);
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loading, hasMore, loadingMore, loadMore]);
+
   // Search handlers
   const handleSearch = useCallback(() => {
     setSearchQuery(inputValue);
+    setPage(0);
+    setHasMore(true);
   }, [inputValue]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") handleSearch();
     },
-    [handleSearch]
+    [handleSearch],
   );
 
-  const handleTagClick = useCallback((label: string) => {
-    setInputValue(label);
-    setSearchQuery(label);
+  const handleTagClick = useCallback((tagName: string) => {
+    setInputValue(tagName);
+    setSearchQuery(tagName);
+    setPage(0);
+    setHasMore(true);
+  }, []);
+
+  // Handle filter change
+  const handleFilterChange = useCallback((filter: string) => {
+    setActiveFilter(filter);
+    setPage(0);
+    setHasMore(true);
   }, []);
 
   // Initial load - parallel fetching
   useEffect(() => {
-    Promise.all([fetchStats(), fetchCollections("")]).finally(() => setLoading(false));
-  }, [fetchStats, fetchCollections]);
+    Promise.all([
+      fetchStats(),
+      fetchCollections("", activeFilter, 0),
+      fetchHotTags(),
+    ]).finally(() => setLoading(false));
+  }, [fetchStats, fetchCollections, fetchHotTags]);
 
-  // Search effect
+  // Search and filter effect - reset pagination
   useEffect(() => {
-    if (!loading) fetchCollections(searchQuery);
-  }, [searchQuery, loading, fetchCollections]);
+    if (!loading) {
+      setCollections([]);
+      fetchCollections(searchQuery, activeFilter, 0, true, false);
+    }
+  }, [searchQuery, activeFilter, loading]);
 
   // Memoize skeleton array to avoid recreation
   const skeletonCards = useMemo(
     () => Array.from({ length: 3 }, (_, i) => <LinkCardSkeleton key={i} />),
-    []
+    [],
+  );
+
+  const loadingMoreSkeletons = useMemo(
+    () =>
+      Array.from({ length: 3 }, (_, i) => (
+        <LinkCardSkeleton key={`loading-${i}`} />
+      )),
+    [],
   );
 
   return (
@@ -213,7 +344,7 @@ export default function Home() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Sparkles size={14} />
-            <span>发现优质资源</span>
+            <span>{t("hero.badge")}</span>
           </div>
 
           {/* Title */}
@@ -238,24 +369,64 @@ export default function Home() {
                 onKeyDown={handleKeyDown}
                 className="flex-1 py-3 px-2 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
-              <Button onClick={handleSearch} className="bg-brand-gradient hover:opacity-90 px-6 rounded-xl">
-                {commonT("search")}
+              <Button
+                onClick={handleSearch}
+                disabled={searchLoading}
+                className="bg-brand-gradient hover:opacity-90 px-6 rounded-xl"
+              >
+                {searchLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  commonT("search")
+                )}
               </Button>
             </div>
           </div>
 
           {/* Hot Tags */}
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">热门:</span>
-            {HOT_TAGS.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => handleTagClick(tag.label)}
-                className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-full transition-colors"
-              >
-                {tag.label}
-              </button>
-            ))}
+            <span className="text-sm text-muted-foreground">
+              {t("search.hotTags")}:
+            </span>
+            {hotTags.length > 0 ? (
+              hotTags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => handleTagClick(tag.name)}
+                  className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-full transition-colors"
+                >
+                  {tag.name}
+                </button>
+              ))
+            ) : (
+              // Fallback to default tags if no tags from database
+              <>
+                <button
+                  onClick={() => handleTagClick("AI工具")}
+                  className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-full transition-colors"
+                >
+                  AI工具
+                </button>
+                <button
+                  onClick={() => handleTagClick("前端开发")}
+                  className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-full transition-colors"
+                >
+                  前端开发
+                </button>
+                <button
+                  onClick={() => handleTagClick("设计资源")}
+                  className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-full transition-colors"
+                >
+                  设计资源
+                </button>
+                <button
+                  onClick={() => handleTagClick("开发工具")}
+                  className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted rounded-full transition-colors"
+                >
+                  开发工具
+                </button>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -264,10 +435,34 @@ export default function Home() {
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            <StatsCard title={t("stats.totalCollections")} value={formatNumber(stats.totalCollections)} icon={Link2} color="primary" loading={loading} />
-            <StatsCard title={t("stats.activeUsers")} value={formatNumber(stats.activeUsers)} icon={Users} color="info" loading={loading} />
-            <StatsCard title={t("stats.monthlyViews")} value={formatNumber(stats.monthlyViews)} icon={TrendingUp} color="success" loading={loading} />
-            <StatsCard title={t("stats.featuredCollections")} value={formatNumber(stats.featuredCollections)} icon={Star} color="warning" loading={loading} />
+            <StatsCard
+              title={t("stats.totalCollections")}
+              value={formatNumber(stats.totalCollections)}
+              icon={Link2}
+              color="primary"
+              loading={loading}
+            />
+            <StatsCard
+              title={t("stats.activeUsers")}
+              value={formatNumber(stats.activeUsers)}
+              icon={Users}
+              color="info"
+              loading={loading}
+            />
+            <StatsCard
+              title={t("stats.monthlyViews")}
+              value={formatNumber(stats.monthlyViews)}
+              icon={TrendingUp}
+              color="success"
+              loading={loading}
+            />
+            <StatsCard
+              title={t("stats.featuredCollections")}
+              value={formatNumber(stats.featuredCollections)}
+              icon={Star}
+              color="warning"
+              loading={loading}
+            />
           </div>
         </div>
       </section>
@@ -278,8 +473,12 @@ export default function Home() {
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-2xl font-semibold text-foreground">{t("collections.title")}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{t("collections.foundCount", { count: collections.length })}</p>
+              <h2 className="text-2xl font-semibold text-foreground">
+                {t("collections.title")}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {t("collections.foundCount", { count: totalCount })}
+              </p>
             </div>
 
             {/* Filter Tabs */}
@@ -287,14 +486,14 @@ export default function Home() {
               {FILTER_OPTIONS.map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setActiveFilter(option.id)}
+                  onClick={() => handleFilterChange(option.id)}
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     activeFilter === option.id
                       ? "bg-primary text-white"
                       : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
                   }`}
                 >
-                  {option.label}
+                  {collectionT(option.labelKey)}
                 </button>
               ))}
             </div>
@@ -302,17 +501,45 @@ export default function Home() {
 
           {/* Collections Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {loading ? skeletonCards : collections.map((collection) => <LinkCard key={collection.id} collection={collection} />)}
+            {loading
+              ? skeletonCards
+              : collections.map((collection) => (
+                  <LinkCard key={collection.id} collection={collection} />
+                ))}
+            {loadingMore && loadingMoreSkeletons}
           </div>
 
+          {/* Load More Trigger */}
+          {!loading && hasMore && (
+            <div ref={loadMoreRef} className="flex justify-center py-8">
+              {loadingMore && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>加载中...</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* No More Data */}
+          {!loading && !hasMore && collections.length > 0 && (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              已加载全部 {totalCount} 个合集
+            </div>
+          )}
+
           {/* Empty State */}
-          {!loading && collections.length === 0 && (
+          {!loading && !searchLoading && collections.length === 0 && (
             <div className="text-center py-16">
               <div className="w-16 h-16 bg-muted/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Link2 className="text-muted-foreground" size={28} />
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">{t("collections.noResults.title")}</h3>
-              <p className="text-muted-foreground">{t("collections.noResults.description")}</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                {t("collections.noResults.title")}
+              </h3>
+              <p className="text-muted-foreground">
+                {t("collections.noResults.description")}
+              </p>
             </div>
           )}
         </div>

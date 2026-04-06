@@ -10,10 +10,12 @@
   "home": {
     "hero": {
       "title": "精心策划的链接合集",
-      "subtitle": "探索、收藏和分享来自社区精选的高质量资源链接，让知识管理更简单高效"
+      "subtitle": "探索、收藏和分享来自社区精选的高质量资源链接，让知识管理更简单高效",
+      "badge": "发现优质资源"
     },
     "search": {
-      "placeholder": "搜索合集、标签或关键词..."
+      "placeholder": "搜索合集、标签或关键词...",
+      "hotTags": "热门"
     },
     "stats": {
       "totalCollections": "精选合集",
@@ -28,6 +30,9 @@
       "title": "探索精选合集",
       "filteredTitle": "筛选结果",
       "foundCount": "发现 {count} 个精选合集",
+      "filterAll": "全部",
+      "filterLatest": "最新",
+      "filterPopular": "最热",
       "noResults": {
         "title": "没有找到匹配的合集",
         "description": "尝试调整搜索条件或浏览其他分类"
@@ -230,7 +235,14 @@
     "myCollections": "我的合集",
     "signOut": "退出登录",
     "importBookmarks": "导入书签",
-    "bookmarklet": "书签小工具"
+    "bookmarklet": "书签小工具",
+    "preferences": "偏好设置"
+  },
+  "preferences": {
+    "title": "偏好设置",
+    "appearance": "外观模式",
+    "themeColor": "主题颜色",
+    "font": "字体"
   },
   "profileSettings": {
     "title": "个人设置",

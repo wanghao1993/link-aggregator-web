@@ -3,40 +3,48 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
-    // 获取收藏总数
-    const { count: totalCollections } = await supabaseAdmin
-      .from("collections")
-      .select("*", { count: "exact", head: true })
-      .eq("is_public", true);
+    // Parallel fetch all stats - eliminates waterfall
+    const [
+      collectionsResult,
+      usersResult,
+      viewsResult,
+      featuredResult,
+    ] = await Promise.all([
+      // Total public collections
+      supabaseAdmin
+        .from("collections")
+        .select("*", { count: "exact", head: true })
+        .eq("is_public", true),
+      // Active users
+      supabaseAdmin
+        .from("users")
+        .select("*", { count: "exact", head: true }),
+      // Views for monthly calculation
+      supabaseAdmin
+        .from("collections")
+        .select("views")
+        .eq("is_public", true),
+      // Featured collections (likes > 10 or views > 100)
+      supabaseAdmin
+        .from("collections")
+        .select("*", { count: "exact", head: true })
+        .eq("is_public", true)
+        .or("likes.gt.10,views.gt.100"),
+    ]);
 
-    // 获取活跃用户数
-    const { count: activeUsers } = await supabaseAdmin
-      .from("users")
-      .select("*", { count: "exact", head: true });
-
-    // 获取总浏览量（月度）
-    const { data: viewsData } = await supabaseAdmin
-      .from("collections")
-      .select("views")
-      .eq("is_public", true);
-
-    const monthlyViews = (viewsData || []).reduce(
+    const totalCollections = collectionsResult.count || 0;
+    const activeUsers = usersResult.count || 0;
+    const monthlyViews = (viewsResult.data || []).reduce(
       (sum, item) => sum + (item.views || 0),
       0
     );
-
-    // 获取精选收藏数（likes > 10 或 views > 100）
-    const { count: featuredCollections } = await supabaseAdmin
-      .from("collections")
-      .select("*", { count: "exact", head: true })
-      .eq("is_public", true)
-      .or("likes.gt.10,views.gt.100");
+    const featuredCollections = featuredResult.count || 0;
 
     return NextResponse.json({
-      totalCollections: totalCollections || 0,
-      activeUsers: activeUsers || 0,
+      totalCollections,
+      activeUsers,
       monthlyViews,
-      featuredCollections: featuredCollections || 0,
+      featuredCollections,
     });
   } catch (error) {
     console.error("Stats API error:", error);

@@ -73,10 +73,28 @@ const NotificationBell: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Initial fetch
     fetchNotifications();
-    intervalRef.current = setInterval(fetchNotifications, POLL_INTERVAL);
+
+    // Only poll when tab is visible - saves resources when tab is hidden
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchNotifications();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Set up polling interval
+    intervalRef.current = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        fetchNotifications();
+      }
+    }, POLL_INTERVAL);
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [fetchNotifications]);
 

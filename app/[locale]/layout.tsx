@@ -11,6 +11,41 @@ import { locales } from "@/locales";
 import { Toaster } from "@/components/ui/sonner";
 import { getBaseUrl } from "@/lib/seo";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import { Inter, Roboto, Lato, Poppins, Noto_Sans_SC } from "next/font/google";
+
+// Load Google Fonts with next/font
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const roboto = Roboto({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-roboto",
+  display: "swap",
+});
+
+const lato = Lato({
+  weight: ["400", "700", "900"],
+  subsets: ["latin"],
+  variable: "--font-lato",
+  display: "swap",
+});
+
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+const notoSansSC = Noto_Sans_SC({
+  subsets: ["latin"],
+  variable: "--font-noto-sans-sc",
+  display: "swap",
+});
 
 // Theme color initialization script - runs before page render to prevent flash
 const themeInitScript = `
@@ -26,6 +61,16 @@ const themeInitScript = `
       violet: { primary: '124 58 237', secondary: '139 92 246', accent: '34 197 94', primaryHover: '109 40 217', accentHover: '22 163 74' },
       slate: { primary: '71 85 105', secondary: '100 116 139', accent: '245 158 11', primaryHover: '51 65 85', accentHover: '217 119 6' },
       amber: { primary: '217 119 6', secondary: '245 158 11', accent: '14 165 233', primaryHover: '180 83 9', accentHover: '3 105 161' }
+    };
+
+    // Font mapping - use CSS variable names set by next/font
+    const fonts = {
+      default: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+      inter: 'var(--font-inter)',
+      roboto: 'var(--font-roboto)',
+      lato: 'var(--font-lato)',
+      poppins: 'var(--font-poppins)',
+      'noto-sans': 'var(--font-noto-sans-sc)'
     };
 
     const savedTheme = localStorage.getItem('theme-color') || 'default';
@@ -50,6 +95,12 @@ const themeInitScript = `
     root.style.setProperty('--button-primary-hover', 'rgb(' + theme.primaryHover + ')');
     root.style.setProperty('--button-accent-bg', 'rgb(' + theme.accent + ')');
     root.style.setProperty('--button-accent-hover', 'rgb(' + theme.accentHover + ')');
+
+    // Apply font preference
+    const savedFont = localStorage.getItem('font-preference') || 'default';
+    const fontFamily = fonts[savedFont] || fonts.default;
+    root.style.setProperty('--font-sans', fontFamily);
+    root.style.setProperty('--fontSans', fontFamily);
   } catch (e) {}
 })();
 `;
@@ -107,7 +158,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning className={`${inter.variable} ${roboto.variable} ${lato.variable} ${poppins.variable} ${notoSansSC.variable}`}>
       <head>
         {/* Theme color init - must run before render to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
