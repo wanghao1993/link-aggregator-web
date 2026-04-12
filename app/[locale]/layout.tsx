@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { getBaseUrl } from "@/lib/seo";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { Inter, Roboto, Lato, Poppins, Noto_Sans_SC } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 // Load Google Fonts with next/font
 const inter = Inter({
@@ -115,7 +116,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
   const baseUrl = getBaseUrl();
@@ -158,8 +163,13 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning className={`${inter.variable} ${roboto.variable} ${lato.variable} ${poppins.variable} ${notoSansSC.variable}`}>
+    <html
+      lang={locale}
+      suppressHydrationWarning
+      className={`${inter.variable} ${roboto.variable} ${lato.variable} ${poppins.variable} ${notoSansSC.variable}`}
+    >
       <head>
+        <Analytics />
         {/* Theme color init - must run before render to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <link rel="manifest" href="/manifest.json" />
