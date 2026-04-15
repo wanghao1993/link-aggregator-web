@@ -110,6 +110,9 @@ importers:
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@15.5.11(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      aegis-web-sdk:
+        specifier: ^1.41.12
+        version: 1.41.12
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -1843,6 +1846,9 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+  aegis-web-sdk@1.41.12:
+    resolution: {integrity: sha512-iT1k5TZbLNnff1tsc+3u0cE2ZBuJvBQP44Ys3hIixJ612J9+aQ3qwtx3N+8ZYZto/FYCWuSM6//D5TH9cDHV/w==}
+
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
@@ -3498,6 +3504,9 @@ packages:
   victory-vendor@36.9.2:
     resolution: {integrity: sha512-PnpQQMuxlwYdocC8fIJqVXvkeViHYzotI+NJrCuav0ZYFoq912ZHBk3mCeuj+5/VpodOjPe1z0Fk2ihgzlXqjQ==}
 
+  web-vitals@3.5.2:
+    resolution: {integrity: sha512-c0rhqNcHXRkY/ogGDJQxZ9Im9D19hDihbzSQJrsioex+KnFgmMzBiy57Z1EjkhX/+OjyBpclDCzz2ITtjokFmg==}
+
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
     engines: {node: '>= 0.4'}
@@ -5035,6 +5044,10 @@ snapshots:
       acorn: 8.15.0
 
   acorn@8.15.0: {}
+
+  aegis-web-sdk@1.41.12:
+    dependencies:
+      web-vitals: 3.5.2
 
   ajv@6.12.6:
     dependencies:
@@ -6947,6 +6960,8 @@ snapshots:
       d3-shape: 3.2.0
       d3-time: 3.1.0
       d3-timer: 3.0.1
+
+  web-vitals@3.5.2: {}
 
   which-boxed-primitive@1.1.1:
     dependencies:
