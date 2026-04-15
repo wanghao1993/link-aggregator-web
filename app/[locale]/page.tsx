@@ -18,14 +18,7 @@ import { useTranslations } from "next-intl";
 import type { LinkCollection, Category } from "@/types/link";
 
 import Aegis from "aegis-web-sdk";
-new Aegis({
-  id: "dWX91Sv3Dmn3aPKa1v", // 上报 id
-  uin: "xxx", // 用户唯一 ID（可选）
-  reportApiSpeed: true, // 接口测速
-  reportAssetSpeed: true, // 静态资源测速
-  spa: true, // spa 应用页面跳转的时候开启 pv 计算
-  hostUrl: "https://rumt-sg.com",
-});
+
 // ============================================
 // Types (hoisted to module level)
 // ============================================
@@ -344,6 +337,17 @@ export default function Home() {
       )),
     [],
   );
+
+  useEffect(() => {
+    new Aegis({
+      id: "dWX91Sv3Dmn3aPKa1v", // 上报 id
+      uin: "xxx", // 用户唯一 ID（可选）
+      reportApiSpeed: true, // 接口测速
+      reportAssetSpeed: true, // 静态资源测速
+      spa: true, // spa 应用页面跳转的时候开启 pv 计算
+      hostUrl: "https://rumt-sg.com",
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
