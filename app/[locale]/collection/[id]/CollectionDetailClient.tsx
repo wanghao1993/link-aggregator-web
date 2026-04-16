@@ -8,7 +8,6 @@ import {
   Heart,
   Link2,
   Share2,
-  Calendar,
   ExternalLink,
   Sparkles,
   Clock,
@@ -20,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTranslations } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import ShareModal from "@/components/ShareModal";
 import { CollectionDetailSkeleton } from "@/components/skeletons";
 import { toast } from "sonner";
@@ -111,7 +111,7 @@ export default function CollectionDetailClient() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8 max-w-md">
-          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+          <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-linear-to-br from-muted to-muted/50 flex items-center justify-center">
             <Link2 className="w-12 h-12 text-muted-foreground/50" />
           </div>
           <h1 className="text-2xl font-bold mb-2">{tc("error")}</h1>
@@ -159,7 +159,7 @@ export default function CollectionDetailClient() {
           toast.error(t("loginRequired"));
         }
       }
-    } catch (error) {
+    } catch {
       toast.error(t("favoriteError"));
     } finally {
       setFavoriteLoading(false);
@@ -172,15 +172,15 @@ export default function CollectionDetailClient() {
     <div className="min-h-screen pb-16">
       {/* Header Bar */}
       <div className="sticky top-16 z-40 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.back()}
             className="text-muted-foreground hover:text-foreground -ml-2"
           >
-            <ArrowLeft size={18} className="mr-1" />
-            {t("back")}
+            <ArrowLeft size={18} className="sm:mr-1" />
+            <span className="hidden sm:inline">{t("back")}</span>
           </Button>
 
           <div className="flex items-center gap-2">
@@ -190,8 +190,8 @@ export default function CollectionDetailClient() {
               size="sm"
               className="text-muted-foreground"
             >
-              <Share2 size={16} className="mr-1" />
-              {ts("title")}
+              <Share2 size={16} className="sm:mr-1" />
+              <span className="hidden sm:inline">{ts("title")}</span>
             </Button>
             <Button
               onClick={handleFavorite}
@@ -202,10 +202,10 @@ export default function CollectionDetailClient() {
             >
               <Bookmark
                 size={16}
-                className="mr-1"
+                className="sm:mr-1"
                 fill={isFavorited ? "currentColor" : "none"}
               />
-              {isFavorited ? "Saved" : "Save"}
+              <span className="hidden sm:inline">{isFavorited ? "Saved" : "Save"}</span>
             </Button>
           </div>
         </div>
@@ -221,7 +221,7 @@ export default function CollectionDetailClient() {
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-6">
           {/* Meta Info */}
-          <div className="flex items-center gap-3 mb-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 text-sm text-muted-foreground">
             <Badge variant="secondary" className="bg-primary/10 text-primary border-0 font-medium">
               {collection.category}
             </Badge>
@@ -236,12 +236,12 @@ export default function CollectionDetailClient() {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 leading-tight">
             {collection.title}
           </h1>
 
           {/* Description */}
-          <p className="text-lg text-muted-foreground leading-relaxed mb-6 max-w-3xl">
+          <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6 max-w-3xl">
             {collection.description}
           </p>
 
@@ -295,7 +295,7 @@ export default function CollectionDetailClient() {
       {/* Stats Bar */}
       <div className="border-y border-border/50 bg-muted/30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-6 py-3 text-sm overflow-x-auto">
+          <div className="grid grid-cols-1 sm:flex items-center gap-3 sm:gap-6 py-3 text-sm">
             <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">
               <div className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center">
                 <Eye size={12} className="text-blue-500" />
@@ -384,7 +384,7 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex items-start gap-4 p-4 bg-card hover:bg-muted/50 border border-border/50 hover:border-primary/20 rounded-2xl transition-all duration-200"
+      className="group relative flex items-start gap-3 sm:gap-4 p-3.5 sm:p-4 bg-card hover:bg-muted/50 border border-border/50 hover:border-primary/20 rounded-2xl transition-all duration-200"
     >
       {/* Index */}
       <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors shrink-0">
@@ -392,11 +392,14 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
       </div>
 
       {/* Favicon */}
-      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 overflow-hidden border border-border/30 relative">
+      <div className="w-10 h-10 rounded-xl bg-linear-to-br from-muted to-muted/50 flex items-center justify-center shrink-0 overflow-hidden border border-border/30 relative">
         {faviconUrl && !showFallback ? (
-          <img
+          <Image
             src={faviconUrl}
             alt=""
+            width={24}
+            height={24}
+            unoptimized
             className="w-6 h-6 object-contain"
             onError={() => setShowFallback(true)}
           />
@@ -408,7 +411,7 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+        <h4 className="font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 sm:line-clamp-1">
           {link.title}
         </h4>
         <p className="text-sm text-muted-foreground/70 truncate mb-1">
@@ -422,7 +425,7 @@ function LinkCard({ link, index }: { link: CollectionLink; index: number }) {
       </div>
 
       {/* Arrow */}
-      <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:bg-primary/10 shrink-0 self-center">
+      <div className="hidden sm:flex w-8 h-8 rounded-full bg-muted/50 items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:bg-primary/10 shrink-0 self-center">
         <ExternalLink size={14} className="text-muted-foreground group-hover:text-primary" />
       </div>
     </a>
